@@ -1,0 +1,14 @@
+COPYING
+MANIFEST
+README
+TODO
+examples/example.rb
+examples/hello_ncurses.rb
+examples/LICENSES_for_examples
+examples/rain.rb
+extconf.rb
+make_dist.rb
+mkmf.log
+ncurses.cc
+ncurses.rb
+panel.hh

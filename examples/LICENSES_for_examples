@@ -1,0 +1,20 @@
+Ideally, an example program how to use a library should be in the public
+domain.
+
+Two of the example programs contained in this dircectory have not been put in
+the public domain, however.
+
+The reason is because I did not write all programs completely myself -- I've
+adapted the following example programs from ncurses programs in other
+programming languages, and I have to respect their original licenses:
+  rain.rb is adapted from rain.c from the ncurses library distribution.
+  example.rb is adapted from an example program for the python ncurses binding.
+
+See the comments in the source files for restrictions imposed on copying and
+modifying these.
+
+That said, I suppose you may still look at their source code and learn how
+ncurses programs generally work, as long as you dont start your own programs
+by loading the example program into your editor and modify it to your needs.
+
+Tobias Peters <t-peters@berlios.de>
