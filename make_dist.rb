@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+
+# $Id: make_dist.rb,v 1.4 2002/02/26 11:04:38 t-peters Exp $
+
 def sys(i)
   puts i
   system i

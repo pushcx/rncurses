@@ -16,6 +16,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
+ * $Id: ncurses.cc,v 1.6 2002/02/26 11:04:38 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:

@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# $Id: example.rb,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+
 # This file provides an example for the usage of the ncurses-ruby module.
 # Copyright (C) 2002 Tobias Peters <t-peters@berlios.de>
 #

@@ -15,6 +15,8 @@
 # License Along With This Module; If Not, Write To The Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, Ma 02111-1307  Usa
 
+# $Id: ncurses.rb,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+
 require "ncurses.so"
 
 def Ncurses._XOPEN_CURSES

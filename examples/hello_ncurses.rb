@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# $Id: hello_ncurses.rb,v 1.2 2002/02/26 11:04:38 t-peters Exp $
+
 # this ncurses-ruby program follows an ancient tradition of example
 # computer programs: When invoked, it prints a friendly greeting on the
 # screen and exits.

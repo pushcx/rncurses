@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# $Id: rain.rb,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+
 # This program is a translation of the popular rain.c demo program from the
 # ncurses library distribution.
 #

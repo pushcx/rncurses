@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# $Id: extconf.rb,v 1.6 2002/02/26 11:04:38 t-peters Exp $
+
 require "mkmf"
 
 $CFLAGS  += " -g"

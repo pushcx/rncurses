@@ -17,6 +17,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
+// $Id: panel.hh,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+
 #if !defined(PANEL_HH) && defined(HAVE_PANEL_H)
 #define PANEL_HH
 #include <panel.h>
