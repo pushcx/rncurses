@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>ncurses-ruby - A Ruby module for accessing the ncurses library</title>
+  </head>
+
+  <body>
+    <h1>ncurses-ruby - A Ruby module for accessing the ncurses library</h1>
+    <h2>About ncurses</h2>
+    <p>
+      ncurses is a C library with fuctions for manipulating text screens.
+      Thus, it is useful for programmers who write interactive applications
+      that have to run in text terminals.
+      ncurses is <a href="http://www.gnu.org/software/ncurses/ncurses.html"
+		    >abailable here</a> as a
+      <a href="http://www.gnu.org">GNU</a> software package.
+      Ncurses provides functions for input and output from and to text
+      terminals (providing random access to any screen coordinate),
+      and embeds these functions into a framework of rectangular regions on the
+      screen.
+    <p>
+      If you want to learn more about ncurses, then you can either read 
+    <ul>
+      <li>
+	the ncurses-intro text that is included in the ncurses distribution
+	(a copy of ot is
+	<a href="http://dickey.his.com/ncurses/ncurses-intro.html">available
+	  here</a>),
+      <li>
+	a few sections from the ancient Linux Programmer's Guide, starting
+	<a href="http://linuxdoc.org/LDP/lpg/node97.html">here</a>,
+	or
+      <li>
+	the new
+	<a href="http://linuxdoc.org/HOWTO/NCURSES-Programming-HOWTO/index.html">
+	  ncurses programming howto</a>
+    </ul>
+    You will need a basic understanding of ncurses if you want to use the
+    ncurses-ruby module, since it is a wrapper of the underlying C library.
+    <h2>About ncurses-ruby</h2>
+    <p>
+      This ruby extension makes most functions, constants, and external variables
+      of the C library
+      <a href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>
+      accessible from the <a href="http://www.ruby-lang.org">Ruby
+      programming language</a>.
+    <p>
+      All C functions are wrapped by module functions of a the module
+      "Ncurses", with exactly the same name.
+      Additionally, C functions expecting a
+      WINDOW* as their first argument can also be called as methods of the
+      "Ncurses::WINDOW" class.
+    <p>
+      The panel library (for support of overlapping windows) is also wrapped,
+      in the module "Ncurses::Panel".
+    <p>
+      ncurses-ruby is distributed under the terms of the
+      <a href="http://www.gnu.org/licenses/lgpl.txt"> GNU Lesser General Public
+      License, Version 2.1 or later</a>.
+      <ul>
+      <li><a href="http://developer.berlios.de/projects/ncurses-ruby">
+	  Project summary</a></li>
+      <li><a href="http://developer.berlios.de/project/filelist.php?group_id=273">
+	  Download area</a></li>
+      </ul>
+    <h2>Using ncurses-ruby on a windows system</h2>
+    <p>
+      ncurses works well in a <a href="http://www.cygwin.com">cygwin</a>
+      environment on windows. If your version of the ruby interpreter was
+      compiled with cygwin, you can easily use the ncurses library provided
+      by the cygwin project to compile ncurses-ruby.
+      
+    <p>
+      If you'd rather use a non-cygwin version of ruby, you may be able to
+      get ncurses-ruby running together with the
+      <a href="pdcurses.sourceforge.net">PDCurses library</a>.
+      The ncurses-ruby source package contains a description
+      how to compile ncurses-ruby for a
+      <a href="http://www.mingw.org/">MinGW</a>-compiled ruby interpreter.
+    <p>
+      In the
+      <a href="http://developer.berlios.de/project/filelist.php?group_id=273">
+	Download area</a>, there is also a precompiled ncurses-ruby Package
+      to use with a <a href="http://www.mingw.org/">MinGW</a>-compiled ruby.
+    <h2>Going further</h2>
+    <p>
+      This BerliOS project aims at more than wrapping ncurses. The goal is to
+      provide a <em>Textmode User Interface Application Framework</em> on the
+      basis of the ncurses wrapper.
+      Ncurses enables applications to manipulate text terminals, but it still
+      requires a lot of work from the programmer to build user interfaces from
+      that.
+    <p>
+      Such a framework would provide <em>User interface Widgets</em> like push
+      buttons, checkboxes, menubars etc, and also an event-driven callback
+      framework.
+      Imagine something like Borland's "Turbo Vision" framework implemented in
+      ruby.
+    <p>
+      To learn more about the requirements of what such a framework, I plan
+      to implement a
+      <a href="tvision-ruby.html">ruby wrapper for turbo vision</a>. 
+    <hr><p>
+    This project is kindly hosted by 
+    <a href="http://developer.berlios.de/">
+      <img alt="BerliOS" src="http://developer.berlios.de/sflogo.php?group_id=273&type=1" width="118" height="52" border="0">
+    </a>.
+    <hr>
+    <address><a href="mailto:t-peters@users.berlios.de">Tobias Peters at BerliOS</a></address>
+  </body>
+</html>
