@@ -17,7 +17,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: extconf.rb,v 1.7 2002/02/28 13:49:48 t-peters Exp $
+# $Id: extconf.rb,v 1.8 2002/11/16 21:16:16 t-peters Exp $
 
 require "mkmf"
 
@@ -25,16 +25,78 @@ $CFLAGS  += " -g"
 $CXXFLAGS  = $CFLAGS
 
 have_header("unistd.h")
-unless have_header("ncurses.h")
-  unless have_header("ncurses/curses.h")
-    unless have_header("curses.h")
-      raise "ncurses header file not found"
-    end
-  end
+if have_header("ncurses.h")
+  curses_header = "ncurses.h"
+elsif have_header("ncurses/curses.h")
+  curses_header = "ncurses/curses.h"
+elsif have_header("curses.h")
+  curses_header = "curses.h"
+else
+  raise "ncurses header file not found"
 end
 unless have_library("ncurses", "wmove")
   raise "ncurses library not found"
 end
+
+have_func("newscr")
+have_func("TABSIZE")
+have_func("ESCDELAY")
+have_func("keybound")
+have_func("curses_version")
+have_func("tigetstr")
+have_func("getwin")
+have_func("putwin")
+have_func("ungetmouse")
+have_func("mousemask")
+have_func("wenclose")
+have_func("mouseinterval")
+have_func("wmouse_trafo")
+have_func("mcprint")
+have_func("has_key")
+
+have_func("delscreen")
+have_func("define_key")
+have_func("keyok")
+have_func("resizeterm")
+have_func("use_default_colors")
+have_func("use_extended_names")
+have_func("wresize")
+have_func("attr_on")
+have_func("attr_off")
+have_func("attr_set")
+have_func("chgat")
+have_func("color_set")
+have_func("filter")
+have_func("intrflush")
+have_func("mvchgat")
+have_func("mvhline")
+have_func("mvvline")
+have_func("mvwchgat")
+have_func("mvwhline")
+have_func("mvwvline")
+have_func("noqiflush")
+have_func("putp")
+have_func("qiflush")
+have_func("scr_dump")
+have_func("scr_init")
+have_func("scr_restore")
+have_func("scr_set")
+have_func("slk_attr_off")
+have_func("slk_attr_on")
+have_func("slk_attr")
+have_func("slk_attr_set")
+have_func("slk_color")
+have_func("tigetflag")
+have_func("tigetnum")
+have_func("use_env")
+have_func("vidattr")
+have_func("vid_attr")
+have_func("wattr_on")
+have_func("wattr_off")
+have_func("wattr_set")
+have_func("wchgat")
+have_func("wcolor_set")
+have_func("getattrs")
 
 puts "checking which debugging functions to wrap..."
 have_func("_tracef")
@@ -55,19 +117,10 @@ puts "checking for the panel library..."
 have_header("panel.h")
 have_library("panel", "panel_hidden")
 
-puts "checking for the standard c++ library..."
-have_stdcpp = have_library("stdc++", "cerr")
-unless have_stdcpp
-  puts "Did not find the standard c++ library.  Assuming this is due to name" +
-    " mangling of symbol std::cerr; trying to link to it by using g++ instead"+
-    " of gcc."
-end
-
 create_makefile('ncurses')
 
 makefile = IO.readlines("Makefile").collect{|line|
   line.chomp!
-  line.sub!("gcc -shared", "g++ -shared") unless (have_stdcpp)
   line
 }
 
