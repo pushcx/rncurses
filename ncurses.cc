@@ -145,66 +145,6 @@ init_constants_2(void)
     rb_define_const(mNcurses, "COLOR_CYAN",    INT2NUM(COLOR_CYAN));
     rb_define_const(mNcurses, "COLOR_WHITE",   INT2NUM(COLOR_WHITE));
 
-    /* line graphics */
-
-    /* VT100 symbols begin here */
-
-    rb_define_const(mNcurses, "ACS_ULCORNER",  INT2NUM(ACS_ULCORNER));
-    rb_define_const(mNcurses, "ACS_LLCORNER",  INT2NUM(ACS_LLCORNER));
-    rb_define_const(mNcurses, "ACS_URCORNER",  INT2NUM(ACS_URCORNER));
-    rb_define_const(mNcurses, "ACS_LRCORNER",  INT2NUM(ACS_LRCORNER));
-    rb_define_const(mNcurses, "ACS_LTEE",      INT2NUM(ACS_LTEE));
-    rb_define_const(mNcurses, "ACS_RTEE",      INT2NUM(ACS_RTEE));
-    rb_define_const(mNcurses, "ACS_BTEE",      INT2NUM(ACS_BTEE));
-    rb_define_const(mNcurses, "ACS_TTEE",      INT2NUM(ACS_TTEE));
-    rb_define_const(mNcurses, "ACS_HLINE",     INT2NUM(ACS_HLINE));
-    rb_define_const(mNcurses, "ACS_VLINE",     INT2NUM(ACS_VLINE));
-    rb_define_const(mNcurses, "ACS_PLUS",      INT2NUM(ACS_PLUS));
-    rb_define_const(mNcurses, "ACS_S1",        INT2NUM(ACS_S1));
-    rb_define_const(mNcurses, "ACS_S9",        INT2NUM(ACS_S9));
-    rb_define_const(mNcurses, "ACS_DIAMOND",   INT2NUM(ACS_DIAMOND));
-    rb_define_const(mNcurses, "ACS_CKBOARD",   INT2NUM(ACS_CKBOARD));
-    rb_define_const(mNcurses, "ACS_DEGREE",    INT2NUM(ACS_DEGREE));
-    rb_define_const(mNcurses, "ACS_PLMINUS",   INT2NUM(ACS_PLMINUS));
-    rb_define_const(mNcurses, "ACS_BULLET",    INT2NUM(ACS_BULLET));
-    /* Teletype 5410v1 symbols begin here */
-    rb_define_const(mNcurses, "ACS_LARROW",    INT2NUM(ACS_LARROW));
-    rb_define_const(mNcurses, "ACS_RARROW",    INT2NUM(ACS_RARROW));
-    rb_define_const(mNcurses, "ACS_DARROW",    INT2NUM(ACS_DARROW));
-    rb_define_const(mNcurses, "ACS_UARROW",    INT2NUM(ACS_UARROW));
-    rb_define_const(mNcurses, "ACS_BOARD",     INT2NUM(ACS_BOARD));
-    rb_define_const(mNcurses, "ACS_LANTERN",   INT2NUM(ACS_LANTERN));
-    rb_define_const(mNcurses, "ACS_BLOCK",     INT2NUM(ACS_BLOCK));
-    /*
-     * These aren't documented, but a lot of System Vs have them anyway
-     * (you can spot pprryyzz{{||}} in a lot of AT&T terminfo strings).
-     * The ACS_names may not match AT&T's, our source didn't know them.
-     */
-    rb_define_const(mNcurses, "ACS_S3",        INT2NUM(ACS_S3));
-    rb_define_const(mNcurses, "ACS_S7",        INT2NUM(ACS_S7));
-    rb_define_const(mNcurses, "ACS_LEQUAL",    INT2NUM(ACS_LEQUAL));
-    rb_define_const(mNcurses, "ACS_GEQUAL",    INT2NUM(ACS_GEQUAL));
-    rb_define_const(mNcurses, "ACS_PI",        INT2NUM(ACS_PI));
-    rb_define_const(mNcurses, "ACS_NEQUAL",    INT2NUM(ACS_NEQUAL));
-    rb_define_const(mNcurses, "ACS_STERLING",  INT2NUM(ACS_STERLING));
-    /*
-     * Line drawing ACS names are of the form ACS_trbl, where t is the top, r
-     * is the right, b is the bottom, and l is the left.  t, r, b, and l might
-     * be B (blank), S (single), D (double), or T (thick).  The subset defined
-     * here only uses B and S.
-     */
-    rb_define_const(mNcurses, "ACS_BSSB",      INT2NUM(ACS_BSSB));
-    rb_define_const(mNcurses, "ACS_SSBB",      INT2NUM(ACS_SSBB));
-    rb_define_const(mNcurses, "ACS_BBSS",      INT2NUM(ACS_BBSS));
-    rb_define_const(mNcurses, "ACS_SBBS",      INT2NUM(ACS_SBBS));
-    rb_define_const(mNcurses, "ACS_SBSS",      INT2NUM(ACS_SBSS));
-    rb_define_const(mNcurses, "ACS_SSSB",      INT2NUM(ACS_SSSB));
-    rb_define_const(mNcurses, "ACS_SSBS",      INT2NUM(ACS_SSBS));
-    rb_define_const(mNcurses, "ACS_BSSS",      INT2NUM(ACS_BSSS));
-    rb_define_const(mNcurses, "ACS_BSBS",      INT2NUM(ACS_BSBS));
-    rb_define_const(mNcurses, "ACS_SBSB",      INT2NUM(ACS_SBSB));
-    rb_define_const(mNcurses, "ACS_SSSS",      INT2NUM(ACS_SSSS));
-
     rb_define_const(mNcurses, "ERR",           INT2NUM(ERR));
     rb_define_const(mNcurses, "OK",            INT2NUM(OK));
 
@@ -661,7 +601,71 @@ static VALUE rb_inch(VALUE) {
     return INT2NUM(inch());
 }
 static VALUE rb_initscr(VALUE) {
-    return wrap_window(initscr());
+    VALUE v = wrap_window(initscr());
+    
+    // These constants are not defined before the call to initscr.
+    
+    /* line graphics */
+
+    /* VT100 symbols begin here */
+
+    rb_define_const(mNcurses, "ACS_ULCORNER",  INT2NUM(ACS_ULCORNER));
+    rb_define_const(mNcurses, "ACS_LLCORNER",  INT2NUM(ACS_LLCORNER));
+    rb_define_const(mNcurses, "ACS_URCORNER",  INT2NUM(ACS_URCORNER));
+    rb_define_const(mNcurses, "ACS_LRCORNER",  INT2NUM(ACS_LRCORNER));
+    rb_define_const(mNcurses, "ACS_LTEE",      INT2NUM(ACS_LTEE));
+    rb_define_const(mNcurses, "ACS_RTEE",      INT2NUM(ACS_RTEE));
+    rb_define_const(mNcurses, "ACS_BTEE",      INT2NUM(ACS_BTEE));
+    rb_define_const(mNcurses, "ACS_TTEE",      INT2NUM(ACS_TTEE));
+    rb_define_const(mNcurses, "ACS_HLINE",     INT2NUM(ACS_HLINE));
+    rb_define_const(mNcurses, "ACS_VLINE",     INT2NUM(ACS_VLINE));
+    rb_define_const(mNcurses, "ACS_PLUS",      INT2NUM(ACS_PLUS));
+    rb_define_const(mNcurses, "ACS_S1",        INT2NUM(ACS_S1));
+    rb_define_const(mNcurses, "ACS_S9",        INT2NUM(ACS_S9));
+    rb_define_const(mNcurses, "ACS_DIAMOND",   INT2NUM(ACS_DIAMOND));
+    rb_define_const(mNcurses, "ACS_CKBOARD",   INT2NUM(ACS_CKBOARD));
+    rb_define_const(mNcurses, "ACS_DEGREE",    INT2NUM(ACS_DEGREE));
+    rb_define_const(mNcurses, "ACS_PLMINUS",   INT2NUM(ACS_PLMINUS));
+    rb_define_const(mNcurses, "ACS_BULLET",    INT2NUM(ACS_BULLET));
+    /* Teletype 5410v1 symbols begin here */
+    rb_define_const(mNcurses, "ACS_LARROW",    INT2NUM(ACS_LARROW));
+    rb_define_const(mNcurses, "ACS_RARROW",    INT2NUM(ACS_RARROW));
+    rb_define_const(mNcurses, "ACS_DARROW",    INT2NUM(ACS_DARROW));
+    rb_define_const(mNcurses, "ACS_UARROW",    INT2NUM(ACS_UARROW));
+    rb_define_const(mNcurses, "ACS_BOARD",     INT2NUM(ACS_BOARD));
+    rb_define_const(mNcurses, "ACS_LANTERN",   INT2NUM(ACS_LANTERN));
+    rb_define_const(mNcurses, "ACS_BLOCK",     INT2NUM(ACS_BLOCK));
+    /*
+     * These aren't documented, but a lot of System Vs have them anyway
+     * (you can spot pprryyzz{{||}} in a lot of AT&T terminfo strings).
+     * The ACS_names may not match AT&T's, our source didn't know them.
+     */
+    rb_define_const(mNcurses, "ACS_S3",        INT2NUM(ACS_S3));
+    rb_define_const(mNcurses, "ACS_S7",        INT2NUM(ACS_S7));
+    rb_define_const(mNcurses, "ACS_LEQUAL",    INT2NUM(ACS_LEQUAL));
+    rb_define_const(mNcurses, "ACS_GEQUAL",    INT2NUM(ACS_GEQUAL));
+    rb_define_const(mNcurses, "ACS_PI",        INT2NUM(ACS_PI));
+    rb_define_const(mNcurses, "ACS_NEQUAL",    INT2NUM(ACS_NEQUAL));
+    rb_define_const(mNcurses, "ACS_STERLING",  INT2NUM(ACS_STERLING));
+    /*
+     * Line drawing ACS names are of the form ACS_trbl, where t is the top, r
+     * is the right, b is the bottom, and l is the left.  t, r, b, and l might
+     * be B (blank), S (single), D (double), or T (thick).  The subset defined
+     * here only uses B and S.
+     */
+    rb_define_const(mNcurses, "ACS_BSSB",      INT2NUM(ACS_BSSB));
+    rb_define_const(mNcurses, "ACS_SSBB",      INT2NUM(ACS_SSBB));
+    rb_define_const(mNcurses, "ACS_BBSS",      INT2NUM(ACS_BBSS));
+    rb_define_const(mNcurses, "ACS_SBBS",      INT2NUM(ACS_SBBS));
+    rb_define_const(mNcurses, "ACS_SBSS",      INT2NUM(ACS_SBSS));
+    rb_define_const(mNcurses, "ACS_SSSB",      INT2NUM(ACS_SSSB));
+    rb_define_const(mNcurses, "ACS_SSBS",      INT2NUM(ACS_SSBS));
+    rb_define_const(mNcurses, "ACS_BSSS",      INT2NUM(ACS_BSSS));
+    rb_define_const(mNcurses, "ACS_BSBS",      INT2NUM(ACS_BSBS));
+    rb_define_const(mNcurses, "ACS_SBSB",      INT2NUM(ACS_SBSB));
+    rb_define_const(mNcurses, "ACS_SSSS",      INT2NUM(ACS_SSSS));
+
+    return v;
 }
 static VALUE rb_init_color(VALUE, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(init_color(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4)));
