@@ -4,7 +4,9 @@
  * Prognosoft Inc. <http://www.prognosoft.biz>
  * Copyright 2004
  * 
+ * Changes:
  * (C) 2004 Tobias Peters
+ * (C) 2005 Tobias Herzke
  *
  *  This module is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -1144,7 +1146,7 @@ static bool field_check(FIELD* field, const void* argblock) {
 		rb_ary_unshift(args, wrap_field(field));		
 		return RTEST(rb_apply(proc, rb_intern("call"), args));
 	 }
-  return true;
+  return 1;
 }
 static bool char_check(int c, const void* argblock) {
   FIELD* field = (FIELD*)argblock;
@@ -1158,7 +1160,7 @@ static bool char_check(int c, const void* argblock) {
 	 rb_ary_unshift(args, rb_str_new2(str));
 	 return RTEST(rb_apply(proc, rb_intern("call"), args));
   }
-  return true;
+  return 1;
 }
 static VALUE rbncurs_m_new_fieldtype(VALUE dummy, VALUE field_check_proc, VALUE char_check_proc) 
 {
@@ -1189,7 +1191,7 @@ static bool next_choice(FIELD* field, const void* argblock) {
 	 /*  Need to find out what exactly is argblock about... */
 	 return RTEST(rb_funcall(proc, rb_intern("call"), 1, wrap_field(field)));
   }
-  return true;
+  return 1;
 }
 static bool prev_choice(FIELD* field, const void* argblock) {
   FIELDTYPE* fieldtype = field_type(field);
@@ -1198,7 +1200,7 @@ static bool prev_choice(FIELD* field, const void* argblock) {
 	 /*  Need to find out what exactly is argblock about... */
 	 return RTEST(rb_funcall(proc, rb_intern("call"), 1, wrap_field(field)));
   }
-  return true;
+  return 1;
 }
 
 static VALUE rbncurs_c_set_fieldtype_choice(VALUE rb_fieldtype, VALUE next_choice_proc, VALUE prev_choice_proc) {
