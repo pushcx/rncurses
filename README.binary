@@ -1,6 +1,5 @@
-This distribution of ncurses-ruby contains the pre-built extension module
-for a ruby 1.6 interpreter compiled with the MinGW compiler for windows.
+This distribution of ncurses-ruby contains the pre-built binary extension
+module for ruby 1.8 on windows.
 
-(see http://www.ruby-lang.org/~eban/ruby/binaries/mingw/)
-
-Copy the files lib/ncurses.rb and ncurses.so into ruby's library search path.
+Copy the files .\lib\ncurses.rb and .\ncurses.so into ruby's library search
+path.
