@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 
 # ncurses-ruby is a ruby module for accessing the FSF's ncurses library
-# (C) 2002 Tobias Peters <t-peters@users.berlios.de>
+# (C) 2002, 2004 Tobias Peters <t-peters@users.berlios.de>
+# (C) 2005 Tobias Herzke
 #
 # This module is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: extconf.rb,v 1.10 2004/05/13 21:54:49 t-peters Exp $
+# $Id: extconf.rb,v 1.11 2005/02/26 22:51:45 t-peters Exp $
 
 require "mkmf"
 
@@ -127,4 +128,4 @@ if have_header("form.h")
   have_library("form", "new_form")
 end
 
-create_makefile('ncurses')
+create_makefile('ncurses_bin')
