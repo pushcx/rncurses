@@ -16,7 +16,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.5 2004/07/31 08:34:09 t-peters Exp $
+# $Id: ncurses.rb,v 1.6 2005/02/25 21:03:22 t-peters Exp $
 
 require "ncurses.so"
 
@@ -286,4 +286,38 @@ def Ncurses.touchline(win, start, count)
 end
 def Ncurses.touchwin(win)
   wtouchln(win, 0, getmaxy(win), 1)
+end
+
+module Ncurses
+  Ncurses = self # for accessing Ncurses from a Module that includes Ncurses
+
+  # Some users like to include ncurses names despite namespace pollution
+  # This module is for them
+  module Namespace
+    def self.append_features(target)
+      # include constants
+      unless target.ancestors.member?(Ncurses)
+        target.__send__(:include, Ncurses)
+      end
+      
+      # make methods available
+      unless target.respond_to?(:pre_Ncurses_method_missing)
+        target.module_eval{
+          alias pre_Ncurses_method_missing method_missing
+          def method_missing(name, *args)
+            if Ncurses.respond_to?(name)
+              Ncurses.send(name, *args)
+            else
+              pre_ncurses_method_missing(name, *args)
+            end
+          end
+        }
+      end
+    end
+    def self.entend_object(object)
+      class << object
+        self
+      end.__send__(:include, self)
+    end
+  end
 end
