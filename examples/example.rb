@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-# $Id: example.rb,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+# $Id: example.rb,v 1.4 2002/03/04 13:24:29 t-peters Exp $
 
 # This file provides an example for the usage of the ncurses-ruby module.
-# Copyright (C) 2002 Tobias Peters <t-peters@berlios.de>
+# Copyright (C) 2002 Tobias Peters <t-peters@users.berlios.de>
 #
 # The following license applys only to this file. It is less restrictive
 # than the license for the rest of the ncurses-ruby distribution. 
