@@ -1,4 +1,4 @@
-$Id: README,v 1.5 2002/11/16 21:16:00 t-peters Exp $
+$Id: README,v 1.6 2003/03/22 22:55:13 t-peters Exp $
 ------------------------------------------------------------------------
 This directory contains a ruby module for accessing the FSF's ncurses
 library.
@@ -52,6 +52,9 @@ make install
 In your programs:
 require "ncurses.rb"
 
+
+If your programs use the scanw functions (most unlikely) you will have to
+install the scanf library for ruby.
 
 External Variables
 ==================
@@ -149,6 +152,12 @@ Functions expecting pointers to structs
 When the C-function expects a pointer to WINDOW, SCREEN, MEVENT or PANEL, then
 simply pass it the corresponding, already existing ruby object.
 
+
+scanf style functions expecting various pointers
+---------------------------------------------------
+
+namely scanw, mvscanw, wscanw, mvwscanw. Use an array after the format string.
+The scanned values will be placed there.
 
 Module / Class Hierarchie
 =========================
