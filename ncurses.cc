@@ -2503,6 +2503,91 @@ static void init_constants_4(void)
 
 // #endif /* __NCURSES_H */
 
+
+// Wrap ACS_* constants (additionally) as methods of SCREEN:
+#define rb_ACS(ACS)                               \
+VALUE rb_## ACS (VALUE rb_screen)                 \
+{                                                 \
+    SCREEN * c_screen = get_screen(rb_screen);    \
+    SCREEN * current_screen = set_term(c_screen); \
+    VALUE rb_ACS_CONST = INT2NUM(ACS);            \
+    set_term(current_screen);                     \
+    return  rb_ACS_CONST;                         \
+}             
+#define wrap_ACS(ACS)                                          \
+rb_define_method(cSCREEN, #ACS,                                \
+                 reinterpret_cast<VALUE(*)(...)>(&rb_ ## ACS), \
+                 0)
+rb_ACS(ACS_ULCORNER)
+    rb_ACS(ACS_LLCORNER)
+    rb_ACS(ACS_URCORNER)
+    rb_ACS(ACS_LRCORNER)
+    rb_ACS(ACS_LTEE)
+    rb_ACS(ACS_RTEE)
+    rb_ACS(ACS_BTEE)
+    rb_ACS(ACS_TTEE)
+    rb_ACS(ACS_HLINE)
+    rb_ACS(ACS_VLINE)
+    rb_ACS(ACS_PLUS)
+    rb_ACS(ACS_S1)
+    rb_ACS(ACS_S9)
+    rb_ACS(ACS_DIAMOND)
+    rb_ACS(ACS_CKBOARD)
+    rb_ACS(ACS_DEGREE)
+    rb_ACS(ACS_PLMINUS)
+    rb_ACS(ACS_BULLET)
+    rb_ACS(ACS_LARROW)
+    rb_ACS(ACS_RARROW)
+    rb_ACS(ACS_DARROW)
+    rb_ACS(ACS_UARROW)
+    rb_ACS(ACS_BOARD)
+    rb_ACS(ACS_LANTERN)
+    rb_ACS(ACS_BLOCK)
+    rb_ACS(ACS_S3)
+    rb_ACS(ACS_S7)
+    rb_ACS(ACS_LEQUAL)
+    rb_ACS(ACS_GEQUAL)
+    rb_ACS(ACS_PI)
+    rb_ACS(ACS_NEQUAL)
+    rb_ACS(ACS_STERLING)
+
+void init_SCREEN_methods(void)
+{
+    wrap_ACS(ACS_ULCORNER);
+    wrap_ACS(ACS_LLCORNER);
+    wrap_ACS(ACS_URCORNER);
+    wrap_ACS(ACS_LRCORNER);
+    wrap_ACS(ACS_LTEE);
+    wrap_ACS(ACS_RTEE);
+    wrap_ACS(ACS_BTEE);
+    wrap_ACS(ACS_TTEE);
+    wrap_ACS(ACS_HLINE);
+    wrap_ACS(ACS_VLINE);
+    wrap_ACS(ACS_PLUS);
+    wrap_ACS(ACS_S1);
+    wrap_ACS(ACS_S9);
+    wrap_ACS(ACS_DIAMOND);
+    wrap_ACS(ACS_CKBOARD);
+    wrap_ACS(ACS_DEGREE);
+    wrap_ACS(ACS_PLMINUS);
+    wrap_ACS(ACS_BULLET);
+    wrap_ACS(ACS_LARROW);
+    wrap_ACS(ACS_RARROW);
+    wrap_ACS(ACS_DARROW);
+    wrap_ACS(ACS_UARROW);
+    wrap_ACS(ACS_BOARD);
+    wrap_ACS(ACS_LANTERN);
+    wrap_ACS(ACS_BLOCK);
+    wrap_ACS(ACS_S3);
+    wrap_ACS(ACS_S7);
+    wrap_ACS(ACS_LEQUAL);
+    wrap_ACS(ACS_GEQUAL);
+    wrap_ACS(ACS_PI);
+    wrap_ACS(ACS_NEQUAL);
+    wrap_ACS(ACS_STERLING);
+}
+
+
 extern "C" void Init_ncurses(void)
 {
     mNcurses = rb_define_module("Ncurses");
@@ -2531,6 +2616,8 @@ extern "C" void Init_ncurses(void)
     init_functions_2();
     // printf("f3\n");
     init_functions_3();
+
+    init_SCREEN_methods();
 #ifdef HAVE_PANEL_H
     init_panel();
 #endif
