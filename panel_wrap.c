@@ -17,12 +17,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-/* $Id: panel_wrap.c,v 1.1 2004/05/13 21:54:27 t-peters Exp $ */
+/* $Id: panel_wrap.c,v 1.2 2004/07/31 08:35:13 t-peters Exp $ */
 
 #ifdef HAVE_PANEL_H
 
 #include "panel_wrap.h"
 #include "ncurses_wrap.h"
+
+VALUE mPanel;
+VALUE cPANEL;
 
 static VALUE wrap_panel(PANEL* panel)
 {

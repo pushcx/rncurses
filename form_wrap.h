@@ -26,11 +26,11 @@
 #include <form.h>
 #include <ruby.h>
 
-VALUE mForm;
-VALUE cFIELD;
-VALUE cFIELDTYPE;
-VALUE cFORM;
-/*VALUE cPAGE;*/
+extern VALUE mForm;
+extern VALUE cFIELD;
+extern VALUE cFIELDTYPE;
+extern VALUE cFORM;
+/*extern VALUE cPAGE;*/
 
 typedef struct {
  		bool (* field_check)(FIELD *,const void *); 

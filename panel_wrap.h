@@ -17,15 +17,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-/* $Id: panel_wrap.h,v 1.4 2004/05/13 21:55:11 t-peters Exp $ */
+/* $Id: panel_wrap.h,v 1.5 2004/07/31 08:35:13 t-peters Exp $ */
 
 #if !defined(PANEL_HH) && defined(HAVE_PANEL_H)
 #define PANEL_HH
 #include <panel.h>
 #include <ruby.h>
 
-VALUE mPanel;
-VALUE cPANEL;
+extern VALUE mPanel;
+extern VALUE cPANEL;
 
 void init_panel(void);
 

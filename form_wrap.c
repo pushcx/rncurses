@@ -28,6 +28,11 @@
 #include "form_wrap.h"
 #include "ncurses_wrap.h"
 
+VALUE mForm;
+VALUE cFIELD;
+VALUE cFIELDTYPE;
+VALUE cFORM;
+
 void init_err_codes() 
 {
   /* The routine succeeded. */

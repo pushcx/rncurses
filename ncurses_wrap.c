@@ -17,7 +17,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.5 2004/05/13 21:55:00 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.6 2004/07/31 08:35:13 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -64,7 +64,11 @@
 */
 
 #include "ncurses_wrap.h"
-#include "form_wrap.h"
+
+VALUE mNcurses;  /* module Ncurses */
+VALUE cWINDOW;   /* class Ncurses::WINDOW */
+VALUE cSCREEN;   /* class Ncurses::SCREEN */
+VALUE eNcurses;  /* Ncurses::Exception thrown by this extension */
 
 static void Init_ncurses_full(void);
 

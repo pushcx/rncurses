@@ -17,7 +17,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.h,v 1.1 2004/05/13 21:54:27 t-peters Exp $
+ * $Id: ncurses_wrap.h,v 1.2 2004/07/31 08:35:13 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -84,10 +84,10 @@ int close(int);
 
 #include <ruby.h>
 
-VALUE mNcurses;  /* module Ncurses */
-VALUE cWINDOW;   /* class Ncurses::WINDOW */
-VALUE cSCREEN;   /* class Ncurses::SCREEN */
-VALUE eNcurses;  /* Ncurses::Exception thrown by this extension */
+extern VALUE mNcurses;  /* module Ncurses */
+extern VALUE cWINDOW;   /* class Ncurses::WINDOW */
+extern VALUE cSCREEN;   /* class Ncurses::SCREEN */
+extern VALUE eNcurses;  /* Ncurses::Exception thrown by this extension */
 
 #define NCFUNC(name, nargs)                       \
   rb_define_singleton_method(mNcurses,            \
