@@ -1,0 +1,187 @@
+------------------------------------------------------------------------
+This directory contains a ruby module for accessing the FSF's ncurses
+library.
+(C) 2002 Tobias Peters <t-peters@berlios.de>
+
+This module is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+
+This module is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this module; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+------------------------------------------------------------------------
+
+This wrapper provides access to the functions, macros, global variables and
+constants of the ncurses library.  These are simply mapped to a Module named
+Ncurses.  Functions and external variables are implemented as module functions
+of the Module Ncurses.
+
+If you don't know how to use ncurses from C, then stop reading here, and read
+an introduction to ncurses. Eric Raymond has written an introduction that
+should be part of the ncurses development package installed on your computer.
+If you need a gentler introduction, there is a part of a chapter in the linux
+programmer's guide dealing with ncurses, available from www.linuxdoc.org.  It
+should be quite old by now, but the ncurses interface has not changed
+since then, regarding the scope of covered functions, so it is still a very
+good read.  You will also appreciate the extensive man-pages of ncurses.
+
+
+Installation and Usage
+======================
+
+ruby extconf.rb
+make
+make install
+
+In your programs:
+require "ncurses.rb"
+
+External Variables
+==================
+
+External variables are accessed read-only, by module functions taking no
+arguments.  They are spelled exactly like their C counterparts, which leads to
+module functions beginning with an uppercase letter (e.g. Ncurses.LINES).
+
+
+Constants
+=========
+(static Preprocessor macros)
+
+Constants are implemented as module functions in the Ncurses module, if
+possible. Ruby constants can not start with an underscore, so these constants
+have been renamed (they lost the leading underscore). There are,however,
+module functions with the same name as these constants, that also return
+the constant's value, when invoked (e.g. "Ncurses._ENDLINE" returns the value
+of the constant "Ncurses::ENDLINE", which has the same value as the C constant
+"_ENDLINE").
+
+
+Functions
+=========
+
+Functions (also those only implemented by macros in C) can also be accessed
+through module functions of the Module Ncurses. They take exactly the same
+arguments as their C counterparts. Some of the C functions return additional
+arguments through pointer arguments. These are implemented as follows:
+
+
+Functions expecting pointers to integer types
+---------------------------------------------
+
+When the C-function expects a pointer to int, short, chtype, or attr_type,
+You should use as the argument to the ruby function a variable containing
+an empty array. This is because ruby passes these types by value instead of
+by reference; but arrays are passed by reference, so that you can see changes
+in them, performed by the function.
+Attention: some macro-only functions like getsyx accept variables of type int,
+but, being macros, they write values to their arguments. Thus, they also need
+empty array arguments when called from ruby.
+Example: 
+	color_pair_number = 4
+	foreground_color  = []
+	background_color  = []
+	if (Ncurses.pair_content(color_pair_number, foreground_color,
+			         background_color) != Ncurses::ERR)
+	  "color pair number #{color_pair_number} contains color number " +
+	  "#{foreground_color[0]} as the foreground color, and color "    +
+	  "number #{background_color[0]} as the background color")
+	end
+
+There are 2 functions that read a value from the location ponted to by a
+pointer to int, and store another value at that locations. These functions are
+mouse_trafo and wmouse_trafo. When calling these functions, you have to provide
+2 arrays, each filled with exacly one Integer. The values contained in these
+arrays will then be changed by the ruby module function.
+
+
+Functions expecting (non-const) pointers to char
+------------------------------------------------
+
+When the C-function expects a pointer to char, you should use a variable
+containing an empty string as the argument to the ruby function.
+Example:
+	line2 = ""
+	if (Ncurses.mvwinnstr(Ncurses.stdscr, y=2, x=0, line2,
+			      Ncurses.getmaxx(Ncurses.stdscr)) == Ncurses::ERR)
+		raise "could not scan 3rd line"
+	else
+		Ncurses.beep if line2.index("|")
+	end
+The string that the C function would store at the pointer-to-char location
+will be appended to the given string.
+
+Functions expecting const pointers to char do not modify the string they
+receive, you can pass any string to them.
+
+
+
+Functions expecting pointers to structs
+---------------------------------------------------
+
+When the C-function expects a pointer to WINDOW, SCREEN, MEVENT or PANEL, then
+simply pass it the corresponding, already existing ruby object.
+
+
+Module / Class Hierarchie
+=========================
+
+module Ncurses
+	class WINDOW; end
+	class SCREEN; end
+	class MEVENT; end
+	module Panel
+		class PANEL; end
+	end
+end
+
+Where to find the functions
+===========================
+
+As stated, all ncurses functions are implemented as module functions in the
+module Ncurses. When you know how an ncurses function is named in C (example:
+"mvaddch"), you can simply call the corresponding module functions with the
+same number of arguments (example: "Ncurses.mvaddch(y,x,ch)")
+
+The class window implements method_missing and tries to map invoked methods
+to Ncurses module functions using a simple heuristic:
+If the method name starts with "mv", it looks for a Ncurses module function
+that starts with "mvw", and if it exists, adds itself to the argument list
+and calls this function.
+If no such module function exists, or the name of the invoked method does not
+start with "mv", it looks if there is a module function with the name "w" +
+methodname, and if it exists, adds itself again to the argument list and calls
+this function.
+If this module function did not exist either, then, as a last step, it invokes
+a module function with the same name as the method, adding itself to the
+argument list.
+
+So, if you invoke win.mvaddch(y,x,ch) on a Ncurses::WINDOW object, it will
+delegate the method call as Ncurses.mvwaddch(win,y,x,ch), which is what you
+probably wanted.
+
+Other examples:
+ win.delwin()        =>  Ncurses.delwin(win)          # win cannot be used
+                                                      # after this call
+ win.printw("hello") =>  Ncurses.wprintw(win, "hello")
+ win.getmaxyx(y=[],
+              x=[])  =>  Ncurses.getmaxyx(win,y,x)
+
+
+The panel library
+=================
+
+The panel library has also been wrapped. All panel functions are implemented
+as module functions of the module Ncurses::Panel.
+
+Most of these functions are also implemented as methods of class
+Ncurses::Panel::PANEL, once with the original name and once with the subword
+"panel" and an adjacent underscore removed.
+
