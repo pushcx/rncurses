@@ -70,6 +70,9 @@ module Ncurses
       Ncurses.delwin(self)
     end
     alias delete del
+    def WINDOW.new(*args)
+      Ncurses.newwin(*args)
+    end
   end
   class SCREEN
     include Destroy_checker
