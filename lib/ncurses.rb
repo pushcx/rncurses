@@ -16,7 +16,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.4 2004/05/13 21:55:31 t-peters Exp $
+# $Id: ncurses.rb,v 1.5 2004/07/31 08:34:09 t-peters Exp $
 
 require "ncurses.so"
 
@@ -147,12 +147,12 @@ def Ncurses.mvwinchnstr(win, y,x, str, n)
   end
 end
 def Ncurses.mvwinchstr(win, y,x, str)
-  maxy = []; maxx = []; getmaxyx(win, naxy,maxx)
+  maxy = []; maxx = []; getmaxyx(win, maxy,maxx)
   return Ncurses::ERR if (maxx[0] == Ncurses::ERR)
   Ncurses.mvwinchnstr(win, y,x, str, maxx[0]+1)
 end
 def Ncurses.winchstr(win, str)
-  maxy = []; maxx = []; getmaxyx(win, naxy,maxx)
+  maxy = []; maxx = []; getmaxyx(win, maxy,maxx)
   return Ncurses::ERR if (maxx[0] == Ncurses::ERR)
   Ncurses.winchnstr(win, str, maxx[0]+1)
 end
@@ -191,12 +191,12 @@ def Ncurses.mvwinnstr(win, y,x, str, n)
   end
 end
 def Ncurses.mvwinstr(win, y,x, str)
-  maxy = []; maxx = []; getmaxyx(win, naxy,maxx)
+  maxy = []; maxx = []; getmaxyx(win, maxy,maxx)
   return Ncurses::ERR if (maxx[0] == Ncurses::ERR)
   Ncurses.mvwinnstr(win, y,x, str, maxx[0]+1)
 end
 def Ncurses.winstr(win, str)
-  maxy = []; maxx = []; getmaxyx(win, naxy,maxx)
+  maxy = []; maxx = []; getmaxyx(win, maxy,maxx)
   return Ncurses::ERR if (maxx[0] == Ncurses::ERR)
   Ncurses.winnstr(win, str, maxx[0]+1)
 end
