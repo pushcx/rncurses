@@ -1,4 +1,4 @@
-$Id: README,v 1.8 2003/08/29 15:43:13 t-peters Exp $
+$Id: README,v 1.9 2003/09/02 19:38:11 t-peters Exp $
 ------------------------------------------------------------------------
 This directory contains a ruby module for accessing the FSF's ncurses
 library.
@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
 This wrapper provides access to the functions, macros, global variables and
 constants of the ncurses library.  These are mapped to a Ruby Module named
-"Ncurses":  Functions and external variables are implemented as module
+"Ncurses":  Functions and external variables are implemented as singleton
 functions of the Module Ncurses.
 
 This wrapper can also be used to access the PDCurses library
@@ -52,9 +52,11 @@ make install
 In your programs:
 require "ncurses.rb"
 
-
 If your programs use the scanw functions (most unlikely) you will have to
 install the scanf library for ruby (http://www.rubyhacker.com/code/scanf).
+
+Most ncurses functions are only available after either Ncurses.initscr or
+Ncurses.newterm has returned successfully.
 
 External Variables
 ==================
@@ -168,7 +170,7 @@ module Ncurses
 	class WINDOW; end
 	class SCREEN; end
 	class MEVENT; end
-	module Panel
+	module Panel 
 		class PANEL; end
 	end
 end
