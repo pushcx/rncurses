@@ -1,6 +1,7 @@
 # ncurses-ruby is a ruby module for accessing the FSF's ncurses library
-# (C) 2002, 2003 Tobias Peters <t-peters@users.berlios.de>
+# (C) 2002, 2003, 2004 Tobias Peters <t-peters@users.berlios.de>
 # (C) 2004 Simon Kaczor <skaczor@cox.net>
+# (C) 2005 Tobias Herzke
 #
 # This module is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,9 +17,9 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.6 2005/02/25 21:03:22 t-peters Exp $
+# $Id: ncurses.rb,v 1.7 2005/02/26 22:51:29 t-peters Exp $
 
-require "ncurses.so"
+require "ncurses_bin.so"
 
 
 # Ncurses constants with leading underscore
@@ -308,7 +309,7 @@ module Ncurses
             if Ncurses.respond_to?(name)
               Ncurses.send(name, *args)
             else
-              pre_ncurses_method_missing(name, *args)
+              pre_Ncurses_method_missing(name, *args)
             end
           end
         }
