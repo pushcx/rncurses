@@ -42,11 +42,12 @@ makefile = IO.readlines("Makefile").collect{|line|
 
 line_no = makefile.index(makefile.grep(/^install:/)[0])
 
-match_inst_prefix = /:(.*\/)/.match(makefile[line_no])
-if (match_inst_prefix == nil)
-  raise("could not deduce installation directory from generated Makefile")
-end
-makefile[line_no+1,0] = "\t@$(RUBY) -r ftools -e 'File::install(ARGV[0], ARGV[1], 0644, true)' ncurses.rb $(sitelibdir)$(target_prefix)/ncurses.rb"
+makefile[line_no] += " $(rubylibdir)$(target_prefix)/ncurses.rb\n" +
+  "$(rubylibdir)$(target_prefix)/ncurses.rb: ncurses.rb        \n" +
+  "\tif test -e $(sitelibdir)$(target_prefix)/ncurses.rb; then echo This file is probably a leftover from ncurses-ruby-0.1; rm -i $(sitelibdir)$(target_prefix)/ncurses.rb; fi\n" +
+  "\t@$(RUBY) -r ftools -e 'File::install(ARGV[0], ARGV[1], 0644, true)' " +
+  "                   ncurses.rb $(rubylibdir)$(target_prefix)/ncurses.rb"
+
 
 File.open("Makefile", "w") {|f|
   f.puts(makefile)
