@@ -15,10 +15,11 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.2 2003/03/22 22:55:54 t-peters Exp $
+# $Id: ncurses.rb,v 1.3 2003/09/02 19:37:51 t-peters Exp $
 
 require "ncurses.so"
 
+# Ncurses constants with leading underscore
 def Ncurses._XOPEN_CURSES
   Ncurses::XOPEN_CURSES
 end
@@ -49,6 +50,8 @@ end
 def Ncurses._NEWINDEX
   Ncurses::NEWINDEX
 end
+
+
 module Ncurses
   module Destroy_checker; def destroyed?; @destroyed; end; end
   class WINDOW
@@ -94,6 +97,10 @@ module Ncurses
     attr_accessor :id, :x,:y,:z, :bstate
   end
   GETSTR_LIMIT = 1024
+
+  module Panel 
+    class PANEL; end
+  end
 end
 
 def Ncurses.inchnstr(str,n)
