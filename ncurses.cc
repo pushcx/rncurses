@@ -16,7 +16,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses.cc,v 1.7 2002/02/26 23:10:18 t-peters Exp $
+ * $Id: ncurses.cc,v 1.8 2002/02/28 09:27:45 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -2107,6 +2107,13 @@ static void init_constants_3(void) {
     rb_define_const(mNcurses, "ALL_MOUSE_EVENTS", INT2NUM(ALL_MOUSE_EVENTS));
     rb_define_const(mNcurses, "REPORT_MOUSE_POSITION", INT2NUM(REPORT_MOUSE_POSITION));
 }
+
+// function that wraps the KEY_F() macro
+static VALUE rb_KEY_F(VALUE, VALUE number)
+{
+    return INT2NUM(KEY_F(NUM2INT(number)));
+}
+
 // typedef struct
 // {
 //     short id;		/* ID to distinguish multiple devices */
@@ -2375,6 +2382,8 @@ static VALUE rb_wattr_get(VALUE,VALUE win, VALUE rb_attrs, VALUE rb_pair,VALUE)
 
 static void init_functions_3(void)
 {
+    rb_define_module_function(mNcurses, "KEY_F",
+                              reinterpret_cast<RB_F_TYPE>(&rb_KEY_F), 1);
     rb_define_module_function(mNcurses, "getmouse",
                               reinterpret_cast<RB_F_TYPE>(&rb_getmouse),
                               1);
@@ -2388,7 +2397,8 @@ static void init_functions_3(void)
                               reinterpret_cast<RB_F_TYPE>(&rb_wenclose),
                               1);
     rb_define_module_function(mNcurses, "mouseinterval",
-                              reinterpret_cast<RB_F_TYPE>(&rb_mouseinterval), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_mouseinterval),
+                              1);
     rb_define_module_function(mNcurses, "wmouse_trafo",
                               reinterpret_cast<RB_F_TYPE>(&rb_wmouse_trafo), 4);
     rb_define_module_function(mNcurses, "mcprint",
