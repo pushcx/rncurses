@@ -1,8 +1,51 @@
+#!/usr/bin/env ruby
+
+# This program is a translation of the popular rain.c demo program from the
+# ncurses library distribution.
+#
+# Copyright (C) 2002 Tobias Peters <t-peters@berlios.de>
+#
+# I do not impose any additional restrictions over the copyright of the
+# ncurses library distribution. It has the following Copyright notice
+
+#/****************************************************************************
+# * Copyright (c) 1998 Free Software Foundation, Inc.                        *
+# *                                                                          *
+# * Permission is hereby granted, free of charge, to any person obtaining a  *
+# * copy of this software and associated documentation files (the            *
+# * "Software"), to deal in the Software without restriction, including      *
+# * without limitation the rights to use, copy, modify, merge, publish,      *
+# * distribute, distribute with modifications, sublicense, and/or sell       *
+# * copies of the Software, and to permit persons to whom the Software is    *
+# * furnished to do so, subject to the following conditions:                 *
+# *                                                                          *
+# * The above copyright notice and this permission notice shall be included  *
+# * in all copies or substantial portions of the Software.                   *
+# *                                                                          *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS  *
+# * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF               *
+# * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.   *
+# * IN NO EVENT SHALL THE ABOVE COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,   *
+# * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR    *
+# * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR    *
+# * THE USE OR OTHER DEALINGS IN THE SOFTWARE.                               *
+# *                                                                          *
+# * Except as contained in this notice, the name(s) of the above copyright   *
+# * holders shall not be used in advertising or otherwise to promote the     *
+# * sale, use or other dealings in this Software without prior written       *
+# * authorization.                                                           *
+# ****************************************************************************/
+
+
+
 require "ncurses"
 
+
+# A class responsible for raindrop drawing
 class Raindrop
-  def initialize (window)
+  def initialize (window, color_pair = nil)
     @window = window
+    @color_pair = color_pair
     lines   = []
     columns = []
     window.getmaxyx(lines,columns)
@@ -16,6 +59,9 @@ class Raindrop
   # draw_next_phase draws the next phase of a raindrop. If this was the last
   # phase, returns 0, otherwise returns the raindrop.
   def draw_next_phase
+    if (@color_pair)
+      @window.color_set(@color_pair, nil)
+    end
     if (DRAWING_PROCS[@current_phase].call(@window,@y,@x))
       @current_phase += 1
       self
@@ -50,14 +96,16 @@ class Raindrop
       window.mvaddstr(y,   x-2, "     ")
       window.mvaddstr(y+1, x-1,  "   ")
       window.mvaddstr(y+2, x,     " ")
-      nil
+      nil   # signal the last raindrop phase
     }
   ]
   NUMBER_OF_PHASES = DRAWING_PROCS.size - 1
 end
 
+
+# This class creates raindrops and tells them to draw on the screen
 class Rain
-  AVERAGE_RAINDROP_SPACE = 475.1
+  AVERAGE_RAINDROP_SPACE = 475.1  # 4 simultaneous raindrops in a 80x24 Window
 
   def Rain.sigwinch_handler(sig = nil)
     ObjectSpace.each_object(Rain){|rain|
@@ -71,39 +119,52 @@ class Rain
     @window = window
     @window_size_changed = true
     @raindrops = []
+    @has_colors = Ncurses.has_colors?
+    if (@has_colors)
+      @current_color = 1
+    end
   end
 
   def fall_for_a_moment
-    if (@window_size_changed)
-      @window_size_changed = false
-      window_size = @window.getmaxx * @window.getmaxy
-      average_number_of_raindrops = window_size / AVERAGE_RAINDROP_SPACE
-      @average_number_of_new_raindrops =
-        average_number_of_raindrops / Raindrop::NUMBER_OF_PHASES
-    end
+    adjust_to_new_window_size if (@window_size_changed)
 
-    nf = @average_number_of_new_raindrops.floor
-    nc = @average_number_of_new_raindrops.ceil
-    if (nf == nc)
-      n = nf
-    else
-      chance = @average_number_of_new_raindrops - nf
-      if (rand > chance)
-        n = nf
+    current_number_of_new_raindrops.times{
+      if (@has_colors)
+	@raindrops.push(Raindrop.new(@window, @current_color))
+	@current_color = 3 - @current_color  # alternate between 1 and 2
       else
-        n = nc
+	@raindrops.push(Raindrop.new(@window))
       end
-    end
-    n.times{@raindrops.push(Raindrop.new(@window))}
+    }
 
     @raindrops = @raindrops.collect{|raindrop|
       raindrop.draw_next_phase
-    }.compact
+    }.compact # erase raindrops that have expired from the list
   end
 
+  def adjust_to_new_window_size
+    @window_size_changed = false
+    window_size = @window.getmaxx * @window.getmaxy
+    average_number_of_raindrops = window_size / AVERAGE_RAINDROP_SPACE
+    @average_number_of_new_raindrops =
+      average_number_of_raindrops / Raindrop::NUMBER_OF_PHASES
+  end
+
+  def current_number_of_new_raindrops
+    num_floor = @average_number_of_new_raindrops.floor
+    num_ceil  = @average_number_of_new_raindrops.ceil
+    chance = @average_number_of_new_raindrops - num_floor
+    if (rand > chance)
+        num_floor
+    else
+      num_ceil
+    end
+  end
+    
   def fall(pause = 0.1)
     begin
       fall_for_a_moment
+      @window.refresh
       sleep(pause)
     end while (true)
   end
@@ -111,17 +172,17 @@ end
 
 Ncurses.initscr
 begin
-#  if (Ncurses.has_colors?)
-#    bg = Ncurses::COLOR_BLACK
-#    Ncurses.start_color
-#    if (Ncurses.respond_to?("use_default_colors"))
-#      if (Ncurses.use_default_colors == Ncurses::OK)
-#        bg = -1
-#      end
-#    end
-#    Ncurses.init_pair(1, Ncurses::COLOR_BLUE, bg);
-#    Ncurses.init_pair(2, Ncurses::COLOR_CYAN, bg);
-#  end
+  if (Ncurses.has_colors?)
+    bg = Ncurses::COLOR_BLACK
+    Ncurses.start_color
+    if (Ncurses.respond_to?("use_default_colors"))
+      if (Ncurses.use_default_colors == Ncurses::OK)
+        bg = -1
+      end
+    end
+    Ncurses.init_pair(1, Ncurses::COLOR_BLUE, bg);
+    Ncurses.init_pair(2, Ncurses::COLOR_CYAN, bg);
+  end
   Ncurses.nl()
   Ncurses.noecho()
   Ncurses.curs_set(0)
