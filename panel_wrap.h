@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-/* $Id: panel_wrap.h,v 1.2 2003/03/22 20:02:52 t-peters Exp $ */
+/* $Id: panel_wrap.h,v 1.3 2003/09/02 19:38:02 t-peters Exp $ */
 
 #if !defined(PANEL_HH) && defined(HAVE_PANEL_H)
 #define PANEL_HH
@@ -132,85 +132,85 @@ static void init_panel(void)
     mPanel = rb_define_module_under(mNcurses, "Panel");
     rb_iv_set(mPanel, "@panels_hash", rb_hash_new());
     cPANEL  = rb_define_class_under(mPanel, "PANEL", rb_cObject);
-    rb_define_module_function(mPanel, "del_panel",
-                              (&rbncurs_m_del_panel),
-                              1);
-    rb_define_module_function(mPanel, "delpanel",
-                              (&rbncurs_m_del_panel),
-                              1);
+    rb_define_singleton_method(mPanel, "del_panel",
+                               (&rbncurs_m_del_panel),
+                               1);
+    rb_define_singleton_method(mPanel, "delpanel",
+                               (&rbncurs_m_del_panel),
+                               1);
     rb_define_method(cPANEL, "del",
                      (&rbncurs_c_del_panel), 0);
     rb_define_method(cPANEL, "delete",
                      (&rbncurs_c_del_panel), 0);
-    rb_define_module_function(mPanel, "panel_window",
-                              (&rbncurs_m_panel_window),
-			      1);
+    rb_define_singleton_method(mPanel, "panel_window",
+                               (&rbncurs_m_panel_window),
+                               1);
     rb_define_method(cPANEL, "panel_window",
                      (&rbncurs_c_panel_window), 0);
     rb_define_method(cPANEL, "window",
                      (&rbncurs_c_panel_window), 0);
-    rb_define_module_function(mPanel, "update_panels",
-                              (&rbncurs_m_update_panels),
-			      0);
-    rb_define_module_function(mPanel, "update",
-                              (&rbncurs_m_update_panels),
-			      0);
-    rb_define_module_function(mPanel, "hide_panel",
-                              (&rbncurs_m_hide_panel),
-			      1);
+    rb_define_singleton_method(mPanel, "update_panels",
+                               (&rbncurs_m_update_panels),
+                               0);
+    rb_define_singleton_method(mPanel, "update",
+                               (&rbncurs_m_update_panels),
+                               0);
+    rb_define_singleton_method(mPanel, "hide_panel",
+                               (&rbncurs_m_hide_panel),
+                               1);
     rb_define_method(cPANEL, "hide_panel",
                      (&rbncurs_c_hide_panel), 0);
     
     rb_define_method(cPANEL, "hide",
                      (&rbncurs_c_hide_panel), 0);
-    rb_define_module_function(mPanel, "show_panel",
-                              (&rbncurs_m_show_panel),
-			      1);
+    rb_define_singleton_method(mPanel, "show_panel",
+                               (&rbncurs_m_show_panel),
+                               1);
     rb_define_method(cPANEL, "show_panel",
                      (&rbncurs_c_show_panel), 0);
     
     rb_define_method(cPANEL, "show",
                      (&rbncurs_c_show_panel), 0);
-    rb_define_module_function(mPanel, "top_panel",
-                              (&rbncurs_m_top_panel), 1);
+    rb_define_singleton_method(mPanel, "top_panel",
+                               (&rbncurs_m_top_panel), 1);
     rb_define_method(cPANEL, "top_panel",
                      (&rbncurs_c_top_panel), 0);
     
     rb_define_method(cPANEL, "top",
                      (&rbncurs_c_top_panel), 0);
-    rb_define_module_function(mPanel, "bottom_panel",
-                              (&rbncurs_m_bottom_panel),
-			      1);
+    rb_define_singleton_method(mPanel, "bottom_panel",
+                               (&rbncurs_m_bottom_panel),
+                               1);
     rb_define_method(cPANEL, "bottom_panel",
                      (&rbncurs_c_bottom_panel), 0);
     
     rb_define_method(cPANEL, "bottom",
                      (&rbncurs_c_bottom_panel), 0);
-    rb_define_module_function(mPanel, "new_panel",
-                              (&rbncurs_m_new_panel),
-                              1);
-    rb_define_module_function(cPANEL, "new",
-                              (&rbncurs_m_new_panel),
-                              1);
+    rb_define_singleton_method(mPanel, "new_panel",
+                               (&rbncurs_m_new_panel),
+                               1);
+    rb_define_singleton_method(cPANEL, "new",
+                               (&rbncurs_m_new_panel),
+                               1);
     rb_define_method(cWINDOW, "new_panel",
-                              (&rbncurs_c_new_panel),
-                              0);
-    rb_define_module_function(mPanel, "panel_above",
-                              (&rbncurs_m_panel_above),
-			      1);
+                     (&rbncurs_c_new_panel),
+                     0);
+    rb_define_singleton_method(mPanel, "panel_above",
+                               (&rbncurs_m_panel_above),
+                               1);
     rb_define_method(cPANEL, "panel_above",
                      (&rbncurs_c_panel_above), 0);
     rb_define_method(cPANEL, "above",
                      (&rbncurs_c_panel_above), 0);
-    rb_define_module_function(mPanel, "panel_below",
-                              (&rbncurs_m_panel_below),
-			      1);
+    rb_define_singleton_method(mPanel, "panel_below",
+                               (&rbncurs_m_panel_below),
+                               1);
     rb_define_method(cPANEL, "panel_below",
                      (&rbncurs_c_panel_below), 0);
     rb_define_method(cPANEL, "below",
                      (&rbncurs_c_panel_below), 0);
-    rb_define_module_function(mPanel, "set_panel_userptr",
-                              (&rbncurs_m_set_panel_userptr), 2);
+    rb_define_singleton_method(mPanel, "set_panel_userptr",
+                               (&rbncurs_m_set_panel_userptr), 2);
     rb_define_method(cPANEL, "set_panel_userptr",
                      (&rbncurs_c_set_panel_userptr),
                      1);
@@ -220,32 +220,32 @@ static void init_panel(void)
     rb_define_method(cPANEL, "userptr=",
                      (&rbncurs_c_set_panel_userptr),
                      1);
-    rb_define_module_function(mPanel, "panel_userptr",
-                              (&rbncurs_m_panel_userptr),
-			      1);
+    rb_define_singleton_method(mPanel, "panel_userptr",
+                               (&rbncurs_m_panel_userptr),
+                               1);
     rb_define_method(cPANEL, "panel_userptr",
                      (&rbncurs_c_panel_userptr),
                      0);
     rb_define_method(cPANEL, "userptr",                
                      (&rbncurs_c_panel_userptr),
                      0);
-    rb_define_module_function(mPanel, "move_panel",
-                              (&rbncurs_m_move_panel),
-			      3);
+    rb_define_singleton_method(mPanel, "move_panel",
+                               (&rbncurs_m_move_panel),
+                               3);
     rb_define_method(cPANEL, "move_panel",
                      (&rbncurs_c_move_panel), 2);
     rb_define_method(cPANEL, "move",
                      (&rbncurs_c_move_panel), 2);
-    rb_define_module_function(mPanel, "replace_panel",
-                              (&rbncurs_m_replace_panel),
-			      2);
+    rb_define_singleton_method(mPanel, "replace_panel",
+                               (&rbncurs_m_replace_panel),
+                               2);
     rb_define_method(cPANEL, "replace_panel",
                      (&rbncurs_c_replace_panel), 1);
     rb_define_method(cPANEL, "replace",
                      (&rbncurs_c_replace_panel), 1);
-    rb_define_module_function(mPanel, "panel_hidden?",
-                              (&rbncurs_m_panel_hidden),
-			      1);
+    rb_define_singleton_method(mPanel, "panel_hidden?",
+                               (&rbncurs_m_panel_hidden),
+                               1);
     rb_define_method(cPANEL, "panel_hidden?",
                      (&rbncurs_c_panel_hidden), 0);
     rb_define_method(cPANEL, "hidden?",
