@@ -15,7 +15,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.4 2002/02/28 13:49:54 t-peters Exp $
+# $Id: ncurses.rb,v 1.1 2003/03/22 20:01:24 t-peters Exp $
 
 require "ncurses.so"
 
@@ -67,6 +67,13 @@ module Ncurses
 	return Ncurses.send(test_name, self, *args)
       end
       Ncurses.send(name, self, *args)
+    end
+    def respond_to?(name)
+      name = name.to_s
+      if (name[0,2] == "mv" && Ncurses.respond_to?("mvw" + name[2..-1]))
+	return true
+      end
+      Ncurses.respond_to?("w" + name) || Ncurses.respond_to?(name)
     end
     def del
       Ncurses.delwin(self)
