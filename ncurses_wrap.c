@@ -16,7 +16,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.3 2003/08/28 08:42:24 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.4 2003/09/02 19:37:00 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -57,7 +57,6 @@
 
 /*
   NOT IMPLEMENTED:
-  - *scanw functions
   - terminfo, termcap-functions
   - rippoffline
   - v*printw functions (but normal printw functions are supported!)
@@ -83,11 +82,18 @@ int close(int);
 #endif
 #include <ruby.h>
 
-#define RB_F_TYPE VALUE(*)()
+static VALUE mNcurses;  /* module Ncurses */
+static VALUE cWINDOW;   /* class Ncurses::WINDOW */
+static VALUE cSCREEN;   /* class Ncurses::SCREEN */
+static VALUE eNcurses;  /* Ncurses::Exception thrown by this extension */
 
-static VALUE mNcurses;
-static VALUE cWINDOW;
-static VALUE cSCREEN;
+#define NCFUNC(name, nargs)                       \
+  rb_define_singleton_method(mNcurses,            \
+                             #name,               \
+                             &rbncurs_ ## name,   \
+                             nargs)
+
+static void Init_ncurses_full(void);
 
 static
 void
@@ -148,10 +154,8 @@ void
 init_globals_1(void)
 {
     /* colors */
-    rb_define_module_function(mNcurses, "COLORS",
-			      (&rbncurs_COLORS), 0);
-    rb_define_module_function(mNcurses, "COLOR_PAIRS",
-			      (&rbncurs_COLOR_PAIRS), 0);
+    NCFUNC(COLORS, 0);
+    NCFUNC(COLOR_PAIRS, 0);
 }
 static
 void
@@ -231,7 +235,7 @@ static WINDOW* get_window(VALUE rb_window)
     WINDOW* window;
     if (rb_window == Qnil) return 0;
     if (rb_iv_get(rb_window, "@destroyed") == Qtrue) {
-        rb_raise(rb_eRuntimeError, "Attempt to access a destroyed window");
+        rb_raise(eNcurses, "Attempt to access a destroyed window");
         return 0;
     }
     Data_Get_Struct(rb_window, WINDOW, window);
@@ -266,7 +270,7 @@ static SCREEN* get_screen(VALUE rb_screen)
     SCREEN* screen;
     if (rb_screen == Qnil) return 0;
     if (rb_iv_get(rb_screen, "@destroyed") == Qtrue) {
-        rb_raise(rb_eRuntimeError, "Attempt to access a destroyed screen");
+        rb_raise(eNcurses, "Attempt to access a destroyed screen");
         return 0;
     }
     Data_Get_Struct(rb_screen, SCREEN, screen);
@@ -342,21 +346,12 @@ void
 init_functions_0(void)
 {
 #ifdef HAVE_DELSCREEN
-    rb_define_module_function(mNcurses, "delscreen",
-                              (&rbncurs_delscreen),
-                              1);
+    NCFUNC(delscreen, 1);
 #endif
-    rb_define_module_function(mNcurses, "delwin",
-                              (&rbncurs_delwin), 1);
-    rb_define_module_function(mNcurses, "winchnstr",
-                              (&rbncurs_winchnstr),
-                              3);
-    rb_define_module_function(mNcurses, "winnstr",
-                              (&rbncurs_winnstr),
-                              3);
-    rb_define_module_function(mNcurses, "wgetnstr",
-                              (&rbncurs_wgetnstr),
-                              3);
+    NCFUNC(delwin, 1);
+    NCFUNC(winchnstr, 3);
+    NCFUNC(winnstr, 3);
+    NCFUNC(wgetnstr, 3);
 }
 
 static VALUE get_stdscr()
@@ -471,7 +466,9 @@ static VALUE rbncurs_resizeterm(VALUE dummy, VALUE lines, VALUE columns)
 #endif
 #ifdef HAVE_USE_DEFAULT_COLORS
 static VALUE rbncurs_use_default_colors()
-{return INT2NUM(use_default_colors());}
+{
+    return INT2NUM(use_default_colors());
+}
 #endif
 #ifdef HAVE_USE_EXTENDED_NAMES
 static VALUE rbncurs_use_extended_names(VALUE dummy, VALUE boolean)
@@ -488,40 +485,28 @@ void
 init_functions_1(void)
 {
 #ifdef HAVE_KEYBOUND
-    rb_define_module_function(mNcurses, "keybound",
-                              (&rbncurs_keybound),
-                              2);
+    NCFUNC(keybound, 2);
 #endif
 #ifdef HAVE_CURSES_VERSION
-    rb_define_module_function(mNcurses, "curses_version",
-                              (&rbncurs_curses_version),
-			      0);
+    NCFUNC(curses_version, 0);
 #endif
 #ifdef HAVE_DEFINE_KEY
-    rb_define_module_function(mNcurses, "define_key",
-                              (&rbncurs_define_key),
-                              2);
+    NCFUNC(define_key, 2);
 #endif
 #ifdef HAVE_KEYOK
-    rb_define_module_function(mNcurses, "keyok",
-                              (&rbncurs_keyok), 2);
+    NCFUNC(keyok, 2);
 #endif
 #ifdef HAVE_RESIZETERM
-    rb_define_module_function(mNcurses, "resizeterm",
-                              (&rbncurs_resizeterm),
-                              2);
+    NCFUNC(resizeterm, 2);
 #endif
 #ifdef HAVE_USE_DEFAULT_COLORS
-    rb_define_module_function(mNcurses, "use_default_colors",
-                              (&rbncurs_use_default_colors), 0);
+    NCFUNC(use_default_colors, 0);
 #endif
 #ifdef HAVE_USE_EXTENDED_NAMES
-    rb_define_module_function(mNcurses, "use_extended_names",
-                              (&rbncurs_use_extended_names), 1);
+    NCFUNC(use_extended_names, 1);
 #endif
 #ifdef HAVE_WRESIZE
-    rb_define_module_function(mNcurses, "wresize",
-                              (&rbncurs_wresize), 3);
+    NCFUNC(wresize, 3);
 #endif
 }
 /* FIXME: what's this? */
@@ -734,9 +719,13 @@ static VALUE rbncurs_inch(VALUE dummy) {
 }
 static VALUE rbncurs_initscr(VALUE dummy) {
     VALUE v = wrap_window(initscr());
-    
-    /* These constants are not defined before the call to initscr. */
-    
+    if (!RTEST(v)) 
+        return v;
+
+    Init_ncurses_full();
+
+    /* Some constants defined by the initscr call. */
+
     /* line graphics */
 
     /* VT100 symbols begin here */
@@ -1481,161 +1470,72 @@ static VALUE rbncurs_newterm(VALUE dummy, VALUE rb_type, VALUE rb_outfd, VALUE r
     char * type = (rb_type == Qnil) ? (char*)0 : STR2CSTR(rb_type);
     int outfd = NUM2INT(rb_funcall(rb_outfd, rb_intern("to_i"), 0));
     int infd  = NUM2INT(rb_funcall(rb_infd, rb_intern("to_i"), 0));
-    return wrap_screen(newterm(type, fdopen(outfd, "w"), fdopen(infd, "r")));
+    VALUE rb_screen =
+        wrap_screen(newterm(type, fdopen(outfd, "w"), fdopen(infd, "r")));
+    if (RTEST(rb_screen))
+        Init_ncurses_full();
+    return rb_screen;
 }
-    
+
 
 static void init_functions_2(void) {
-    rb_define_module_function(mNcurses, "addch",
-                              (&rbncurs_addch),
-                              1);
-    rb_define_module_function(mNcurses, "addchnstr",
-                              (&rbncurs_addchnstr),
-                              2);
-    rb_define_module_function(mNcurses, "addchstr",
-                              (&rbncurs_addchstr),
-                              1);
-    rb_define_module_function(mNcurses, "addnstr",
-                              (&rbncurs_addnstr),
-                              2);
-    rb_define_module_function(mNcurses, "addstr",
-                              (&rbncurs_addstr),
-                              1);
-    rb_define_module_function(mNcurses, "attroff",
-                              (&rbncurs_attroff),
-                              1);
-    rb_define_module_function(mNcurses, "attron",
-                              (&rbncurs_attron),
-                              1);
-    rb_define_module_function(mNcurses, "attrset",
-                              (&rbncurs_attrset),
-                              1);
+    NCFUNC(addch, 1);
+    NCFUNC(addchnstr, 2);
+    NCFUNC(addchstr, 1);
+    NCFUNC(addnstr, 2);
+    NCFUNC(addstr, 1);
+    NCFUNC(attroff, 1);
+    NCFUNC(attron, 1);
+    NCFUNC(attrset, 1);
 #ifdef HAVE_ATTR_OFF
-    rb_define_module_function(mNcurses, "attr_off",
-                              (&rbncurs_attr_off),
-                              2);
+    NCFUNC(attr_off, 2);
 #endif
 #ifdef HAVE_ATTR_ON
-    rb_define_module_function(mNcurses, "attr_on",
-                              (&rbncurs_attr_on),
-                              2);
+    NCFUNC(attr_on, 2);
 #endif
 #ifdef HAVE_ATTR_SET
-    rb_define_module_function(mNcurses, "attr_set",
-                              (&rbncurs_attr_set),
-                              3);
+    NCFUNC(attr_set, 3);
 #endif
-    rb_define_module_function(mNcurses, "baudrate",
-                              (&rbncurs_baudrate),
-                              0);
-    rb_define_module_function(mNcurses, "beep",
-                              (&rbncurs_beep),
-                              0);
-    rb_define_module_function(mNcurses, "bkgd",
-                              (&rbncurs_bkgd),
-                              1);
-    rb_define_module_function(mNcurses, "bkgdset",
-                              (&rbncurs_bkgdset),
-                              1);
-    rb_define_module_function(mNcurses, "border",
-                              (&rbncurs_border),
-                              8);
-    rb_define_module_function(mNcurses, "box",
-                              (&rbncurs_box),
-                              3);
+    NCFUNC(baudrate, 0);
+    NCFUNC(beep, 0);
+    NCFUNC(bkgd, 1);
+    NCFUNC(bkgdset, 1);
+    NCFUNC(border, 8);
+    NCFUNC(box, 3);
     rb_define_module_function(mNcurses, "can_change_color?",
                               (&rbncurs_can_change_color),
                               0);
-    rb_define_module_function(mNcurses, "cbreak",
-                              (&rbncurs_cbreak),
-                              0);
+    NCFUNC(cbreak, 0);
 #ifdef HAVE_CHGAT
-    rb_define_module_function(mNcurses, "chgat",
-                              (&rbncurs_chgat),
-                              4);
+    NCFUNC(chgat, 4);
 #endif
-    rb_define_module_function(mNcurses, "clear",
-                              (&rbncurs_clear),
-                              0);
-    rb_define_module_function(mNcurses, "clearok",
-                              (&rbncurs_clearok),
-                              2);
-    rb_define_module_function(mNcurses, "clrtobot",
-                              (&rbncurs_clrtobot),
-                              0);
-    rb_define_module_function(mNcurses, "clrtoeol",
-                              (&rbncurs_clrtoeol),
-                              0);
+    NCFUNC(clear, 0);
+    NCFUNC(clearok, 2);
+    NCFUNC(clrtobot, 0);
+    NCFUNC(clrtoeol, 0);
 #ifdef HAVE_COLOR_SET
-    rb_define_module_function(mNcurses, "color_set",
-                              (&rbncurs_color_set),
-                              2);
+    NCFUNC(color_set, 2);
 #endif
-    rb_define_module_function(mNcurses, "COLOR_PAIR",
-                              (&rbncurs_COLOR_PAIR),
-                              1);
-    rb_define_module_function(mNcurses, "copywin",
-                              (&rbncurs_copywin),
-                              9);
-    rb_define_module_function(mNcurses, "curs_set",
-                              (&rbncurs_curs_set),
-                              1);
-    rb_define_module_function(mNcurses, "def_prog_mode",
-                              (&rbncurs_def_prog_mode),
-                              0);
-    rb_define_module_function(mNcurses, "def_shell_mode",
-                              (&rbncurs_def_shell_mode),
-                              0);
-    rb_define_module_function(mNcurses, "delay_output",
-                              (&rbncurs_delay_output),
-                              1);
-    rb_define_module_function(mNcurses, "delch",
-                              (&rbncurs_delch),
-                              0);
-    rb_define_module_function(mNcurses, "deleteln",
-                              (&rbncurs_deleteln),
-                              0);
-    rb_define_module_function(mNcurses, "derwin",
-                              (&rbncurs_derwin),
-                              5);
-    rb_define_module_function(mNcurses, "doupdate",
-                              (&rbncurs_doupdate),
-                              0);
-    rb_define_module_function(mNcurses, "dupwin",
-                              (&rbncurs_dupwin),
-                              1);
-    rb_define_module_function(mNcurses, "echo",
-                              (&rbncurs_echo),
-                              0);
-    rb_define_module_function(mNcurses, "echochar",
-                              (&rbncurs_echochar),
-                              1);
-    rb_define_module_function(mNcurses, "endwin",
-                              (&rbncurs_endwin),
-                              0);
-    rb_define_module_function(mNcurses, "erasechar",
-                              (&rbncurs_erasechar),
-                              0);
-#ifdef HAVE_FILTER
-    rb_define_module_function(mNcurses, "filter",
-                              (&rbncurs_filter),
-                              0);
-#endif
-    rb_define_module_function(mNcurses, "flash",
-                              (&rbncurs_flash),
-                              0);
-    rb_define_module_function(mNcurses, "flushinp",
-                              (&rbncurs_flushinp),
-                              0);
-    rb_define_module_function(mNcurses, "getbkgd",
-                              (&rbncurs_getbkgd),
-                              1);
-    rb_define_module_function(mNcurses, "getch",
-                              (&rbncurs_getch),
-                              0);
-    rb_define_module_function(mNcurses, "halfdelay",
-                              (&rbncurs_halfdelay),
-                              1);
+    NCFUNC(COLOR_PAIR, 1);
+    NCFUNC(copywin, 9);
+    NCFUNC(curs_set, 1);
+    NCFUNC(def_prog_mode, 0);
+    NCFUNC(def_shell_mode, 0);
+    NCFUNC(delay_output, 1);
+    NCFUNC(delch, 0);
+    NCFUNC(deleteln, 0);
+    NCFUNC(derwin, 5);
+    NCFUNC(doupdate, 0);
+    NCFUNC(dupwin, 1);
+    NCFUNC(echo, 0);
+    NCFUNC(echochar, 1);
+    NCFUNC(endwin, 0);
+    NCFUNC(erasechar, 0);
+    NCFUNC(flash, 0);
+    NCFUNC(flushinp, 0);
+    NCFUNC(getbkgd, 1);
+    NCFUNC(getch, 0);
+    NCFUNC(halfdelay, 1);
     rb_define_module_function(mNcurses, "has_colors?",
                               (&rbncurs_has_colors),
                               0);
@@ -1645,49 +1545,20 @@ static void init_functions_2(void) {
     rb_define_module_function(mNcurses, "has_il?",
                               (&rbncurs_has_il),
                               0);
-    rb_define_module_function(mNcurses, "hline",
-                              (&rbncurs_hline),
-                              2);
-    rb_define_module_function(mNcurses, "idcok",
-                              (&rbncurs_idcok),
-                              2);
-    rb_define_module_function(mNcurses, "idlok",
-                              (&rbncurs_idlok),
-                              2);
-    rb_define_module_function(mNcurses, "immedok",
-                              (&rbncurs_immedok),
-                              2);
-    rb_define_module_function(mNcurses, "inch",
-                              (&rbncurs_inch),
-                              0);
-    rb_define_module_function(mNcurses, "initscr",
-                              (&rbncurs_initscr),
-                              0);
-    rb_define_module_function(mNcurses, "init_color",
-                              (&rbncurs_init_color),
-                              4);
-    rb_define_module_function(mNcurses, "init_pair",
-                              (&rbncurs_init_pair),
-                              3);
-    rb_define_module_function(mNcurses, "insch",
-                              (&rbncurs_insch),
-                              1);
-    rb_define_module_function(mNcurses, "insdelln",
-                              (&rbncurs_insdelln),
-                              1);
-    rb_define_module_function(mNcurses, "insertln",
-                              (&rbncurs_insertln),
-                              0);
-    rb_define_module_function(mNcurses, "insnstr",
-                              (&rbncurs_insnstr),
-                              2);
-    rb_define_module_function(mNcurses, "insstr",
-                              (&rbncurs_insstr),
-                              1);
+    NCFUNC(hline, 2);
+    NCFUNC(idcok, 2);
+    NCFUNC(idlok, 2);
+    NCFUNC(immedok, 2);
+    NCFUNC(inch, 0);
+    NCFUNC(init_color, 4);
+    NCFUNC(init_pair, 3);
+    NCFUNC(insch, 1);
+    NCFUNC(insdelln, 1);
+    NCFUNC(insertln, 0);
+    NCFUNC(insnstr, 2);
+    NCFUNC(insstr, 1);
 #ifdef HAVE_INTRFLUSH
-    rb_define_module_function(mNcurses, "intrflush",
-                              (&rbncurs_intrflush),
-                              2);
+    NCFUNC(intrflush, 2);
 #endif
     rb_define_module_function(mNcurses, "isendwin?",
                               (&rbncurs_isendwin),
@@ -1698,545 +1569,227 @@ static void init_functions_2(void) {
     rb_define_module_function(mNcurses, "is_wintouched?",
                               (&rbncurs_is_wintouched),
                               1);
-    rb_define_module_function(mNcurses, "keyname",
-                              (&rbncurs_keyname),
-                              1);
-    rb_define_module_function(mNcurses, "keypad",
-                              (&rbncurs_keypad),
-                              2);
-    rb_define_module_function(mNcurses, "killchar",
-                              (&rbncurs_killchar),
-                              0);
-    rb_define_module_function(mNcurses, "leaveok",
-                              (&rbncurs_leaveok),
-                              2);
-    rb_define_module_function(mNcurses, "longname",
-                              (&rbncurs_longname),
-                              0);
-    rb_define_module_function(mNcurses, "meta",
-                              (&rbncurs_meta),
-                              2);
-    rb_define_module_function(mNcurses, "move",
-                              (&rbncurs_move),
-                              2);
-    rb_define_module_function(mNcurses, "mvaddch",
-                              (&rbncurs_mvaddch),
-                              3);
-    rb_define_module_function(mNcurses, "mvaddchnstr",
-                              (&rbncurs_mvaddchnstr),
-                              4);
-    rb_define_module_function(mNcurses, "mvaddchstr",
-                              (&rbncurs_mvaddchstr),
-                              3);
-    rb_define_module_function(mNcurses, "mvaddnstr",
-                              (&rbncurs_mvaddnstr),
-                              4);
-    rb_define_module_function(mNcurses, "mvaddstr",
-                              (&rbncurs_mvaddstr),
-                              3);
+    NCFUNC(keyname, 1);
+    NCFUNC(keypad, 2);
+    NCFUNC(killchar, 0);
+    NCFUNC(leaveok, 2);
+    NCFUNC(longname, 0);
+    NCFUNC(meta, 2);
+    NCFUNC(move, 2);
+    NCFUNC(mvaddch, 3);
+    NCFUNC(mvaddchnstr, 4);
+    NCFUNC(mvaddchstr, 3);
+    NCFUNC(mvaddnstr, 4);
+    NCFUNC(mvaddstr, 3);
 #ifdef HAVE_MVCHGAT
-    rb_define_module_function(mNcurses, "mvchgat",
-                              (&rbncurs_mvchgat),
-                              6);
+    NCFUNC(mvchgat, 6);
 #endif
-    rb_define_module_function(mNcurses, "mvcur",
-                              (&rbncurs_mvcur),
-                              4);
-    rb_define_module_function(mNcurses, "mvdelch",
-                              (&rbncurs_mvdelch),
-                              2);
-    rb_define_module_function(mNcurses, "mvderwin",
-                              (&rbncurs_mvderwin),
-                              3);
-    rb_define_module_function(mNcurses, "mvgetch",
-                              (&rbncurs_mvgetch),
-                              2);
+    NCFUNC(mvcur, 4);
+    NCFUNC(mvdelch, 2);
+    NCFUNC(mvderwin, 3);
+    NCFUNC(mvgetch, 2);
 #ifdef HAVE_MVHLINE
-    rb_define_module_function(mNcurses, "mvhline",
-                              (&rbncurs_mvhline),
-                              4);
+    NCFUNC(mvhline, 4);
 #endif
-    rb_define_module_function(mNcurses, "mvinch",
-                              (&rbncurs_mvinch),
-                              2);
-    rb_define_module_function(mNcurses, "mvinsch",
-                              (&rbncurs_mvinsch),
-                              3);
-    rb_define_module_function(mNcurses, "mvinsnstr",
-                              (&rbncurs_mvinsnstr),
-                              4);
-    rb_define_module_function(mNcurses, "mvinsstr",
-                              (&rbncurs_mvinsstr),
-                              3);
+    NCFUNC(mvinch, 2);
+    NCFUNC(mvinsch, 3);
+    NCFUNC(mvinsnstr, 4);
+    NCFUNC(mvinsstr, 3);
 #ifdef HAVE_MVVLINE
-    rb_define_module_function(mNcurses, "mvvline",
-                              (&rbncurs_mvvline),
-                              4);
+    NCFUNC(mvvline, 4);
 #endif
-    rb_define_module_function(mNcurses, "mvwaddch",
-                              (&rbncurs_mvwaddch),
-                              4);
-    rb_define_module_function(mNcurses, "mvwaddchnstr",
-                              (&rbncurs_mvwaddchnstr),
-                              5);
-    rb_define_module_function(mNcurses, "mvwaddchstr",
-                              (&rbncurs_mvwaddchstr),
-                              4);
-    rb_define_module_function(mNcurses, "mvwaddnstr",
-                              (&rbncurs_mvwaddnstr),
-                              5);
-    rb_define_module_function(mNcurses, "mvwaddstr",
-                              (&rbncurs_mvwaddstr),
-                              4);
+    NCFUNC(mvwaddch, 4);
+    NCFUNC(mvwaddchnstr, 5);
+    NCFUNC(mvwaddchstr, 4);
+    NCFUNC(mvwaddnstr, 5);
+    NCFUNC(mvwaddstr, 4);
 #ifdef HAVE_MVWCHGAT
-    rb_define_module_function(mNcurses, "mvwchgat",
-                              (&rbncurs_mvwchgat),
-                              7);
+    NCFUNC(mvwchgat, 7);
 #endif
-    rb_define_module_function(mNcurses, "mvwdelch",
-                              (&rbncurs_mvwdelch),
-                              3);
-    rb_define_module_function(mNcurses, "mvwgetch",
-                              (&rbncurs_mvwgetch),
-                              3);
+    NCFUNC(mvwdelch, 3);
+    NCFUNC(mvwgetch, 3);
 #ifdef HAVE_MVWHLINE
-    rb_define_module_function(mNcurses, "mvwhline",
-                              (&rbncurs_mvwhline),
-                              5);
+    NCFUNC(mvwhline, 5);
 #endif
-    rb_define_module_function(mNcurses, "mvwin",
-                              (&rbncurs_mvwin),
-                              3);
-    rb_define_module_function(mNcurses, "mvwinch",
-                              (&rbncurs_mvwinch),
-                              3);
-    rb_define_module_function(mNcurses, "mvwinsch",
-                              (&rbncurs_mvwinsch),
-                              4);
-    rb_define_module_function(mNcurses, "mvwinsnstr",
-                              (&rbncurs_mvwinsnstr),
-                              5);
-    rb_define_module_function(mNcurses, "mvwinsstr",
-                              (&rbncurs_mvwinsstr),
-                              4);
+    NCFUNC(mvwin, 3);
+    NCFUNC(mvwinch, 3);
+    NCFUNC(mvwinsch, 4);
+    NCFUNC(mvwinsnstr, 5);
+    NCFUNC(mvwinsstr, 4);
 #ifdef HAVE_MVWVLINE
-    rb_define_module_function(mNcurses, "mvwvline",
-                              (&rbncurs_mvwvline),
-                              5);
+    NCFUNC(mvwvline, 5);
 #endif
-    rb_define_module_function(mNcurses, "napms",
-                              (&rbncurs_napms),
-                              1);
-    rb_define_module_function(mNcurses, "newpad",
-                              (&rbncurs_newpad),
-                              2);
-    rb_define_module_function(mNcurses, "newwin",
-                              (&rbncurs_newwin),
-                              4);
-    rb_define_module_function(mNcurses, "nl",
-                              (&rbncurs_nl),
-                              0);
-    rb_define_module_function(mNcurses, "nocbreak",
-                              (&rbncurs_nocbreak),
-                              0);
-    rb_define_module_function(mNcurses, "nodelay",
-                              (&rbncurs_nodelay),
-                              2);
-    rb_define_module_function(mNcurses, "noecho",
-                              (&rbncurs_noecho),
-                              0);
-    rb_define_module_function(mNcurses, "nonl",
-                              (&rbncurs_nonl),
-                              0);
+    NCFUNC(napms, 1);
+    NCFUNC(newpad, 2);
+    NCFUNC(newwin, 4);
+    NCFUNC(nl, 0);
+    NCFUNC(nocbreak, 0);
+    NCFUNC(nodelay, 2);
+    NCFUNC(noecho, 0);
+    NCFUNC(nonl, 0);
 #ifdef HAVE_NOQIFLUSH
-    rb_define_module_function(mNcurses, "noqiflush",
-                              (&rbncurs_noqiflush),
-                              0);
+    NCFUNC(noqiflush, 0);
 #endif
-    rb_define_module_function(mNcurses, "noraw",
-                              (&rbncurs_noraw),
-                              0);
-    rb_define_module_function(mNcurses, "notimeout",
-                              (&rbncurs_notimeout),
-                              2);
-    rb_define_module_function(mNcurses, "overlay",
-                              (&rbncurs_overlay),
-                              2);
-    rb_define_module_function(mNcurses, "overwrite",
-                              (&rbncurs_overwrite),
-                              2);
-    rb_define_module_function(mNcurses, "PAIR_NUMBER",
-                              (&rbncurs_PAIR_NUMBER),
-                              1);
+    NCFUNC(noraw, 0);
+    NCFUNC(notimeout, 2);
+    NCFUNC(overlay, 2);
+    NCFUNC(overwrite, 2);
+    NCFUNC(PAIR_NUMBER, 1);
 #ifndef __PDCURSES__ /* pdcurses' pechochar macro does not work */
-    rb_define_module_function(mNcurses, "pechochar",
-                              (&rbncurs_pechochar),
-                              2);
+    NCFUNC(pechochar, 2);
 #endif
-    rb_define_module_function(mNcurses, "pnoutrefresh",
-                              (&rbncurs_pnoutrefresh),
-                              7);
-    rb_define_module_function(mNcurses, "prefresh",
-                              (&rbncurs_prefresh),
-                              7);
+    NCFUNC(pnoutrefresh, 7);
+    NCFUNC(prefresh, 7);
 #ifdef HAVE_PUTP
-    rb_define_module_function(mNcurses, "putp",
-                              (&rbncurs_putp),
-                              1);
+    NCFUNC(putp, 1);
 #endif
 #ifdef HAVE_QIFLUSH
-    rb_define_module_function(mNcurses, "qiflush",
-                              (&rbncurs_qiflush),
-                              0);
+    NCFUNC(qiflush, 0);
 #endif
-    rb_define_module_function(mNcurses, "raw",
-                              (&rbncurs_raw),
-                              0);
+    NCFUNC(raw, 0);
 #ifndef __PDCURSES__ /* pdcurses redrawwin macro has a bug */
-    rb_define_module_function(mNcurses, "redrawwin",
-                              (&rbncurs_redrawwin),
-                              1);
+    NCFUNC(redrawwin, 1);
 #endif
-    rb_define_module_function(mNcurses, "refresh",
-                              (&rbncurs_refresh),
-                              0);
-    rb_define_module_function(mNcurses, "resetty",
-                              (&rbncurs_resetty),
-                              0);
-    rb_define_module_function(mNcurses, "reset_prog_mode",
-                              (&rbncurs_reset_prog_mode),
-                              0);
-    rb_define_module_function(mNcurses, "reset_shell_mode",
-                              (&rbncurs_reset_shell_mode),
-                              0);
-    rb_define_module_function(mNcurses, "savetty",
-                              (&rbncurs_savetty),
-                              0);
+    NCFUNC(refresh, 0);
+    NCFUNC(resetty, 0);
+    NCFUNC(reset_prog_mode, 0);
+    NCFUNC(reset_shell_mode, 0);
+    NCFUNC(savetty, 0);
 #ifdef HAVE_SCR_DUMP
-    rb_define_module_function(mNcurses, "scr_dump",
-                              (&rbncurs_scr_dump),
-                              1);
+    NCFUNC(scr_dump, 1);
 #endif
 #ifdef HAVE_SCR_INIT
-    rb_define_module_function(mNcurses, "scr_init",
-                              (&rbncurs_scr_init),
-                              1);
+    NCFUNC(scr_init, 1);
 #endif
-    rb_define_module_function(mNcurses, "scrl",
-                              (&rbncurs_scrl),
-                              1);
-    rb_define_module_function(mNcurses, "scroll",
-                              (&rbncurs_scroll),
-                              1);
-    rb_define_module_function(mNcurses, "scrollok",
-                              (&rbncurs_scrollok),
-                              2);
+    NCFUNC(scrl, 1);
+    NCFUNC(scroll, 1);
+    NCFUNC(scrollok, 2);
 #ifdef HAVE_SCR_RESTORE
-    rb_define_module_function(mNcurses, "scr_restore",
-                              (&rbncurs_scr_restore),
-                              1);
+    NCFUNC(scr_restore, 1);
 #endif
 #ifdef HAVE_SCR_SET
-    rb_define_module_function(mNcurses, "scr_set",
-                              (&rbncurs_scr_set),
-                              1);
+    NCFUNC(scr_set, 1);
 #endif
-    rb_define_module_function(mNcurses, "setscrreg",
-                              (&rbncurs_setscrreg),
-                              2);
-    rb_define_module_function(mNcurses, "set_term",
-                              (&rbncurs_set_term),
-                              1);
-    rb_define_module_function(mNcurses, "slk_attroff",
-                              (&rbncurs_slk_attroff),
-                              1);
+    NCFUNC(setscrreg, 2);
+    NCFUNC(set_term, 1);
+    NCFUNC(slk_attroff, 1);
 #if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
-    rb_define_module_function(mNcurses, "slk_attr_off",
-                              (&rbncurs_slk_attr_off),
-                              2);
+    NCFUNC(slk_attr_off, 2);
 #endif
-    rb_define_module_function(mNcurses, "slk_attron",
-                              (&rbncurs_slk_attron),
-                              1);
+    NCFUNC(slk_attron, 1);
 #if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
-    rb_define_module_function(mNcurses, "slk_attr_on",
-                              (&rbncurs_slk_attr_on),
-                              2);
+    NCFUNC(slk_attr_on, 2);
 #endif
-    rb_define_module_function(mNcurses, "slk_attrset",
-                              (&rbncurs_slk_attrset),
-                              1);
+    NCFUNC(slk_attrset, 1);
 #ifdef HAVE_SLK_ATTR
-    rb_define_module_function(mNcurses, "slk_attr",
-                              (&rbncurs_slk_attr),
-                              0);
+    NCFUNC(slk_attr, 0);
 #endif
 #ifdef HAVE_SLK_ATTR_SET
-    rb_define_module_function(mNcurses, "slk_attr_set",
-                              (&rbncurs_slk_attr_set),
-                              3);
+    NCFUNC(slk_attr_set, 3);
 #endif
-    rb_define_module_function(mNcurses, "slk_clear",
-                              (&rbncurs_slk_clear),
-                              0);
+    NCFUNC(slk_clear, 0);
 #ifdef HAVE_SLK_COLOR
-    rb_define_module_function(mNcurses, "slk_color",
-                              (&rbncurs_slk_color),
-                              1);
+    NCFUNC(slk_color, 1);
 #endif
-    rb_define_module_function(mNcurses, "slk_init",
-                              (&rbncurs_slk_init),
-                              1);
-    rb_define_module_function(mNcurses, "slk_label",
-                              (&rbncurs_slk_label),
-                              1);
-    rb_define_module_function(mNcurses, "slk_noutrefresh",
-                              (&rbncurs_slk_noutrefresh),
-                              0);
-    rb_define_module_function(mNcurses, "slk_refresh",
-                              (&rbncurs_slk_refresh),
-                              0);
-    rb_define_module_function(mNcurses, "slk_restore",
-                              (&rbncurs_slk_restore),
-                              0);
-    rb_define_module_function(mNcurses, "slk_set",
-                              (&rbncurs_slk_set),
-                              3);
-    rb_define_module_function(mNcurses, "slk_touch",
-                              (&rbncurs_slk_touch),
-                              0);
-    rb_define_module_function(mNcurses, "standout",
-                              (&rbncurs_standout),
-                              0);
-    rb_define_module_function(mNcurses, "standend",
-                              (&rbncurs_standend),
-                              0);
-    rb_define_module_function(mNcurses, "start_color",
-                              (&rbncurs_start_color),
-                              0);
-    rb_define_module_function(mNcurses, "subpad",
-                              (&rbncurs_subpad),
-                              5);
-    rb_define_module_function(mNcurses, "subwin",
-                              (&rbncurs_subwin),
-                              5);
-    rb_define_module_function(mNcurses, "syncok",
-                              (&rbncurs_syncok),
-                              2);
-    rb_define_module_function(mNcurses, "termattrs",
-                              (&rbncurs_termattrs),
-                              0);
-    rb_define_module_function(mNcurses, "termname",
-                              (&rbncurs_termname),
-                              0);
+    NCFUNC(slk_label, 1);
+    NCFUNC(slk_noutrefresh, 0);
+    NCFUNC(slk_refresh, 0);
+    NCFUNC(slk_restore, 0);
+    NCFUNC(slk_set, 3);
+    NCFUNC(slk_touch, 0);
+    NCFUNC(standout, 0);
+    NCFUNC(standend, 0);
+    NCFUNC(start_color, 0);
+    NCFUNC(subpad, 5);
+    NCFUNC(subwin, 5);
+    NCFUNC(syncok, 2);
+    NCFUNC(termattrs, 0);
+    NCFUNC(termname, 0);
 #ifdef HAVE_TIGETFLAG
-    rb_define_module_function(mNcurses, "tigetflag",
-                              (&rbncurs_tigetflag),
-                              1);
+    NCFUNC(tigetflag, 1);
 #endif
 #ifdef HAVE_TIGETNUM
-    rb_define_module_function(mNcurses, "tigetnum",
-                              (&rbncurs_tigetnum),
-                              1);
+    NCFUNC(tigetnum, 1);
 #endif
 #ifdef HAVE_TIGETSTR
-    rb_define_module_function(mNcurses, "tigetstr",
-                              (&rbncurs_tigetstr),
-                              1);
+    NCFUNC(tigetstr, 1);
 #endif
-    rb_define_module_function(mNcurses, "timeout",
-                              (&rbncurs_timeout),
-                              1);
-    rb_define_module_function(mNcurses, "typeahead",
-                              (&rbncurs_typeahead),
-                              1);
-    rb_define_module_function(mNcurses, "ungetch",
-                              (&rbncurs_ungetch),
-                              1);
-    rb_define_module_function(mNcurses, "untouchwin",
-                              (&rbncurs_untouchwin),
-                              1);
-#ifdef HAVE_USE_ENV
-    rb_define_module_function(mNcurses, "use_env",
-                              (&rbncurs_use_env),
-                              1);
-#endif
+    NCFUNC(timeout, 1);
+    NCFUNC(typeahead, 1);
+    NCFUNC(ungetch, 1);
+    NCFUNC(untouchwin, 1);
 #ifdef HAVE_VIDATTR
-    rb_define_module_function(mNcurses, "vidattr",
-                              (&rbncurs_vidattr),
-                              1);
+    NCFUNC(vidattr, 1);
 #endif
 #if defined (HAVE_VID_ATTR) || defined(vid_attr)
-    rb_define_module_function(mNcurses, "vid_attr",
-                              (&rbncurs_vid_attr),
-                              3);
+    NCFUNC(vid_attr, 3);
 #endif
-    rb_define_module_function(mNcurses, "vline",
-                              (&rbncurs_vline),
-                              2);
-    rb_define_module_function(mNcurses, "waddch",
-                              (&rbncurs_waddch),
-                              2);
-    rb_define_module_function(mNcurses, "waddchnstr",
-                              (&rbncurs_waddchnstr),
-                              3);
-    rb_define_module_function(mNcurses, "waddchstr",
-                              (&rbncurs_waddchstr),
-                              2);
-    rb_define_module_function(mNcurses, "waddnstr",
-                              (&rbncurs_waddnstr),
-                              3);
-    rb_define_module_function(mNcurses, "waddstr",
-                              (&rbncurs_waddstr),
-                              2);
-    rb_define_module_function(mNcurses, "wattron",
-                              (&rbncurs_wattron),
-                              2);
-    rb_define_module_function(mNcurses, "wattroff",
-                              (&rbncurs_wattroff),
-                              2);
-    rb_define_module_function(mNcurses, "wattrset",
-                              (&rbncurs_wattrset),
-                              2);
+    NCFUNC(vline, 2);
+    NCFUNC(waddch, 2);
+    NCFUNC(waddchnstr, 3);
+    NCFUNC(waddchstr, 2);
+    NCFUNC(waddnstr, 3);
+    NCFUNC(waddstr, 2);
+    NCFUNC(wattron, 2);
+    NCFUNC(wattroff, 2);
+    NCFUNC(wattrset, 2);
  #ifdef HAVE_WATTR_ON
-   rb_define_module_function(mNcurses, "wattr_on",
-                              (&rbncurs_wattr_on),
-                              3);
+   NCFUNC(wattr_on, 3);
 #endif
 #ifdef HAVE_WATTR_OFF
-    rb_define_module_function(mNcurses, "wattr_off",
-                              (&rbncurs_wattr_off),
-                              3);
+    NCFUNC(wattr_off, 3);
 #endif
 #ifdef HAVE_WATTR_SET
-    rb_define_module_function(mNcurses, "wattr_set",
-                              (&rbncurs_wattr_set),
-                              4);
+    NCFUNC(wattr_set, 4);
 #endif
-    rb_define_module_function(mNcurses, "wbkgd",
-                              (&rbncurs_wbkgd),
-                              2);
-    rb_define_module_function(mNcurses, "wbkgdset",
-                              (&rbncurs_wbkgdset),
-                              2);
-    rb_define_module_function(mNcurses, "wborder",
-                              (&rbncurs_wborder),
-                              9);
+    NCFUNC(wbkgd, 2);
+    NCFUNC(wbkgdset, 2);
+    NCFUNC(wborder, 9);
 #ifdef HAVE_WCHGAT
-    rb_define_module_function(mNcurses, "wchgat",
-                              (&rbncurs_wchgat),
-                              5);
+    NCFUNC(wchgat, 5);
 #endif
-    rb_define_module_function(mNcurses, "wclear",
-                              (&rbncurs_wclear),
-                              1);
-    rb_define_module_function(mNcurses, "wclrtobot",
-                              (&rbncurs_wclrtobot),
-                              1);
-    rb_define_module_function(mNcurses, "wclrtoeol",
-                              (&rbncurs_wclrtoeol),
-                              1);
+    NCFUNC(wclear, 1);
+    NCFUNC(wclrtobot, 1);
+    NCFUNC(wclrtoeol, 1);
 #ifdef HAVE_WCOLOR_SET
-    rb_define_module_function(mNcurses, "wcolor_set",
-                              (&rbncurs_wcolor_set),
-                              3);
+    NCFUNC(wcolor_set, 3);
 #endif
-    rb_define_module_function(mNcurses, "wcursyncup",
-                              (&rbncurs_wcursyncup),
-                              1);
-    rb_define_module_function(mNcurses, "wdelch",
-                              (&rbncurs_wdelch),
-                              1);
-    rb_define_module_function(mNcurses, "wdeleteln",
-                              (&rbncurs_wdeleteln),
-                              1);
-    rb_define_module_function(mNcurses, "wechochar",
-                              (&rbncurs_wechochar),
-                              2);
-    rb_define_module_function(mNcurses, "werase",
-                              (&rbncurs_werase),
-                              1);
-    rb_define_module_function(mNcurses, "wgetch",
-                              (&rbncurs_wgetch),
-                              1);
-    rb_define_module_function(mNcurses, "whline",
-                              (&rbncurs_whline),
-                              3);
-    rb_define_module_function(mNcurses, "winch",
-                              (&rbncurs_winch),
-                              1);
-    rb_define_module_function(mNcurses, "winsch",
-                              (&rbncurs_winsch),
-                              2);
-    rb_define_module_function(mNcurses, "winsdelln",
-                              (&rbncurs_winsdelln),
-                              2);
-    rb_define_module_function(mNcurses, "winsertln",
-                              (&rbncurs_winsertln),
-                              1);
-    rb_define_module_function(mNcurses, "winsnstr",
-                              (&rbncurs_winsnstr),
-                              3);
-    rb_define_module_function(mNcurses, "winsstr",
-                              (&rbncurs_winsstr),
-                              2);
-    rb_define_module_function(mNcurses, "wmove",
-                              (&rbncurs_wmove),
-                              3);
-    rb_define_module_function(mNcurses, "wnoutrefresh",
-                              (&rbncurs_wnoutrefresh),
-                              1);
-    rb_define_module_function(mNcurses, "wredrawln",
-                              (&rbncurs_wredrawln),
-                              3);
-    rb_define_module_function(mNcurses, "wrefresh",
-                              (&rbncurs_wrefresh),
-                              1);
-    rb_define_module_function(mNcurses, "wscrl",
-                              (&rbncurs_wscrl),
-                              2);
-    rb_define_module_function(mNcurses, "wsetscrreg",
-                              (&rbncurs_wsetscrreg),
-                              3);
-    rb_define_module_function(mNcurses, "wstandout",
-                              (&rbncurs_wstandout),
-                              1);
-    rb_define_module_function(mNcurses, "wstandend",
-                              (&rbncurs_wstandend),
-                              1);
-    rb_define_module_function(mNcurses, "wsyncdown",
-                              (&rbncurs_wsyncdown),
-                              1);
-    rb_define_module_function(mNcurses, "wsyncup",
-                              (&rbncurs_wsyncup),
-                              1);
-    rb_define_module_function(mNcurses, "wtimeout",
-                              (&rbncurs_wtimeout),
-                              2);
-    rb_define_module_function(mNcurses, "wtouchln",
-                              (&rbncurs_wtouchln),
-                              4);
-    rb_define_module_function(mNcurses, "wvline",
-                              (&rbncurs_wvline),
-                              3);
-    rb_define_module_function(mNcurses, "color_content",
-                              (&rbncurs_color_content), 4);
-    rb_define_module_function(mNcurses, "pair_content",
-                              (&rbncurs_pair_content), 3);
-    rb_define_module_function(mNcurses, "pair_content",
-                              (&rbncurs_pair_content), 3);
+    NCFUNC(wcursyncup, 1);
+    NCFUNC(wdelch, 1);
+    NCFUNC(wdeleteln, 1);
+    NCFUNC(wechochar, 2);
+    NCFUNC(werase, 1);
+    NCFUNC(wgetch, 1);
+    NCFUNC(whline, 3);
+    NCFUNC(winch, 1);
+    NCFUNC(winsch, 2);
+    NCFUNC(winsdelln, 2);
+    NCFUNC(winsertln, 1);
+    NCFUNC(winsnstr, 3);
+    NCFUNC(winsstr, 2);
+    NCFUNC(wmove, 3);
+    NCFUNC(wnoutrefresh, 1);
+    NCFUNC(wredrawln, 3);
+    NCFUNC(wrefresh, 1);
+    NCFUNC(wscrl, 2);
+    NCFUNC(wsetscrreg, 3);
+    NCFUNC(wstandout, 1);
+    NCFUNC(wstandend, 1);
+    NCFUNC(wsyncdown, 1);
+    NCFUNC(wsyncup, 1);
+    NCFUNC(wtimeout, 2);
+    NCFUNC(wtouchln, 4);
+    NCFUNC(wvline, 3);
+    NCFUNC(color_content, 4);
+    NCFUNC(pair_content, 3);
+    NCFUNC(pair_content, 3);
 #ifdef HAVE_GETWIN
-    rb_define_module_function(mNcurses, "getwin",
-                              (&rbncurs_getwin), 1);
+    NCFUNC(getwin, 1);
 #endif
 #ifdef HAVE_PUTWIN
-    rb_define_module_function(mNcurses, "putwin",
-                              (&rbncurs_putwin), 2);
+    NCFUNC(putwin, 2);
 #endif
-    rb_define_module_function(mNcurses, "unctrl",
-                              (&rbncurs_unctrl), 1);
-    rb_define_module_function(mNcurses, "newterm",
-                              (&rbncurs_newterm), 3);
+    NCFUNC(unctrl, 1);
 }
 
 
@@ -2775,17 +2328,11 @@ static VALUE rbncurs_wattr_get(VALUE dummy,VALUE win, VALUE rb_attrs, VALUE rb_p
 static void init_functions_3(void)
 {
 #ifdef HAVE_UNGETMOUSE
-    rb_define_module_function(mNcurses, "getmouse",
-                              (&rbncurs_getmouse),
-                              1);
-    rb_define_module_function(mNcurses, "ungetmouse",
-                              (&rbncurs_ungetmouse),
-                              1);
+    NCFUNC(getmouse, 1);
+    NCFUNC(ungetmouse, 1);
 #endif
 #ifdef HAVE_MOUSEMASK
-    rb_define_module_function(mNcurses, "mousemask",
-                              (&rbncurs_mousemask),
-                              1);
+    NCFUNC(mousemask, 1);
 #endif
 #ifdef HAVE_WENCLOSE
     rb_define_module_function(mNcurses, "wenclose?",
@@ -2793,45 +2340,27 @@ static void init_functions_3(void)
                               1);
 #endif
 #ifdef HAVE_MOUSEINTERVAL
-    rb_define_module_function(mNcurses, "mouseinterval",
-                              (&rbncurs_mouseinterval), 1);
+    NCFUNC(mouseinterval, 1);
 #endif
 #ifdef HAVE_WMOUSE_TRAFO
-    rb_define_module_function(mNcurses, "wmouse_trafo",
-                              (&rbncurs_wmouse_trafo), 4);
+    NCFUNC(wmouse_trafo, 4);
 #endif
 #ifdef HAVE_MCPRINT
-    rb_define_module_function(mNcurses, "mcprint",
-                              (&rbncurs_mcprint),
-                              2);
+    NCFUNC(mcprint, 2);
 #endif
 #ifdef HAVE_HAS_KEY
     rb_define_module_function(mNcurses, "has_key?",
                               (&rbncurs_has_key),
                               2);
 #endif
-    rb_define_module_function(mNcurses, "getyx",
-                              (&rbncurs_getyx),
-                              3);
-    rb_define_module_function(mNcurses, "getbegyx",
-                              (&rbncurs_getbegyx),
-                              3);
-    rb_define_module_function(mNcurses, "getmaxyx",
-                              (&rbncurs_getmaxyx),
-                              3);
-    rb_define_module_function(mNcurses, "getparyx",
-                              (&rbncurs_getparyx),
-                              3);
-    rb_define_module_function(mNcurses, "getsyx",
-                              (&rbncurs_getsyx),
-                              2);
-    rb_define_module_function(mNcurses, "setsyx",
-                              (&rbncurs_setsyx),
-                              2);
+    NCFUNC(getyx, 3);
+    NCFUNC(getbegyx, 3);
+    NCFUNC(getmaxyx, 3);
+    NCFUNC(getparyx, 3);
+    NCFUNC(getsyx, 2);
+    NCFUNC(setsyx, 2);
 #if defined(HAVE_GETATTRS) || defined(getattrs)
-    rb_define_module_function(mNcurses, "getattrs",
-                              (&rbncurs_getattrs),
-                              1);
+    NCFUNC(getattrs, 1);
 #endif
 #ifdef HAVE__TRACEF
     rb_define_module_function(mNcurses, "_tracef",
@@ -2877,28 +2406,19 @@ static void init_functions_3(void)
                               1);
 #endif /* HAVE__TRACEMOUSE */
 #ifdef HAVE_TRACE
-    rb_define_module_function(mNcurses, "trace",
-                              (&rbncurs_trace),
-                              1);
+    NCFUNC(trace, 1);
 #endif /* HAVE_TRACE */
 #ifdef HAVE__NC_TRACEBITS
     rb_define_module_function(mNcurses, "_nc_tracebits", &rbncurs_nc_tracebits, 0);
 #endif /* HAVE__NC_TRACEBITS */
 #ifdef HAVE_ASSUME_DEFAULT_COLORS
-    rb_define_module_function(mNcurses, "assume_default_colors",
-                              (&rbncurs_assume_default_colors), 2);
+    NCFUNC(assume_default_colors, 2);
 #endif  /* HAVE_ASSUME_DEFAULT_COLORS */
 #ifdef HAVE_ATTR_GET
-    rb_define_module_function(mNcurses, "attr_get",
-                              (&rbncurs_attr_get),
-                              3);
-    rb_define_module_function(mNcurses, "wattr_get",
-                              (&rbncurs_wattr_get),
-                              4);
+    NCFUNC(attr_get, 3);
+    NCFUNC(wattr_get, 4);
 #endif /* HAVE_ATTR_GET */
-    rb_define_module_function(mNcurses, "wprintw",
-                              (&rbncurs_wprintw),
-                              -1);
+    NCFUNC(wprintw, -1);
 }
 
 static void init_constants_4(void)
@@ -3059,19 +2579,34 @@ void init_SCREEN_methods(void)
 #endif
 }
 
-
+static void init_safe_functions(void)
+{
+    NCFUNC(initscr, 0);
+    NCFUNC(newterm, 3);
+    NCFUNC(slk_init, 1);
+#ifdef HAVE_FILTER
+    NCFUNC(filter, 0);
+#endif
+#ifdef HAVE_USE_ENV
+    NCFUNC(use_env, 1);
+#endif
+}
 void Init_ncurses(void)
 {
     mNcurses = rb_define_module("Ncurses");
+    eNcurses = rb_define_class_under(mNcurses, "Exception", rb_eRuntimeError);
     rb_iv_set(mNcurses, "@windows_hash", rb_hash_new());
     rb_iv_set(mNcurses, "@screens_hash", rb_hash_new());
     cWINDOW  = rb_define_class_under(mNcurses, "WINDOW", rb_cObject);
     cSCREEN  = rb_define_class_under(mNcurses, "SCREEN", rb_cObject);
-
     init_constants_1();
     init_constants_2();
     init_constants_3();
     init_constants_4();
+    init_safe_functions();
+}
+static void Init_ncurses_full(void)
+{
     init_globals_1();
     init_globals_2();
     init_functions_0();
