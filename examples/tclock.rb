@@ -23,10 +23,10 @@
 #  COMING SOON: tfishtank. Be the envy of your mac-owning
 #  colleagues.
 
-#
-# The translation of this program to ruby is a modification and is hereby
-# clearly marked as such.
-#
+###########################################################################
+# The translation of this program to ruby is a modification and is hereby #
+# clearly marked as such.                                                 #
+###########################################################################
 
 require "ncurses"
 PI = Math::PI
@@ -111,9 +111,6 @@ begin
     
 
   lastbeep = -1;
-  #    time_t tim;
-  #    struct tm *t;
-  #    char szChar[10];
   my_bg = Ncurses::COLOR_BLACK;
   
   Ncurses::initscr();
@@ -138,14 +135,14 @@ begin
     mradius = ((3 * cy) / 4).to_f;	#/* 9 */
     hradius = (cy / 2).to_f;		#/* 6 */
     sradius = ((2 * cy) / 3).to_f;	#/* 8 */
-    
+
     for i in (0...12)
       sangle = (i + 1) * (2.0 * PI) / 12.0;
       sradius = ((5 * cy) / 6).to_f;	#/* 10 */
       sdx = a2x(sangle, sradius);
       sdy = a2y(sangle, sradius);
       szChar = sprintf("%d", i + 1);
-      
+
       Ncurses::mvaddstr(cy - sdy, cx + sdx, szChar);
     end
     
