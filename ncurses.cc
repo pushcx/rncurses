@@ -80,6 +80,8 @@ extern "C" int close(int);
 #endif
 #include <ruby.h>
 
+#define RB_F_TYPE VALUE(*)()
+
 static VALUE mNcurses;
 static VALUE cWINDOW;
 static VALUE cSCREEN;
@@ -129,8 +131,10 @@ void
 init_globals_1(void)
 {
     // colors
-    rb_define_module_function(mNcurses, "COLORS", &rb_COLORS, 0);
-    rb_define_module_function(mNcurses, "COLOR_PAIRS", &rb_COLOR_PAIRS, 0);
+    rb_define_module_function(mNcurses, "COLORS",
+			      reinterpret_cast<RB_F_TYPE>(&rb_COLORS), 0);
+    rb_define_module_function(mNcurses, "COLOR_PAIRS",
+			      reinterpret_cast<RB_F_TYPE>(&rb_COLOR_PAIRS), 0);
 }
 static
 void
@@ -293,18 +297,18 @@ void
 init_functions_0(void)
 {
     rb_define_module_function(mNcurses, "delscreen",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_delscreen),
+                              reinterpret_cast<RB_F_TYPE>(&rb_delscreen),
                               1);
     rb_define_module_function(mNcurses, "delwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_delwin), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_delwin), 1);
     rb_define_module_function(mNcurses, "winchnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winchnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winchnstr),
                               3);
     rb_define_module_function(mNcurses, "winnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winnstr),
                               3);
     rb_define_module_function(mNcurses, "wgetnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wgetnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wgetnstr),
                               3);
 }
 
@@ -349,13 +353,20 @@ init_globals_2(void)
     rb_iv_set(mNcurses, "@stdscr", Qnil);
     rb_iv_set(mNcurses, "@curscr", Qnil);
     rb_iv_set(mNcurses, "@newscr", Qnil);
-    rb_define_module_function(mNcurses, "stdscr", &get_stdscr, 0);
-    rb_define_module_function(mNcurses, "curscr", &get_curscr, 0);
-    rb_define_module_function(mNcurses, "newscr", &get_newscr, 0);
-    rb_define_module_function(mNcurses, "LINES",  &get_LINES,  0);
-    rb_define_module_function(mNcurses, "COLS",   &get_COLS,   0);
-    rb_define_module_function(mNcurses, "TABSIZE",&get_TABSIZE,0);
-    rb_define_module_function(mNcurses, "ESCDELAY",&get_ESCDELAY,0);
+    rb_define_module_function(mNcurses, "stdscr", 
+                              reinterpret_cast<RB_F_TYPE>(&get_stdscr), 0);
+    rb_define_module_function(mNcurses, "curscr", 
+                              reinterpret_cast<RB_F_TYPE>(&get_curscr), 0);
+    rb_define_module_function(mNcurses, "newscr", 
+                              reinterpret_cast<RB_F_TYPE>(&get_newscr), 0);
+    rb_define_module_function(mNcurses, "LINES",  
+                              reinterpret_cast<RB_F_TYPE>(&get_LINES),  0);
+    rb_define_module_function(mNcurses, "COLS",   
+                              reinterpret_cast<RB_F_TYPE>(&get_COLS),   0);
+    rb_define_module_function(mNcurses, "TABSIZE",
+                              reinterpret_cast<RB_F_TYPE>(&get_TABSIZE),0);
+    rb_define_module_function(mNcurses, "ESCDELAY",
+                              reinterpret_cast<RB_F_TYPE>(&get_ESCDELAY),0);
 }
 
 static VALUE rb_keybound(VALUE, VALUE keycode, VALUE count)
@@ -398,24 +409,25 @@ void
 init_functions_1(void)
 {
     rb_define_module_function(mNcurses, "keybound",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_keybound),
+                              reinterpret_cast<RB_F_TYPE>(&rb_keybound),
                               2);
     rb_define_module_function(mNcurses, "curses_version",
-                              &rb_curses_version, 0);
+                              reinterpret_cast<RB_F_TYPE>(&rb_curses_version),
+			      0);
     rb_define_module_function(mNcurses, "define_key",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_define_key),
+                              reinterpret_cast<RB_F_TYPE>(&rb_define_key),
                               2);
     rb_define_module_function(mNcurses, "keyok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_keyok), 2);
+                              reinterpret_cast<RB_F_TYPE>(&rb_keyok), 2);
     rb_define_module_function(mNcurses, "resizeterm",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_resizeterm),
+                              reinterpret_cast<RB_F_TYPE>(&rb_resizeterm),
                               2);
     rb_define_module_function(mNcurses, "use_default_colors",
-                              &rb_use_default_colors, 0);
+                              reinterpret_cast<RB_F_TYPE>(&rb_use_default_colors), 0);
     rb_define_module_function(mNcurses, "use_extended_names",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_use_extended_names), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_use_extended_names), 1);
     rb_define_module_function(mNcurses, "wresize",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wresize), 3);
+                              reinterpret_cast<RB_F_TYPE>(&rb_wresize), 3);
 }
 // FIXME: what's this?
 // extern char ttytype[];		/* needed for backward compatibility */
@@ -1218,676 +1230,676 @@ static VALUE rb_newterm(VALUE, VALUE rb_type, VALUE rb_outfd, VALUE rb_infd)
 
 static void init_functions_2(void) {
     rb_define_module_function(mNcurses, "addch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_addch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_addch),
                               1);
     rb_define_module_function(mNcurses, "addchnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_addchnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_addchnstr),
                               2);
     rb_define_module_function(mNcurses, "addchstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_addchstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_addchstr),
                               1);
     rb_define_module_function(mNcurses, "addnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_addnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_addnstr),
                               2);
     rb_define_module_function(mNcurses, "addstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_addstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_addstr),
                               1);
     rb_define_module_function(mNcurses, "attroff",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_attroff),
+                              reinterpret_cast<RB_F_TYPE>(&rb_attroff),
                               1);
     rb_define_module_function(mNcurses, "attron",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_attron),
+                              reinterpret_cast<RB_F_TYPE>(&rb_attron),
                               1);
     rb_define_module_function(mNcurses, "attrset",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_attrset),
+                              reinterpret_cast<RB_F_TYPE>(&rb_attrset),
                               1);
     rb_define_module_function(mNcurses, "attr_off",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_attr_off),
+                              reinterpret_cast<RB_F_TYPE>(&rb_attr_off),
                               2);
     rb_define_module_function(mNcurses, "attr_on",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_attr_on),
+                              reinterpret_cast<RB_F_TYPE>(&rb_attr_on),
                               2);
     rb_define_module_function(mNcurses, "attr_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_attr_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_attr_set),
                               3);
     rb_define_module_function(mNcurses, "baudrate",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_baudrate),
+                              reinterpret_cast<RB_F_TYPE>(&rb_baudrate),
                               0);
     rb_define_module_function(mNcurses, "beep",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_beep),
+                              reinterpret_cast<RB_F_TYPE>(&rb_beep),
                               0);
     rb_define_module_function(mNcurses, "bkgd",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_bkgd),
+                              reinterpret_cast<RB_F_TYPE>(&rb_bkgd),
                               1);
     rb_define_module_function(mNcurses, "bkgdset",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_bkgdset),
+                              reinterpret_cast<RB_F_TYPE>(&rb_bkgdset),
                               1);
     rb_define_module_function(mNcurses, "border",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_border),
+                              reinterpret_cast<RB_F_TYPE>(&rb_border),
                               8);
     rb_define_module_function(mNcurses, "box",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_box),
+                              reinterpret_cast<RB_F_TYPE>(&rb_box),
                               3);
     rb_define_module_function(mNcurses, "can_change_color?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_can_change_color),
+                              reinterpret_cast<RB_F_TYPE>(&rb_can_change_color),
                               0);
     rb_define_module_function(mNcurses, "cbreak",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_cbreak),
+                              reinterpret_cast<RB_F_TYPE>(&rb_cbreak),
                               0);
     rb_define_module_function(mNcurses, "chgat",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_chgat),
+                              reinterpret_cast<RB_F_TYPE>(&rb_chgat),
                               4);
     rb_define_module_function(mNcurses, "clear",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_clear),
+                              reinterpret_cast<RB_F_TYPE>(&rb_clear),
                               0);
     rb_define_module_function(mNcurses, "clearok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_clearok),
+                              reinterpret_cast<RB_F_TYPE>(&rb_clearok),
                               2);
     rb_define_module_function(mNcurses, "clrtobot",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_clrtobot),
+                              reinterpret_cast<RB_F_TYPE>(&rb_clrtobot),
                               0);
     rb_define_module_function(mNcurses, "clrtoeol",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_clrtoeol),
+                              reinterpret_cast<RB_F_TYPE>(&rb_clrtoeol),
                               0);
     rb_define_module_function(mNcurses, "color_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_color_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_color_set),
                               2);
     rb_define_module_function(mNcurses, "COLOR_PAIR",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_COLOR_PAIR),
+                              reinterpret_cast<RB_F_TYPE>(&rb_COLOR_PAIR),
                               1);
     rb_define_module_function(mNcurses, "copywin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_copywin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_copywin),
                               9);
     rb_define_module_function(mNcurses, "curs_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_curs_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_curs_set),
                               1);
     rb_define_module_function(mNcurses, "def_prog_mode",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_def_prog_mode),
+                              reinterpret_cast<RB_F_TYPE>(&rb_def_prog_mode),
                               0);
     rb_define_module_function(mNcurses, "def_shell_mode",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_def_shell_mode),
+                              reinterpret_cast<RB_F_TYPE>(&rb_def_shell_mode),
                               0);
     rb_define_module_function(mNcurses, "delay_output",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_delay_output),
+                              reinterpret_cast<RB_F_TYPE>(&rb_delay_output),
                               1);
     rb_define_module_function(mNcurses, "delch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_delch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_delch),
                               0);
     rb_define_module_function(mNcurses, "deleteln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_deleteln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_deleteln),
                               0);
     rb_define_module_function(mNcurses, "derwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_derwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_derwin),
                               5);
     rb_define_module_function(mNcurses, "doupdate",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_doupdate),
+                              reinterpret_cast<RB_F_TYPE>(&rb_doupdate),
                               0);
     rb_define_module_function(mNcurses, "dupwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_dupwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_dupwin),
                               1);
     rb_define_module_function(mNcurses, "echo",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_echo),
+                              reinterpret_cast<RB_F_TYPE>(&rb_echo),
                               0);
     rb_define_module_function(mNcurses, "echochar",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_echochar),
+                              reinterpret_cast<RB_F_TYPE>(&rb_echochar),
                               1);
     rb_define_module_function(mNcurses, "endwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_endwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_endwin),
                               0);
     rb_define_module_function(mNcurses, "erasechar",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_erasechar),
+                              reinterpret_cast<RB_F_TYPE>(&rb_erasechar),
                               0);
     rb_define_module_function(mNcurses, "filter",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_filter),
+                              reinterpret_cast<RB_F_TYPE>(&rb_filter),
                               0);
     rb_define_module_function(mNcurses, "flash",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_flash),
+                              reinterpret_cast<RB_F_TYPE>(&rb_flash),
                               0);
     rb_define_module_function(mNcurses, "flushinp",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_flushinp),
+                              reinterpret_cast<RB_F_TYPE>(&rb_flushinp),
                               0);
     rb_define_module_function(mNcurses, "getbkgd",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getbkgd),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getbkgd),
                               1);
     rb_define_module_function(mNcurses, "getch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getch),
                               0);
     rb_define_module_function(mNcurses, "halfdelay",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_halfdelay),
+                              reinterpret_cast<RB_F_TYPE>(&rb_halfdelay),
                               1);
     rb_define_module_function(mNcurses, "has_colors?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_has_colors),
+                              reinterpret_cast<RB_F_TYPE>(&rb_has_colors),
                               0);
     rb_define_module_function(mNcurses, "has_ic?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_has_ic),
+                              reinterpret_cast<RB_F_TYPE>(&rb_has_ic),
                               0);
     rb_define_module_function(mNcurses, "has_il?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_has_il),
+                              reinterpret_cast<RB_F_TYPE>(&rb_has_il),
                               0);
     rb_define_module_function(mNcurses, "hline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_hline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_hline),
                               2);
     rb_define_module_function(mNcurses, "idcok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_idcok),
+                              reinterpret_cast<RB_F_TYPE>(&rb_idcok),
                               2);
     rb_define_module_function(mNcurses, "idlok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_idlok),
+                              reinterpret_cast<RB_F_TYPE>(&rb_idlok),
                               2);
     rb_define_module_function(mNcurses, "immedok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_immedok),
+                              reinterpret_cast<RB_F_TYPE>(&rb_immedok),
                               2);
     rb_define_module_function(mNcurses, "inch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_inch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_inch),
                               0);
     rb_define_module_function(mNcurses, "initscr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_initscr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_initscr),
                               0);
     rb_define_module_function(mNcurses, "init_color",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_init_color),
+                              reinterpret_cast<RB_F_TYPE>(&rb_init_color),
                               4);
     rb_define_module_function(mNcurses, "init_pair",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_init_pair),
+                              reinterpret_cast<RB_F_TYPE>(&rb_init_pair),
                               3);
     rb_define_module_function(mNcurses, "insch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_insch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_insch),
                               1);
     rb_define_module_function(mNcurses, "insdelln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_insdelln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_insdelln),
                               1);
     rb_define_module_function(mNcurses, "insertln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_insertln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_insertln),
                               0);
     rb_define_module_function(mNcurses, "insnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_insnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_insnstr),
                               2);
     rb_define_module_function(mNcurses, "insstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_insstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_insstr),
                               1);
     rb_define_module_function(mNcurses, "intrflush",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_intrflush),
+                              reinterpret_cast<RB_F_TYPE>(&rb_intrflush),
                               2);
     rb_define_module_function(mNcurses, "isendwin?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_isendwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_isendwin),
                               0);
     rb_define_module_function(mNcurses, "is_linetouched?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_is_linetouched),
+                              reinterpret_cast<RB_F_TYPE>(&rb_is_linetouched),
                               2);
     rb_define_module_function(mNcurses, "is_wintouched?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_is_wintouched),
+                              reinterpret_cast<RB_F_TYPE>(&rb_is_wintouched),
                               1);
     rb_define_module_function(mNcurses, "keyname",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_keyname),
+                              reinterpret_cast<RB_F_TYPE>(&rb_keyname),
                               1);
     rb_define_module_function(mNcurses, "keypad",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_keypad),
+                              reinterpret_cast<RB_F_TYPE>(&rb_keypad),
                               2);
     rb_define_module_function(mNcurses, "killchar",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_killchar),
+                              reinterpret_cast<RB_F_TYPE>(&rb_killchar),
                               0);
     rb_define_module_function(mNcurses, "leaveok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_leaveok),
+                              reinterpret_cast<RB_F_TYPE>(&rb_leaveok),
                               2);
     rb_define_module_function(mNcurses, "longname",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_longname),
+                              reinterpret_cast<RB_F_TYPE>(&rb_longname),
                               0);
     rb_define_module_function(mNcurses, "meta",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_meta),
+                              reinterpret_cast<RB_F_TYPE>(&rb_meta),
                               2);
     rb_define_module_function(mNcurses, "move",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_move),
+                              reinterpret_cast<RB_F_TYPE>(&rb_move),
                               2);
     rb_define_module_function(mNcurses, "mvaddch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvaddch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvaddch),
                               3);
     rb_define_module_function(mNcurses, "mvaddchnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvaddchnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvaddchnstr),
                               4);
     rb_define_module_function(mNcurses, "mvaddchstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvaddchstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvaddchstr),
                               3);
     rb_define_module_function(mNcurses, "mvaddnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvaddnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvaddnstr),
                               4);
     rb_define_module_function(mNcurses, "mvaddstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvaddstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvaddstr),
                               3);
     rb_define_module_function(mNcurses, "mvchgat",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvchgat),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvchgat),
                               6);
     rb_define_module_function(mNcurses, "mvcur",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvcur),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvcur),
                               4);
     rb_define_module_function(mNcurses, "mvdelch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvdelch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvdelch),
                               2);
     rb_define_module_function(mNcurses, "mvderwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvderwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvderwin),
                               3);
     rb_define_module_function(mNcurses, "mvgetch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvgetch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvgetch),
                               2);
     rb_define_module_function(mNcurses, "mvhline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvhline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvhline),
                               4);
     rb_define_module_function(mNcurses, "mvinch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvinch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvinch),
                               2);
     rb_define_module_function(mNcurses, "mvinsch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvinsch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvinsch),
                               3);
     rb_define_module_function(mNcurses, "mvinsnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvinsnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvinsnstr),
                               4);
     rb_define_module_function(mNcurses, "mvinsstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvinsstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvinsstr),
                               3);
     rb_define_module_function(mNcurses, "mvvline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvvline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvvline),
                               4);
     rb_define_module_function(mNcurses, "mvwaddch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwaddch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwaddch),
                               4);
     rb_define_module_function(mNcurses, "mvwaddchnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwaddchnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwaddchnstr),
                               5);
     rb_define_module_function(mNcurses, "mvwaddchstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwaddchstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwaddchstr),
                               4);
     rb_define_module_function(mNcurses, "mvwaddnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwaddnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwaddnstr),
                               5);
     rb_define_module_function(mNcurses, "mvwaddstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwaddstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwaddstr),
                               4);
     rb_define_module_function(mNcurses, "mvwchgat",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwchgat),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwchgat),
                               7);
     rb_define_module_function(mNcurses, "mvwdelch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwdelch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwdelch),
                               3);
     rb_define_module_function(mNcurses, "mvwgetch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwgetch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwgetch),
                               3);
     rb_define_module_function(mNcurses, "mvwhline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwhline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwhline),
                               5);
     rb_define_module_function(mNcurses, "mvwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwin),
                               3);
     rb_define_module_function(mNcurses, "mvwinch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwinch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwinch),
                               3);
     rb_define_module_function(mNcurses, "mvwinsch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwinsch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwinsch),
                               4);
     rb_define_module_function(mNcurses, "mvwinsnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwinsnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwinsnstr),
                               5);
     rb_define_module_function(mNcurses, "mvwinsstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwinsstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwinsstr),
                               4);
     rb_define_module_function(mNcurses, "mvwvline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mvwvline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mvwvline),
                               5);
     rb_define_module_function(mNcurses, "napms",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_napms),
+                              reinterpret_cast<RB_F_TYPE>(&rb_napms),
                               1);
     rb_define_module_function(mNcurses, "newpad",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_newpad),
+                              reinterpret_cast<RB_F_TYPE>(&rb_newpad),
                               2);
     rb_define_module_function(mNcurses, "newwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_newwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_newwin),
                               4);
     rb_define_module_function(mNcurses, "nl",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_nl),
+                              reinterpret_cast<RB_F_TYPE>(&rb_nl),
                               0);
     rb_define_module_function(mNcurses, "nocbreak",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_nocbreak),
+                              reinterpret_cast<RB_F_TYPE>(&rb_nocbreak),
                               0);
     rb_define_module_function(mNcurses, "nodelay",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_nodelay),
+                              reinterpret_cast<RB_F_TYPE>(&rb_nodelay),
                               2);
     rb_define_module_function(mNcurses, "noecho",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_noecho),
+                              reinterpret_cast<RB_F_TYPE>(&rb_noecho),
                               0);
     rb_define_module_function(mNcurses, "nonl",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_nonl),
+                              reinterpret_cast<RB_F_TYPE>(&rb_nonl),
                               0);
     rb_define_module_function(mNcurses, "noqiflush",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_noqiflush),
+                              reinterpret_cast<RB_F_TYPE>(&rb_noqiflush),
                               0);
     rb_define_module_function(mNcurses, "noraw",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_noraw),
+                              reinterpret_cast<RB_F_TYPE>(&rb_noraw),
                               0);
     rb_define_module_function(mNcurses, "notimeout",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_notimeout),
+                              reinterpret_cast<RB_F_TYPE>(&rb_notimeout),
                               2);
     rb_define_module_function(mNcurses, "overlay",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_overlay),
+                              reinterpret_cast<RB_F_TYPE>(&rb_overlay),
                               2);
     rb_define_module_function(mNcurses, "overwrite",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_overwrite),
+                              reinterpret_cast<RB_F_TYPE>(&rb_overwrite),
                               2);
     rb_define_module_function(mNcurses, "PAIR_NUMBER",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_PAIR_NUMBER),
+                              reinterpret_cast<RB_F_TYPE>(&rb_PAIR_NUMBER),
                               1);
     rb_define_module_function(mNcurses, "pechochar",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_pechochar),
+                              reinterpret_cast<RB_F_TYPE>(&rb_pechochar),
                               2);
     rb_define_module_function(mNcurses, "pnoutrefresh",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_pnoutrefresh),
+                              reinterpret_cast<RB_F_TYPE>(&rb_pnoutrefresh),
                               7);
     rb_define_module_function(mNcurses, "prefresh",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_prefresh),
+                              reinterpret_cast<RB_F_TYPE>(&rb_prefresh),
                               7);
     rb_define_module_function(mNcurses, "putp",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_putp),
+                              reinterpret_cast<RB_F_TYPE>(&rb_putp),
                               1);
     rb_define_module_function(mNcurses, "qiflush",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_qiflush),
+                              reinterpret_cast<RB_F_TYPE>(&rb_qiflush),
                               0);
     rb_define_module_function(mNcurses, "raw",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_raw),
+                              reinterpret_cast<RB_F_TYPE>(&rb_raw),
                               0);
     rb_define_module_function(mNcurses, "redrawwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_redrawwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_redrawwin),
                               1);
     rb_define_module_function(mNcurses, "refresh",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_refresh),
+                              reinterpret_cast<RB_F_TYPE>(&rb_refresh),
                               0);
     rb_define_module_function(mNcurses, "resetty",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_resetty),
+                              reinterpret_cast<RB_F_TYPE>(&rb_resetty),
                               0);
     rb_define_module_function(mNcurses, "reset_prog_mode",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_reset_prog_mode),
+                              reinterpret_cast<RB_F_TYPE>(&rb_reset_prog_mode),
                               0);
     rb_define_module_function(mNcurses, "reset_shell_mode",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_reset_shell_mode),
+                              reinterpret_cast<RB_F_TYPE>(&rb_reset_shell_mode),
                               0);
     rb_define_module_function(mNcurses, "savetty",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_savetty),
+                              reinterpret_cast<RB_F_TYPE>(&rb_savetty),
                               0);
     rb_define_module_function(mNcurses, "scr_dump",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_scr_dump),
+                              reinterpret_cast<RB_F_TYPE>(&rb_scr_dump),
                               1);
     rb_define_module_function(mNcurses, "scr_init",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_scr_init),
+                              reinterpret_cast<RB_F_TYPE>(&rb_scr_init),
                               1);
     rb_define_module_function(mNcurses, "scrl",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_scrl),
+                              reinterpret_cast<RB_F_TYPE>(&rb_scrl),
                               1);
     rb_define_module_function(mNcurses, "scroll",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_scroll),
+                              reinterpret_cast<RB_F_TYPE>(&rb_scroll),
                               1);
     rb_define_module_function(mNcurses, "scrollok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_scrollok),
+                              reinterpret_cast<RB_F_TYPE>(&rb_scrollok),
                               2);
     rb_define_module_function(mNcurses, "scr_restore",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_scr_restore),
+                              reinterpret_cast<RB_F_TYPE>(&rb_scr_restore),
                               1);
     rb_define_module_function(mNcurses, "scr_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_scr_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_scr_set),
                               1);
     rb_define_module_function(mNcurses, "setscrreg",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_setscrreg),
+                              reinterpret_cast<RB_F_TYPE>(&rb_setscrreg),
                               2);
     rb_define_module_function(mNcurses, "set_term",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_set_term),
+                              reinterpret_cast<RB_F_TYPE>(&rb_set_term),
                               1);
     rb_define_module_function(mNcurses, "slk_attroff",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_attroff),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_attroff),
                               1);
     rb_define_module_function(mNcurses, "slk_attr_off",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_attr_off),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_attr_off),
                               2);
     rb_define_module_function(mNcurses, "slk_attron",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_attron),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_attron),
                               1);
     rb_define_module_function(mNcurses, "slk_attr_on",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_attr_on),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_attr_on),
                               2);
     rb_define_module_function(mNcurses, "slk_attrset",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_attrset),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_attrset),
                               1);
     rb_define_module_function(mNcurses, "slk_attr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_attr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_attr),
                               0);
     rb_define_module_function(mNcurses, "slk_attr_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_attr_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_attr_set),
                               3);
     rb_define_module_function(mNcurses, "slk_clear",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_clear),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_clear),
                               0);
     rb_define_module_function(mNcurses, "slk_color",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_color),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_color),
                               1);
     rb_define_module_function(mNcurses, "slk_init",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_init),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_init),
                               1);
     rb_define_module_function(mNcurses, "slk_label",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_label),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_label),
                               1);
     rb_define_module_function(mNcurses, "slk_noutrefresh",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_noutrefresh),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_noutrefresh),
                               0);
     rb_define_module_function(mNcurses, "slk_refresh",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_refresh),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_refresh),
                               0);
     rb_define_module_function(mNcurses, "slk_restore",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_restore),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_restore),
                               0);
     rb_define_module_function(mNcurses, "slk_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_set),
                               3);
     rb_define_module_function(mNcurses, "slk_touch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_slk_touch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_slk_touch),
                               0);
     rb_define_module_function(mNcurses, "standout",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_standout),
+                              reinterpret_cast<RB_F_TYPE>(&rb_standout),
                               0);
     rb_define_module_function(mNcurses, "standend",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_standend),
+                              reinterpret_cast<RB_F_TYPE>(&rb_standend),
                               0);
     rb_define_module_function(mNcurses, "start_color",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_start_color),
+                              reinterpret_cast<RB_F_TYPE>(&rb_start_color),
                               0);
     rb_define_module_function(mNcurses, "subpad",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_subpad),
+                              reinterpret_cast<RB_F_TYPE>(&rb_subpad),
                               5);
     rb_define_module_function(mNcurses, "subwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_subwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_subwin),
                               5);
     rb_define_module_function(mNcurses, "syncok",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_syncok),
+                              reinterpret_cast<RB_F_TYPE>(&rb_syncok),
                               2);
     rb_define_module_function(mNcurses, "termattrs",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_termattrs),
+                              reinterpret_cast<RB_F_TYPE>(&rb_termattrs),
                               0);
     rb_define_module_function(mNcurses, "termname",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_termname),
+                              reinterpret_cast<RB_F_TYPE>(&rb_termname),
                               0);
     rb_define_module_function(mNcurses, "tigetflag",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tigetflag),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tigetflag),
                               1);
     rb_define_module_function(mNcurses, "tigetnum",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tigetnum),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tigetnum),
                               1);
     rb_define_module_function(mNcurses, "tigetstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tigetstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tigetstr),
                               1);
     rb_define_module_function(mNcurses, "timeout",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_timeout),
+                              reinterpret_cast<RB_F_TYPE>(&rb_timeout),
                               1);
     rb_define_module_function(mNcurses, "typeahead",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_typeahead),
+                              reinterpret_cast<RB_F_TYPE>(&rb_typeahead),
                               1);
     rb_define_module_function(mNcurses, "ungetch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_ungetch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_ungetch),
                               1);
     rb_define_module_function(mNcurses, "untouchwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_untouchwin),
+                              reinterpret_cast<RB_F_TYPE>(&rb_untouchwin),
                               1);
     rb_define_module_function(mNcurses, "use_env",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_use_env),
+                              reinterpret_cast<RB_F_TYPE>(&rb_use_env),
                               1);
     rb_define_module_function(mNcurses, "vidattr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_vidattr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_vidattr),
                               1);
     rb_define_module_function(mNcurses, "vid_attr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_vid_attr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_vid_attr),
                               3);
     rb_define_module_function(mNcurses, "vline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_vline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_vline),
                               2);
     rb_define_module_function(mNcurses, "waddch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_waddch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_waddch),
                               2);
     rb_define_module_function(mNcurses, "waddchnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_waddchnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_waddchnstr),
                               3);
     rb_define_module_function(mNcurses, "waddchstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_waddchstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_waddchstr),
                               2);
     rb_define_module_function(mNcurses, "waddnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_waddnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_waddnstr),
                               3);
     rb_define_module_function(mNcurses, "waddstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_waddstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_waddstr),
                               2);
     rb_define_module_function(mNcurses, "wattron",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wattron),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wattron),
                               2);
     rb_define_module_function(mNcurses, "wattroff",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wattroff),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wattroff),
                               2);
     rb_define_module_function(mNcurses, "wattrset",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wattrset),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wattrset),
                               2);
     rb_define_module_function(mNcurses, "wattr_on",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wattr_on),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wattr_on),
                               3);
     rb_define_module_function(mNcurses, "wattr_off",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wattr_off),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wattr_off),
                               3);
     rb_define_module_function(mNcurses, "wattr_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wattr_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wattr_set),
                               4);
     rb_define_module_function(mNcurses, "wbkgd",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wbkgd),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wbkgd),
                               2);
     rb_define_module_function(mNcurses, "wbkgdset",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wbkgdset),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wbkgdset),
                               2);
     rb_define_module_function(mNcurses, "wborder",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wborder),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wborder),
                               9);
     rb_define_module_function(mNcurses, "wchgat",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wchgat),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wchgat),
                               5);
     rb_define_module_function(mNcurses, "wclear",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wclear),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wclear),
                               1);
     rb_define_module_function(mNcurses, "wclrtobot",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wclrtobot),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wclrtobot),
                               1);
     rb_define_module_function(mNcurses, "wclrtoeol",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wclrtoeol),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wclrtoeol),
                               1);
     rb_define_module_function(mNcurses, "wcolor_set",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wcolor_set),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wcolor_set),
                               3);
     rb_define_module_function(mNcurses, "wcursyncup",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wcursyncup),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wcursyncup),
                               1);
     rb_define_module_function(mNcurses, "wdelch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wdelch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wdelch),
                               1);
     rb_define_module_function(mNcurses, "wdeleteln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wdeleteln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wdeleteln),
                               1);
     rb_define_module_function(mNcurses, "wechochar",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wechochar),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wechochar),
                               2);
     rb_define_module_function(mNcurses, "werase",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_werase),
+                              reinterpret_cast<RB_F_TYPE>(&rb_werase),
                               1);
     rb_define_module_function(mNcurses, "wgetch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wgetch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wgetch),
                               1);
     rb_define_module_function(mNcurses, "whline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_whline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_whline),
                               3);
     rb_define_module_function(mNcurses, "winch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winch),
                               1);
     rb_define_module_function(mNcurses, "winsch",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winsch),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winsch),
                               2);
     rb_define_module_function(mNcurses, "winsdelln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winsdelln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winsdelln),
                               2);
     rb_define_module_function(mNcurses, "winsertln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winsertln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winsertln),
                               1);
     rb_define_module_function(mNcurses, "winsnstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winsnstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winsnstr),
                               3);
     rb_define_module_function(mNcurses, "winsstr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_winsstr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_winsstr),
                               2);
     rb_define_module_function(mNcurses, "wmove",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wmove),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wmove),
                               3);
     rb_define_module_function(mNcurses, "wnoutrefresh",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wnoutrefresh),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wnoutrefresh),
                               1);
     rb_define_module_function(mNcurses, "wredrawln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wredrawln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wredrawln),
                               3);
     rb_define_module_function(mNcurses, "wrefresh",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wrefresh),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wrefresh),
                               1);
     rb_define_module_function(mNcurses, "wscrl",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wscrl),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wscrl),
                               2);
     rb_define_module_function(mNcurses, "wsetscrreg",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wsetscrreg),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wsetscrreg),
                               3);
     rb_define_module_function(mNcurses, "wstandout",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wstandout),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wstandout),
                               1);
     rb_define_module_function(mNcurses, "wstandend",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wstandend),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wstandend),
                               1);
     rb_define_module_function(mNcurses, "wsyncdown",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wsyncdown),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wsyncdown),
                               1);
     rb_define_module_function(mNcurses, "wsyncup",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wsyncup),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wsyncup),
                               1);
     rb_define_module_function(mNcurses, "wtimeout",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wtimeout),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wtimeout),
                               2);
     rb_define_module_function(mNcurses, "wtouchln",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wtouchln),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wtouchln),
                               4);
     rb_define_module_function(mNcurses, "wvline",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wvline),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wvline),
                               3);
     rb_define_module_function(mNcurses, "color_content",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_color_content), 4);
+                              reinterpret_cast<RB_F_TYPE>(&rb_color_content), 4);
     rb_define_module_function(mNcurses, "pair_content",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_pair_content), 3);
+                              reinterpret_cast<RB_F_TYPE>(&rb_pair_content), 3);
     rb_define_module_function(mNcurses, "pair_content",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_pair_content), 3);
+                              reinterpret_cast<RB_F_TYPE>(&rb_pair_content), 3);
     rb_define_module_function(mNcurses, "getwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getwin), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_getwin), 1);
     rb_define_module_function(mNcurses, "putwin",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_putwin), 2);
+                              reinterpret_cast<RB_F_TYPE>(&rb_putwin), 2);
     rb_define_module_function(mNcurses, "unctrl",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_unctrl), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_unctrl), 1);
     rb_define_module_function(mNcurses, "newterm",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_newterm), 3);
+                              reinterpret_cast<RB_F_TYPE>(&rb_newterm), 3);
 }
 
 
@@ -2357,95 +2369,95 @@ static VALUE rb_wattr_get(VALUE,VALUE win, VALUE rb_attrs, VALUE rb_pair,VALUE)
 static void init_functions_3(void)
 {
     rb_define_module_function(mNcurses, "getmouse",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getmouse),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getmouse),
                               1);
     rb_define_module_function(mNcurses, "ungetmouse",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_ungetmouse),
+                              reinterpret_cast<RB_F_TYPE>(&rb_ungetmouse),
                               1);
     rb_define_module_function(mNcurses, "mousemask",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mousemask),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mousemask),
                               1);
     rb_define_module_function(mNcurses, "wenclose?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wenclose),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wenclose),
                               1);
     rb_define_module_function(mNcurses, "mouseinterval",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mouseinterval), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_mouseinterval), 1);
     rb_define_module_function(mNcurses, "wmouse_trafo",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wmouse_trafo), 4);
+                              reinterpret_cast<RB_F_TYPE>(&rb_wmouse_trafo), 4);
     rb_define_module_function(mNcurses, "mcprint",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_mcprint),
+                              reinterpret_cast<RB_F_TYPE>(&rb_mcprint),
                               2);
     rb_define_module_function(mNcurses, "has_key?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_has_key),
+                              reinterpret_cast<RB_F_TYPE>(&rb_has_key),
                               2);
     rb_define_module_function(mNcurses, "getyx",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getyx),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getyx),
                               3);
     rb_define_module_function(mNcurses, "getbegyx",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getbegyx),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getbegyx),
                               3);
     rb_define_module_function(mNcurses, "getmaxyx",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getmaxyx),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getmaxyx),
                               3);
     rb_define_module_function(mNcurses, "getparyx",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getparyx),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getparyx),
                               3);
     rb_define_module_function(mNcurses, "getsyx",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getsyx),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getsyx),
                               2);
     rb_define_module_function(mNcurses, "setsyx",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_setsyx),
+                              reinterpret_cast<RB_F_TYPE>(&rb_setsyx),
                               2);
     rb_define_module_function(mNcurses, "getattrs",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_getattrs),
+                              reinterpret_cast<RB_F_TYPE>(&rb_getattrs),
                               1);
 
 #ifdef HAVE__TRACEF
     rb_define_module_function(mNcurses, "_tracef",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tracef), -1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_tracef), -1);
 #endif // HAVE__TRACEF
 #ifdef HAVE__TRACEDUMP
     rb_define_module_function(mNcurses, "_tracedump",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tracedump),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tracedump),
                               2);
 #endif // HAVE__TRACEDUMP
 #ifdef HAVE__TRACEATTR
     rb_define_module_function(mNcurses, "_traceattr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_traceattr),
+                              reinterpret_cast<RB_F_TYPE>(&rb_traceattr),
                               1);
 #endif // HAVE__TRACEATTR
 #ifdef HAVE__TRACEATTR2
     rb_define_module_function(mNcurses, "_traceattr2",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_traceattr2),
+                              reinterpret_cast<RB_F_TYPE>(&rb_traceattr2),
                               2);
 #endif // HAVE__TRACEATTR2
 #ifdef HAVE__TRACEBITS
     rb_define_module_function(mNcurses, "_tracebits",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tracebits),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tracebits),
                               0);
 #endif // HAVE__TRACEBITS
 #ifdef HAVE__TRACECHAR
     rb_define_module_function(mNcurses, "_tracechar",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tracechar),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tracechar),
                               1);
 #endif // HAVE__TRACECHAR
 #ifdef HAVE__TRACECHTYPE
     rb_define_module_function(mNcurses, "_tracechtype",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tracechtype),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tracechtype),
                               1);
 #endif // HAVE__TRACECHTYPE
 #ifdef HAVE__TRACECHTYPE2
     rb_define_module_function(mNcurses, "_tracechtype2",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tracechtype2), 2);
+                              reinterpret_cast<RB_F_TYPE>(&rb_tracechtype2), 2);
 #endif // HAVE__TRACECHTYPE2
 #ifdef HAVE__TRACEMOUSE
     rb_define_module_function(mNcurses, "_tracechmouse",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_tracemouse),
+                              reinterpret_cast<RB_F_TYPE>(&rb_tracemouse),
                               1);
 #endif // HAVE__TRACEMOUSE
 #ifdef HAVE_TRACE
     rb_define_module_function(mNcurses, "trace",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_trace),
+                              reinterpret_cast<RB_F_TYPE>(&rb_trace),
                               1);
 #endif // HAVE_TRACE
 #ifdef HAVE__NC_TRACEBITS
@@ -2453,18 +2465,18 @@ static void init_functions_3(void)
 #endif // HAVE__NC_TRACEBITS
 #ifdef HAVE_ASSUME_DEFAULT_COLORS
     rb_define_module_function(mNcurses, "assume_default_colors",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_assume_default_colors), 2);
+                              reinterpret_cast<RB_F_TYPE>(&rb_assume_default_colors), 2);
 #endif  // HAVE_ASSUME_DEFAULT_COLORS
 #ifdef HAVE_ATTR_GET
     rb_define_module_function(mNcurses, "attr_get",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_attr_get),
+                              reinterpret_cast<RB_F_TYPE>(&rb_attr_get),
                               3);
     rb_define_module_function(mNcurses, "wattr_get",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wattr_get),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wattr_get),
                               4);
 #endif // HAVE_ATTR_GET
     rb_define_module_function(mNcurses, "wprintw",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_wprintw),
+                              reinterpret_cast<RB_F_TYPE>(&rb_wprintw),
                               -1);
 }
 
@@ -2516,7 +2528,7 @@ VALUE rb_## ACS (VALUE rb_screen)                 \
 }             
 #define wrap_ACS(ACS)                                          \
 rb_define_method(cSCREEN, #ACS,                                \
-                 reinterpret_cast<VALUE(*)(...)>(&rb_ ## ACS), \
+                 reinterpret_cast<RB_F_TYPE>(&rb_ ## ACS),     \
                  0)
 rb_ACS(ACS_ULCORNER)
     rb_ACS(ACS_LLCORNER)

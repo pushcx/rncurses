@@ -129,110 +129,122 @@ static void init_panel(void)
     rb_iv_set(mPanel, "@panels_hash", rb_hash_new());
     cPANEL  = rb_define_class_under(mPanel, "PANEL", rb_cObject);
     rb_define_module_function(mPanel, "del_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_del_panel),
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_del_panel),
                               1);
     rb_define_module_function(mPanel, "delpanel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_del_panel),
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_del_panel),
                               1);
     rb_define_method(cPANEL, "del",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_del_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_del_panel), 0);
     rb_define_method(cPANEL, "delete",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_del_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_del_panel), 0);
     rb_define_module_function(mPanel, "panel_window",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_panel_window), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_panel_window),
+			      1);
     rb_define_method(cPANEL, "panel_window",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_window), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_window), 0);
     rb_define_method(cPANEL, "window",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_window), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_window), 0);
     rb_define_module_function(mPanel, "update_panels",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_update_panels), 0);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_update_panels),
+			      0);
     rb_define_module_function(mPanel, "update",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_update_panels), 0);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_update_panels),
+			      0);
     rb_define_module_function(mPanel, "hide_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_hide_panel), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_hide_panel),
+			      1);
     rb_define_method(cPANEL, "hide_panel",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_hide_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_hide_panel), 0);
     
     rb_define_method(cPANEL, "hide",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_hide_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_hide_panel), 0);
     rb_define_module_function(mPanel, "show_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_show_panel), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_show_panel),
+			      1);
     rb_define_method(cPANEL, "show_panel",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_show_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_show_panel), 0);
     
     rb_define_method(cPANEL, "show",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_show_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_show_panel), 0);
     rb_define_module_function(mPanel, "top_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_top_panel), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_top_panel), 1);
     rb_define_method(cPANEL, "top_panel",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_top_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_top_panel), 0);
     
     rb_define_method(cPANEL, "top",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_top_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_top_panel), 0);
     rb_define_module_function(mPanel, "bottom_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_bottom_panel), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_bottom_panel),
+			      1);
     rb_define_method(cPANEL, "bottom_panel",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_bottom_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_bottom_panel), 0);
     
     rb_define_method(cPANEL, "bottom",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_bottom_panel), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_bottom_panel), 0);
     rb_define_module_function(mPanel, "new_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_new_panel),
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_new_panel),
                               1);
     rb_define_module_function(cPANEL, "new",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_new_panel),
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_new_panel),
                               1);
     rb_define_method(cWINDOW, "new_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_c_new_panel),
+                              reinterpret_cast<RB_F_TYPE>(&rb_c_new_panel),
                               0);
     rb_define_module_function(mPanel, "panel_above",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_panel_above), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_panel_above),
+			      1);
     rb_define_method(cPANEL, "panel_above",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_above), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_above), 0);
     rb_define_method(cPANEL, "above",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_above), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_above), 0);
     rb_define_module_function(mPanel, "panel_below",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_panel_below), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_panel_below),
+			      1);
     rb_define_method(cPANEL, "panel_below",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_below), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_below), 0);
     rb_define_method(cPANEL, "below",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_below), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_below), 0);
     rb_define_module_function(mPanel, "set_panel_userptr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_set_panel_userptr), 2);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_set_panel_userptr), 2);
     rb_define_method(cPANEL, "set_panel_userptr",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_set_panel_userptr),
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_set_panel_userptr),
                      1);
     rb_define_method(cPANEL, "set_userptr",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_set_panel_userptr),
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_set_panel_userptr),
                      1);
     rb_define_method(cPANEL, "userptr=",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_set_panel_userptr),
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_set_panel_userptr),
                      1);
     rb_define_module_function(mPanel, "panel_userptr",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_panel_userptr), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_panel_userptr),
+			      1);
     rb_define_method(cPANEL, "panel_userptr",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_userptr),
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_userptr),
                      0);
     rb_define_method(cPANEL, "userptr",                
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_userptr),
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_userptr),
                      0);
     rb_define_module_function(mPanel, "move_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_move_panel), 3);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_move_panel),
+			      3);
     rb_define_method(cPANEL, "move_panel",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_move_panel), 2);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_move_panel), 2);
     rb_define_method(cPANEL, "move",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_move_panel), 2);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_move_panel), 2);
     rb_define_module_function(mPanel, "replace_panel",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_replace_panel), 2);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_replace_panel),
+			      2);
     rb_define_method(cPANEL, "replace_panel",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_replace_panel), 1);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_replace_panel), 1);
     rb_define_method(cPANEL, "replace",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_replace_panel), 1);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_replace_panel), 1);
     rb_define_module_function(mPanel, "panel_hidden?",
-                              reinterpret_cast<VALUE(*)(...)>(&rb_m_panel_hidden), 1);
+                              reinterpret_cast<RB_F_TYPE>(&rb_m_panel_hidden),
+			      1);
     rb_define_method(cPANEL, "panel_hidden?",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_hidden), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_hidden), 0);
     rb_define_method(cPANEL, "hidden?",
-                     reinterpret_cast<VALUE(*)(...)>(&rb_c_panel_hidden), 0);
+                     reinterpret_cast<RB_F_TYPE>(&rb_c_panel_hidden), 0);
 }
 #endif
