@@ -1,4 +1,4 @@
-$Id: README,v 1.3 2002/02/26 11:04:37 t-peters Exp $
+$Id: README,v 1.4 2002/02/28 09:29:19 t-peters Exp $
 ------------------------------------------------------------------------
 This directory contains a ruby module for accessing the FSF's ncurses
 library.
@@ -27,16 +27,16 @@ of the Module Ncurses.
 If you don't know how to use ncurses from C, then stop reading here, and read
 an introduction to ncurses. Eric Raymond has written an introduction that
 should be part of the ncurses development package installed on your computer.
-If you need a gentler introduction, there is a part of a chapter in the linux
-programmer's guide dealing with ncurses, available from www.linuxdoc.org.  It
-should be quite old by now, but the ncurses interface has not changed
-since then, regarding the scope of covered functions, so it is still a very
-good read.  You will also appreciate the extensive man-pages of ncurses.
+If you need a gentler introduction, then you have two options:
+(1) there is a part of a chapter in the linux programmer's guide dealing with
+    ncurses, available from www.linuxdoc.org.  It should be quite old by now,
+    but the ncurses interface has not changed since then, regarding the scope
+    of covered functions, so it is still a very good read.
+(2) There is also a quite up-to-date "NCURSES-Programming-HOWTO" in the HOWTO
+    collection of the Linux Documentation Project, also available at
+    www.linuxdoc.org, which is worth a read.
 
-There is also a quite up-to-date "NCURSES-Programming-HOWTO" in the HOWTO
-collection of the Linux Documentation Project, also available at
-www.linuxdoc.org, which might be worth a read.
-
+You will also appreciate the extensive man-pages of ncurses.
 
 
 Installation and Usage
@@ -57,10 +57,13 @@ External variables are accessed read-only, by module functions taking no
 arguments.  They are spelled exactly like their C counterparts, which leads to
 module functions beginning with an uppercase letter (e.g. Ncurses.LINES).
 
+One of these external variables, ESCDELAY, is also settable with a ruby method
+(Ncurses.ESCDELAY=).
+
 
 Constants
 =========
-(static Preprocessor macros)
+(static C Preprocessor macros)
 
 Constants are implemented as module functions in the Ncurses module, if
 possible. Ruby constants can not start with an underscore, so these constants
@@ -69,6 +72,13 @@ module functions with the same name as these constants, that also return
 the constant's value, when invoked (e.g. "Ncurses._ENDLINE" returns the value
 of the constant "Ncurses::ENDLINE", which has the same value as the C constant
 "_ENDLINE").
+
+The ncurses macros starting with ACS_ are not really constants, their value
+depends on the terminal in use.  Nevertheless, they are implemented as
+constants of the Ncurses module, but since they depend on the terminal, they
+are not initialized before initscr() has been called. If you need more than
+one terminal in a single program, you can access the ACS_ values through member
+functions of class SCREEN.
 
 
 Functions
@@ -85,9 +95,9 @@ Functions expecting pointers to integer types
 
 When the C-function expects a pointer to int, short, chtype, or attr_type,
 You should use as the argument to the ruby function a variable containing
-an empty array. This is because ruby passes these types by value instead of
-by reference; but arrays are passed by reference, so that you can see changes
-in them, performed by the function.
+an empty array. This is because ruby passes these types (ints) by value instead
+of by reference; but arrays are passed by reference, so that you can see
+changes in them, performed by the function.
 Attention: some macro-only functions like getsyx accept variables of type int,
 but, being macros, they write values to their arguments. Thus, they also need
 empty array arguments when called from ruby.
@@ -103,7 +113,7 @@ Example:
 	end
 
 There are 2 functions that read a value from the location ponted to by a
-pointer to int, and store another value at that locations. These functions are
+pointer to int, and store another value at those locations. These functions are
 mouse_trafo and wmouse_trafo. When calling these functions, you have to provide
 2 arrays, each filled with exacly one Integer. The values contained in these
 arrays will then be changed by the ruby module function.
@@ -171,7 +181,7 @@ If this module function did not exist either, then, as a last step, it invokes
 a module function with the same name as the method, adding itself to the
 argument list.
 
-So, if you invoke win.mvaddch(y,x,ch) on a Ncurses::WINDOW object, it will
+So, if you invoke win.mvaddch(y,x,ch) on an Ncurses::WINDOW object, it will
 delegate the method call as Ncurses.mvwaddch(win,y,x,ch), which is what you
 probably wanted.
 
