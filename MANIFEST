@@ -15,5 +15,5 @@ examples/test_scanw.rb
 extconf.rb
 make_dist.rb
 ncurses_wrap.c
-ncurses.rb
+lib/ncurses.rb
 panel_wrap.h

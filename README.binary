@@ -3,4 +3,4 @@ for a ruby 1.6 interpreter compiled with the MinGW compiler for windows.
 
 (see http://www.ruby-lang.org/~eban/ruby/binaries/mingw/)
 
-Copy both files ncurses.rb and ncurses.so into ruby's library search path.
+Copy the files lib/ncurses.rb and ncurses.so into ruby's library search path.
