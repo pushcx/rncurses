@@ -17,7 +17,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: extconf.rb,v 1.9 2003/03/22 20:00:52 t-peters Exp $
+# $Id: extconf.rb,v 1.10 2004/05/13 21:54:49 t-peters Exp $
 
 require "mkmf"
 
@@ -121,6 +121,10 @@ have_func("attr_get")
 puts "checking for the panel library..."
 if have_header("panel.h")
   have_library("panel", "panel_hidden")
+end
+puts "checking for the form library..."
+if have_header("form.h")
+  have_library("form", "new_form")
 end
 
 create_makefile('ncurses')
