@@ -1,4 +1,4 @@
-$Id: README,v 1.6 2003/03/22 22:55:13 t-peters Exp $
+$Id: README,v 1.7 2003/08/28 09:05:27 t-peters Exp $
 ------------------------------------------------------------------------
 This directory contains a ruby module for accessing the FSF's ncurses
 library.
@@ -20,24 +20,24 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 ------------------------------------------------------------------------
 
 This wrapper provides access to the functions, macros, global variables and
-constants of the ncurses library.  These are simply mapped to a Module named
-Ncurses.  Functions and external variables are implemented as module functions
-of the Module Ncurses.
+constants of the ncurses library.  These are mapped to a Ruby Module named
+"Ncurses":  Functions and external variables are implemented as module
+functions of the Module Ncurses.
 
-This wrapper can also be used to wrap the PDCurses library
+This wrapper can also be used to access the PDCurses library
 (http://pdcurses.sourceforge.net/). See README.windows for details.
 
 If you don't know how to use ncurses from C, then stop reading here, and read
 an introduction to ncurses. Eric Raymond has written an introduction that
 should be part of the ncurses development package installed on your computer.
 If you need a gentler introduction, then you have two options:
-(1) there is a part of a chapter in the linux programmer's guide dealing with
-    ncurses, available from www.linuxdoc.org.  It should be quite old by now,
+(1) there is a part of a chapter in "The Linux Programmer's Guide" dealing with
+    ncurses, available from www.tldp.org.  It is quite old by now,
     but the ncurses interface has not changed since then, regarding the scope
     of covered functions, so it is still a very good read.
-(2) There is also a quite up-to-date "NCURSES-Programming-HOWTO" in the HOWTO
+(2) There is also an up-to-date "NCURSES-Programming-HOWTO" in the HOWTO
     collection of the Linux Documentation Project, also available at
-    www.linuxdoc.org, which is worth a read.
+    www.tldp.org, which is worth a read.
 
 You will also appreciate the extensive man-pages of ncurses.
 
@@ -54,14 +54,15 @@ require "ncurses.rb"
 
 
 If your programs use the scanw functions (most unlikely) you will have to
-install the scanf library for ruby.
+install the scanf library for ruby (http://www.rubyhacker.com/code/scanf).
 
 External Variables
 ==================
 
 External variables are accessed read-only, by module functions taking no
-arguments.  They are spelled exactly like their C counterparts, which leads to
-module functions beginning with an uppercase letter (e.g. Ncurses.LINES).
+arguments.  They are spelled exactly like their C counterparts. Sometimes, this
+leads to module functions beginning with an uppercase letter (e.g.
+Ncurses.LINES).
 
 One of these external variables, ESCDELAY, is also settable with a ruby method
 (Ncurses.ESCDELAY=).
@@ -71,7 +72,7 @@ Constants
 =========
 (static C Preprocessor macros)
 
-Constants are implemented as module functions in the Ncurses module, if
+Constants are implemented as module constants in the Ncurses module, if
 possible. Ruby constants can not start with an underscore, so these constants
 have been renamed (they lost the leading underscore). There are,however,
 module functions with the same name as these constants, that also return
@@ -79,7 +80,7 @@ the constant's value, when invoked (e.g. "Ncurses._ENDLINE" returns the value
 of the constant "Ncurses::ENDLINE", which has the same value as the C constant
 "_ENDLINE").
 
-The ncurses macros starting with ACS_ are not really constants, their value
+Note: The ncurses macros starting with ACS_ are not constants, their value
 depends on the terminal in use.  Nevertheless, they are implemented as
 constants of the Ncurses module, but since they depend on the terminal, they
 are not initialized before initscr() has been called. If you need more than
@@ -100,10 +101,10 @@ Functions expecting pointers to integer types
 ---------------------------------------------
 
 When the C-function expects a pointer to int, short, chtype, or attr_type,
-You should use as the argument to the ruby function a variable containing
-an empty array. This is because ruby passes these types (ints) by value instead
-of by reference; but arrays are passed by reference, so that you can see
-changes in them, performed by the function.
+You should use a variable containing an empty array as the argument to the ruby
+function. This is because ruby passes these types (ints) "by value" instead of
+"by reference"; but arrays are passed by reference, so that you can see the
+changes to them.
 Attention: some macro-only functions like getsyx accept variables of type int,
 but, being macros, they write values to their arguments. Thus, they also need
 empty array arguments when called from ruby.
@@ -118,7 +119,7 @@ Example:
 	  "number #{background_color[0]} as the background color")
 	end
 
-There are 2 functions that read a value from the location ponted to by a
+There are 2 functions that read a value from the location pointed to by a
 pointer to int, and store another value at those locations. These functions are
 mouse_trafo and wmouse_trafo. When calling these functions, you have to provide
 2 arrays, each filled with exacly one Integer. The values contained in these
@@ -156,8 +157,9 @@ simply pass it the corresponding, already existing ruby object.
 scanf style functions expecting various pointers
 ---------------------------------------------------
 
-namely scanw, mvscanw, wscanw, mvwscanw. Use an array after the format string.
-The scanned values will be placed there.
+namely scanw, mvscanw, wscanw, mvwscanw.  Use an array after the format string.
+The scanned values will be placed there.  Remember, you need scanf for ruby
+installed for these functions to work.
 
 Module / Class Hierarchie
 =========================
@@ -176,8 +178,8 @@ Where to find the functions
 ===========================
 
 As stated, all ncurses functions are implemented as module functions in the
-module Ncurses. When you know how an ncurses function is named in C (example:
-"mvaddch"), you can simply call the corresponding module functions with the
+module Ncurses. If you know how an ncurses function is named in C (example:
+"mvaddch"), then call the corresponding module functions with the
 same number of arguments (example: "Ncurses.mvaddch(y,x,ch)")
 
 The class window implements method_missing and tries to map invoked methods
@@ -193,9 +195,8 @@ If this module function did not exist either, then, as a last step, it invokes
 a module function with the same name as the method, adding itself to the
 argument list.
 
-So, if you invoke win.mvaddch(y,x,ch) on an Ncurses::WINDOW object, it will
-delegate the method call as Ncurses.mvwaddch(win,y,x,ch), which is what you
-probably wanted.
+Example: If you invoke win.mvaddch(y,x,ch) on an Ncurses::WINDOW object, it
+will delegate the method call to Ncurses.mvwaddch(win,y,x,ch).
 
 Other examples:
  win.delwin()        =>  Ncurses.delwin(win)          # win cannot be used
@@ -220,6 +221,5 @@ The panel library has also been wrapped. All panel functions are implemented
 as module functions of the module Ncurses::Panel.
 
 Most of these functions are also implemented as methods of class
-Ncurses::Panel::PANEL, once with the original name and once with the subword
+Ncurses::Panel::PANEL, once with their original name and once with the subword
 "panel" and an adjacent underscore removed.
-
