@@ -4,7 +4,7 @@
 # Copyright (C) 2002 Tobias Peters <t-peters@berlios.de>
 #
 # The following license applys only to this file. It is less restrictive
-# than the license for the rest of the ncurses-ruby distribution, because
+# than the license for the rest of the ncurses-ruby distribution. 
 # I've adapted this file from someone else, see below. 
 #
 # Permission is hereby granted, free of charge, to any person
