@@ -1,7 +1,8 @@
 /*
  * ncurses-ruby is a ruby module for accessing the FSF's ncurses library
- * (C) 2002 Tobias Peters <t-peters@berlios.de>
- * 
+ * (C) 2002, 2003, 2004 Tobias Peters <t-peters@berlios.de>
+ * (C) 2004 Simon Kaczor <skaczor@cox.net>
+ *
  *  This module is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -16,7 +17,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.4 2003/09/02 19:37:00 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.5 2004/05/13 21:55:00 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -62,36 +63,8 @@
   - v*printw functions (but normal printw functions are supported!)
 */
 
-#if defined(HAVE_GETWIN) || defined(HAVE_PUTWIN)
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#else
-int dup(int);
-int close(int);
-#endif
-#endif
-
-#ifdef HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#ifdef HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#else
-#include <curses.h>
-#endif
-#endif
-#include <ruby.h>
-
-static VALUE mNcurses;  /* module Ncurses */
-static VALUE cWINDOW;   /* class Ncurses::WINDOW */
-static VALUE cSCREEN;   /* class Ncurses::SCREEN */
-static VALUE eNcurses;  /* Ncurses::Exception thrown by this extension */
-
-#define NCFUNC(name, nargs)                       \
-  rb_define_singleton_method(mNcurses,            \
-                             #name,               \
-                             &rbncurs_ ## name,   \
-                             nargs)
+#include "ncurses_wrap.h"
+#include "form_wrap.h"
 
 static void Init_ncurses_full(void);
 
@@ -215,7 +188,7 @@ init_constants_2(void)
 #endif
 }
 
-static VALUE   wrap_window(WINDOW* window)
+VALUE   wrap_window(WINDOW* window)
 {
     if (window == 0) return Qnil;
     {
@@ -230,7 +203,7 @@ static VALUE   wrap_window(WINDOW* window)
         return rb_window;
     }
 }
-static WINDOW* get_window(VALUE rb_window)
+WINDOW* get_window(VALUE rb_window)
 {
     WINDOW* window;
     if (rb_window == Qnil) return 0;
@@ -339,6 +312,10 @@ static VALUE rbncurs_winnstr(VALUE dummy, VALUE rb_win, VALUE rb_chstr, VALUE rb
 
 #ifdef HAVE_PANEL_H
 #include "panel_wrap.h" /* needs access to mNcurses, wrap_window, get_window */
+#endif
+
+#ifdef HAVE_FORM_H
+#include "form_wrap.h" /* needs init_form */
 #endif
 
 static
@@ -566,6 +543,7 @@ static VALUE rbncurs_attron(VALUE dummy, VALUE arg1) {
 static VALUE rbncurs_attrset(VALUE dummy, VALUE arg1) {
     return INT2NUM(attrset(NUM2ULONG(arg1)));
 }
+#if defined(NCURSES_VERSION_MAJOR) && NCURSES_VERSION_MAJOR > 4
 #ifdef HAVE_ATTR_OFF
 static VALUE rbncurs_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(attr_off(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
@@ -581,6 +559,81 @@ static VALUE rbncurs_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
 }
 #endif
+#if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
+static VALUE rbncurs_slk_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
+    return INT2NUM(slk_attr_off(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
+}
+#endif
+#if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
+static VALUE rbncurs_slk_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
+    return INT2NUM(slk_attr_on(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
+}
+#endif
+#ifdef HAVE_SLK_ATTR_SET
+static VALUE rbncurs_slk_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+    return INT2NUM(slk_attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
+}
+#endif
+#ifdef HAVE_WATTR_ON
+static VALUE rbncurs_wattr_on(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+    return INT2NUM(wattr_on(get_window(arg1),  NUM2ULONG(arg2),  ((void)(arg3),NULL)));
+}
+#endif
+#ifdef HAVE_WATTR_OFF
+static VALUE rbncurs_wattr_off(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+    return INT2NUM(wattr_off(get_window(arg1),  NUM2ULONG(arg2),  ((void)(arg3),NULL)));
+}
+#endif
+#ifdef HAVE_WATTR_SET
+static VALUE rbncurs_wattr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+    return INT2NUM(wattr_set(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3),  ((void)(arg4),NULL)));
+}
+#endif
+#if defined(HAVE_VID_ATTR) || defined(vid_attr)
+static VALUE rbncurs_vid_attr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+    return INT2NUM(vid_attr(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
+}
+#endif
+#ifdef HAVE_ATTR_GET
+static VALUE rbncurs_attr_get(VALUE dummy, VALUE rb_attrs, VALUE rb_pair,
+                         VALUE dummy2)
+{
+    if ((rb_obj_is_instance_of(rb_attrs, rb_cArray) != Qtrue)
+        || (rb_obj_is_instance_of(rb_pair, rb_cArray) != Qtrue)) {
+        rb_raise(rb_eArgError,
+                 "attrs and pair arguments must be empty Arrays");
+        return Qnil;
+    }
+    {
+        attr_t attrs = 0;
+        short  pair  = 0;
+        int return_value = attr_get(&attrs, &pair, 0);
+        rb_ary_push(rb_attrs, INT2NUM(attrs));
+        rb_ary_push(rb_pair, INT2NUM(pair));
+        return INT2NUM(return_value);
+    }
+}
+static VALUE rbncurs_wattr_get(VALUE dummy,VALUE win, VALUE rb_attrs, VALUE rb_pair,
+                          VALUE dummy2)
+{
+    if ((rb_obj_is_instance_of(rb_attrs, rb_cArray) != Qtrue)
+        || (rb_obj_is_instance_of(rb_pair, rb_cArray) != Qtrue)) {
+        rb_raise(rb_eArgError,
+                 "attrs and pair arguments must be empty Arrays");
+        return Qnil;
+    }
+    {
+        attr_t attrs = 0;
+        short  pair  = 0;
+        int return_value = wattr_get(get_window(win), &attrs, &pair, 0);
+        rb_ary_push(rb_attrs, INT2NUM(attrs));
+        rb_ary_push(rb_pair, INT2NUM(pair));
+        return INT2NUM(return_value);
+    }
+}
+#endif /* HAVE_ATTR_GET */
+#endif
+
 static VALUE rbncurs_baudrate(VALUE dummy) {
     return INT2NUM(baudrate());
 }
@@ -1130,19 +1183,9 @@ static VALUE rbncurs_set_term(VALUE dummy, VALUE arg1) {
 static VALUE rbncurs_slk_attroff(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_attroff(NUM2ULONG(arg1)));
 }
-#if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
-static VALUE rbncurs_slk_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(slk_attr_off(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
-}
-#endif
 static VALUE rbncurs_slk_attron(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_attron(NUM2ULONG(arg1)));
 }
-#if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
-static VALUE rbncurs_slk_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(slk_attr_on(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
-}
-#endif
 static VALUE rbncurs_slk_attrset(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_attrset(NUM2ULONG(arg1)));
 }
@@ -1151,11 +1194,7 @@ static VALUE rbncurs_slk_attr(VALUE dummy) {
     return INT2NUM(slk_attr());
 }
 #endif
-#ifdef HAVE_SLK_ATTR_SET
-static VALUE rbncurs_slk_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(slk_attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
-}
-#endif
+
 static VALUE rbncurs_slk_clear(VALUE dummy) {
     return INT2NUM(slk_clear());
 }
@@ -1246,11 +1285,6 @@ static VALUE rbncurs_vidattr(VALUE dummy, VALUE arg1) {
     return INT2NUM(vidattr(NUM2ULONG(arg1)));
 }
 #endif
-#if defined(HAVE_VID_ATTR) || defined(vid_attr)
-static VALUE rbncurs_vid_attr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(vid_attr(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
-}
-#endif
 static VALUE rbncurs_vline(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(vline(NUM2ULONG(arg1),  NUM2INT(arg2)));
 }
@@ -1285,21 +1319,6 @@ static VALUE rbncurs_wattroff(VALUE dummy, VALUE arg1, VALUE arg2) {
 static VALUE rbncurs_wattrset(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wattrset(get_window(arg1),  NUM2INT(arg2)));
 }
-#ifdef HAVE_WATTR_ON
-static VALUE rbncurs_wattr_on(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(wattr_on(get_window(arg1),  NUM2ULONG(arg2),  ((void)(arg3),NULL)));
-}
-#endif
-#ifdef HAVE_WATTR_OFF
-static VALUE rbncurs_wattr_off(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(wattr_off(get_window(arg1),  NUM2ULONG(arg2),  ((void)(arg3),NULL)));
-}
-#endif
-#ifdef HAVE_WATTR_SET
-static VALUE rbncurs_wattr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
-    return INT2NUM(wattr_set(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3),  ((void)(arg4),NULL)));
-}
-#endif
 static VALUE rbncurs_wbkgd(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wbkgd(get_window(arg1),  NUM2ULONG(arg2)));
 }
@@ -1487,6 +1506,7 @@ static void init_functions_2(void) {
     NCFUNC(attroff, 1);
     NCFUNC(attron, 1);
     NCFUNC(attrset, 1);
+#if defined(NCURSES_VERSION_MAJOR) && NCURSES_VERSION_MAJOR > 4
 #ifdef HAVE_ATTR_OFF
     NCFUNC(attr_off, 2);
 #endif
@@ -1495,6 +1515,32 @@ static void init_functions_2(void) {
 #endif
 #ifdef HAVE_ATTR_SET
     NCFUNC(attr_set, 3);
+#endif
+#if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
+    NCFUNC(slk_attr_off, 2);
+#endif
+#if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
+    NCFUNC(slk_attr_on, 2);
+#endif
+#ifdef HAVE_SLK_ATTR_SET
+    NCFUNC(slk_attr_set, 3);
+#endif
+#ifdef HAVE_WATTR_ON
+   NCFUNC(wattr_on, 3);
+#endif
+#ifdef HAVE_WATTR_OFF
+    NCFUNC(wattr_off, 3);
+#endif
+#ifdef HAVE_WATTR_SET
+    NCFUNC(wattr_set, 4);
+#endif
+#if defined (HAVE_VID_ATTR) || defined(vid_attr)
+    NCFUNC(vid_attr, 3);
+#endif
+#ifdef HAVE_ATTR_GET
+    NCFUNC(attr_get, 3);
+    NCFUNC(wattr_get, 4);
+#endif /* HAVE_ATTR_GET */
 #endif
     NCFUNC(baudrate, 0);
     NCFUNC(beep, 0);
@@ -1673,19 +1719,10 @@ static void init_functions_2(void) {
     NCFUNC(setscrreg, 2);
     NCFUNC(set_term, 1);
     NCFUNC(slk_attroff, 1);
-#if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
-    NCFUNC(slk_attr_off, 2);
-#endif
     NCFUNC(slk_attron, 1);
-#if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
-    NCFUNC(slk_attr_on, 2);
-#endif
     NCFUNC(slk_attrset, 1);
 #ifdef HAVE_SLK_ATTR
     NCFUNC(slk_attr, 0);
-#endif
-#ifdef HAVE_SLK_ATTR_SET
-    NCFUNC(slk_attr_set, 3);
 #endif
     NCFUNC(slk_clear, 0);
 #ifdef HAVE_SLK_COLOR
@@ -1721,9 +1758,6 @@ static void init_functions_2(void) {
 #ifdef HAVE_VIDATTR
     NCFUNC(vidattr, 1);
 #endif
-#if defined (HAVE_VID_ATTR) || defined(vid_attr)
-    NCFUNC(vid_attr, 3);
-#endif
     NCFUNC(vline, 2);
     NCFUNC(waddch, 2);
     NCFUNC(waddchnstr, 3);
@@ -1733,15 +1767,6 @@ static void init_functions_2(void) {
     NCFUNC(wattron, 2);
     NCFUNC(wattroff, 2);
     NCFUNC(wattrset, 2);
- #ifdef HAVE_WATTR_ON
-   NCFUNC(wattr_on, 3);
-#endif
-#ifdef HAVE_WATTR_OFF
-    NCFUNC(wattr_off, 3);
-#endif
-#ifdef HAVE_WATTR_SET
-    NCFUNC(wattr_set, 4);
-#endif
     NCFUNC(wbkgd, 2);
     NCFUNC(wbkgdset, 2);
     NCFUNC(wborder, 9);
@@ -2279,51 +2304,13 @@ static VALUE rbncurs_trace(VALUE dummy, VALUE param)
 #endif /* HAVE_TRACE */
 #ifdef HAVE__NC_TRACEBITS
 static VALUE rbncurs_nc_tracebits()
-{ return rb_str_new2(_nc_tracebits()); }
+{ return rb_str_new2((char*)_nc_tracebits()); }
 #endif /* HAVE__NC_TRACEBITS */
 
 #ifdef HAVE_ASSUME_DEFAULT_COLORS
 static VALUE rbncurs_assume_default_colors(VALUE dummy, VALUE fg, VALUE bg)
 { return INT2NUM(assume_default_colors(NUM2INT(fg),NUM2INT(bg))); }
 #endif  /* HAVE_ASSUME_DEFAULT_COLORS */
-#ifdef HAVE_ATTR_GET
-static VALUE rbncurs_attr_get(VALUE dummy, VALUE rb_attrs, VALUE rb_pair,
-                         VALUE dummy2)
-{
-    if ((rb_obj_is_instance_of(rb_attrs, rb_cArray) != Qtrue)
-        || (rb_obj_is_instance_of(rb_pair, rb_cArray) != Qtrue)) {
-        rb_raise(rb_eArgError,
-                 "attrs and pair arguments must be empty Arrays");
-        return Qnil;
-    }
-    {
-        attr_t attrs = 0;
-        short  pair  = 0;
-        int return_value = attr_get(&attrs, &pair, 0);
-        rb_ary_push(rb_attrs, INT2NUM(attrs));
-        rb_ary_push(rb_pair, INT2NUM(pair));
-        return INT2NUM(return_value);
-    }
-}
-static VALUE rbncurs_wattr_get(VALUE dummy,VALUE win, VALUE rb_attrs, VALUE rb_pair,
-                          VALUE dummy2)
-{
-    if ((rb_obj_is_instance_of(rb_attrs, rb_cArray) != Qtrue)
-        || (rb_obj_is_instance_of(rb_pair, rb_cArray) != Qtrue)) {
-        rb_raise(rb_eArgError,
-                 "attrs and pair arguments must be empty Arrays");
-        return Qnil;
-    }
-    {
-        attr_t attrs = 0;
-        short  pair  = 0;
-        int return_value = wattr_get(get_window(win), &attrs, &pair, 0);
-        rb_ary_push(rb_attrs, INT2NUM(attrs));
-        rb_ary_push(rb_pair, INT2NUM(pair));
-        return INT2NUM(return_value);
-    }
-}
-#endif /* HAVE_ATTR_GET */
 
 static void init_functions_3(void)
 {
@@ -2414,10 +2401,6 @@ static void init_functions_3(void)
 #ifdef HAVE_ASSUME_DEFAULT_COLORS
     NCFUNC(assume_default_colors, 2);
 #endif  /* HAVE_ASSUME_DEFAULT_COLORS */
-#ifdef HAVE_ATTR_GET
-    NCFUNC(attr_get, 3);
-    NCFUNC(wattr_get, 4);
-#endif /* HAVE_ATTR_GET */
     NCFUNC(wprintw, -1);
 }
 
@@ -2617,5 +2600,8 @@ static void Init_ncurses_full(void)
     init_SCREEN_methods();
 #ifdef HAVE_PANEL_H
     init_panel();
+#endif
+#ifdef HAVE_FORM_H
+    init_form();
 #endif
 }
