@@ -15,7 +15,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.1 2003/03/22 20:01:24 t-peters Exp $
+# $Id: ncurses.rb,v 1.2 2003/03/22 22:55:54 t-peters Exp $
 
 require "ncurses.so"
 
@@ -210,10 +210,32 @@ end
 def Ncurses.mvwgetstr(win, y,x, str)
   Ncurses.mvwgetnstr(win, y,x, str, Ncurses::GETSTR_LIMIT)
 end
-def Ncurses.wgetstr(str)
-  Ncurses.wgetnstr(str, Ncurses::GETSTR_LIMIT)
+def Ncurses.wgetstr(win, str)
+  Ncurses.wgetnstr(win, str, Ncurses::GETSTR_LIMIT)
 end
 
+def Ncurses.scanw(format, result)
+  Ncurses.wscanw(Ncurses.stdscr, format, result)
+end
+def Ncurses.mvscanw(y,x, format, result)
+  Ncurses.mvwscanw(Ncurses.stdscr, y,x, format, result)
+end
+def Ncurses.mvwscanw(win, y,x, format, result)
+  if (Ncurses.wmove(win, y,x) == Ncurses::ERR) 
+    Ncurses::ERR
+  else
+    Ncurses.wscanw(win, format, result)
+  end
+end
+def Ncurses.wscanw(win, format, result)
+  str = ""
+  if (Ncurses.wgetstr(win, str) == Ncurses::ERR) 
+    Ncurses::ERR
+  else
+    require "scanf.rb" # Use ruby's implementation of scanf
+    result.replace(str.scanf(format))
+  end
+end
 
 def Ncurses.mvprintw(*args)
   Ncurses.mvwprintw(Ncurses.stdscr, *args)
