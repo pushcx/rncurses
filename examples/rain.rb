@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# $Id: rain.rb,v 1.4 2002/02/28 13:50:03 t-peters Exp $
+# $Id: rain.rb,v 1.5 2002/11/16 21:16:32 t-peters Exp $
 
 # This program is a translation of the popular rain.c demo program from the
 # ncurses library distribution.
@@ -62,7 +62,11 @@ class Raindrop
   # phase, returns 0, otherwise returns the raindrop.
   def draw_next_phase
     if (@color_pair)
-      @window.color_set(@color_pair, nil)
+      if Ncurses.respond_to?(:color_set)
+        @window.color_set(@color_pair, nil)
+      else
+        @window.attrset(Ncurses.COLOR_PAIR(@color_pair))
+      end
     end
     if (DRAWING_PROCS[@current_phase].call(@window,@y,@x))
       @current_phase += 1
@@ -188,6 +192,7 @@ begin
   Ncurses.nl()
   Ncurses.noecho()
   Ncurses.curs_set(0)
+  Ncurses.stdscr.nodelay(true)
   Ncurses.timeout(0)
 
   rain = Rain.new(Ncurses.stdscr)
