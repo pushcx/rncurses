@@ -3,3 +3,4 @@ ncurses.o
 ncurses.so
 *~
 #*
+mkmf.log
