@@ -16,7 +16,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses.cc,v 1.6 2002/02/26 11:04:38 t-peters Exp $
+ * $Id: ncurses.cc,v 1.7 2002/02/26 23:10:18 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -346,7 +346,11 @@ static VALUE get_TABSIZE(...) {return INT2NUM(TABSIZE);}
 // This global was an undocumented feature under AIX curses.
 // ESC expire time in milliseconds
 static VALUE get_ESCDELAY(...){return INT2NUM(ESCDELAY);}
-
+static VALUE set_ESCDELAY(VALUE, VALUE new_delay)
+{
+    ESCDELAY=NUM2INT(new_delay);
+    return INT2NUM(ESCDELAY);
+}
 static
 void
 init_globals_2(void)
@@ -368,6 +372,8 @@ init_globals_2(void)
                               reinterpret_cast<RB_F_TYPE>(&get_TABSIZE),0);
     rb_define_module_function(mNcurses, "ESCDELAY",
                               reinterpret_cast<RB_F_TYPE>(&get_ESCDELAY),0);
+    rb_define_module_function(mNcurses, "ESCDELAY=",
+                              reinterpret_cast<RB_F_TYPE>(&set_ESCDELAY),1);
 }
 
 static VALUE rb_keybound(VALUE, VALUE keycode, VALUE count)
