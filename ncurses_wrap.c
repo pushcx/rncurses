@@ -18,7 +18,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.8 2005/03/05 22:48:43 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.9 2005/03/06 16:13:31 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -787,7 +787,7 @@ static int rbncurshelper_nonblocking_wgetch(WINDOW *c_win) {
 #ifdef NCURSES_VERSION
     c_win->_delay = 0;
 #endif
-    while ((result = wgetch(c_win)) == ERR) {
+    while (wrefresh(c_win), (result = wgetch(c_win)) == ERR) {
         gettimeofday(&tv, &tz);
         nowtime = tv.tv_sec + tv.tv_usec * 1e-6;
         delay = finishtime - nowtime;
