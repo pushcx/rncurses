@@ -1,11 +1,14 @@
 COPYING
 MANIFEST
 README
+THANKS
 TODO
+VERSION
 examples/example.rb
 examples/hello_ncurses.rb
 examples/LICENSES_for_examples
 examples/rain.rb
+examples/tclock.rb
 extconf.rb
 make_dist.rb
 mkmf.log
