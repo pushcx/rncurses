@@ -2,6 +2,7 @@
  * ncurses-ruby is a ruby module for accessing the FSF's ncurses library
  * (C) 2002, 2003, 2004 Tobias Peters <t-peters@berlios.de>
  * (C) 2004 Simon Kaczor <skaczor@cox.net>
+ * (C) 2005 Tobias Herzke
  *
  *  This module is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.6 2004/07/31 08:35:13 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.7 2005/02/26 22:52:36 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -659,8 +660,25 @@ static VALUE rbncurs_box(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
 static VALUE rbncurs_can_change_color(VALUE dummy) {
     return (can_change_color()) ? Qtrue : Qfalse;
 }
+
+static int rbncurshelper_halfdelay_cbreak(int tenths, int break_chars)
+{
+    int status = break_chars ? cbreak() : nocbreak();
+    if (status != ERR) {
+        rb_iv_set(mNcurses, "@halfdelay", INT2NUM(tenths));
+        rb_iv_set(mNcurses, "@cbreak", break_chars ? Qtrue : Qfalse);
+    }
+    return status;
+}
+static void rbncurshelper_halfdelay_cbreak_restore()
+{
+    if (RTEST(rb_iv_get(mNcurses, "@cbreak")))
+        cbreak();
+    else
+        nocbreak();
+}
 static VALUE rbncurs_cbreak(VALUE dummy) {
-    return INT2NUM(cbreak());
+    return INT2NUM(rbncurshelper_halfdelay_cbreak(0, 1));
 }
 #ifdef HAVE_CHGAT
 static VALUE rbncurs_chgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
@@ -744,11 +762,47 @@ static VALUE rbncurs_flushinp(VALUE dummy) {
 static VALUE rbncurs_getbkgd(VALUE dummy, VALUE arg1) {
     return INT2NUM(getbkgd(get_window(arg1)));
 }
+
+static int rbncurshelper_nonblocking_wgetch(WINDOW *c_win) {
+    /* nonblocking wgetch only implemented for Ncurses */
+    int halfdelay = NUM2INT(rb_iv_get(mNcurses, "@halfdelay"));
+    double screen_delay = halfdelay * 0.1;
+#ifdef NCURSES_VERSION
+    int windelay = c_win->_delay;
+#else
+    int windelay = 0;
+#endif
+    double window_delay = (windelay >= 0) ? 0.001 * windelay : (1e200*1e200);
+    double delay = (screen_delay > 0) ? screen_delay : window_delay;
+    int result;
+    struct timeval tv;
+    struct timezone tz = {0,0};
+    double starttime, nowtime, finishtime;
+    gettimeofday(&tv, &tz);
+    starttime = tv.tv_sec + tv.tv_usec * 1e-6;
+    finishtime = starttime + delay;
+#ifdef NCURSES_VERSION
+    c_win->_delay = 0;
+#endif
+    while ((result = wgetch(c_win)) == ERR && delay > 0) {
+        tv.tv_sec = 0;
+        tv.tv_usec =  (unsigned)( ( (0.1 < delay) ? 0.1 : delay) * 1e6 );
+        rb_thread_wait_for(tv);
+
+        gettimeofday(&tv, &tz);
+        nowtime = tv.tv_sec + tv.tv_usec * 1e-6;
+        delay = finishtime - nowtime;
+    }
+#ifdef NCURSES_VERSION
+    c_win->_delay = windelay;
+#endif
+    return result;
+}
 static VALUE rbncurs_getch(VALUE dummy) {
-    return INT2NUM(getch());
+    return INT2NUM(rbncurshelper_nonblocking_wgetch(stdscr));
 }
 static VALUE rbncurs_halfdelay(VALUE dummy, VALUE arg1) {
-    return INT2NUM(halfdelay(NUM2INT(arg1)));
+    return INT2NUM(rbncurshelper_halfdelay_cbreak(NUM2INT(arg1), 1));
 }
 static VALUE rbncurs_has_colors(VALUE dummy) {
     return (has_colors()) ? Qtrue : Qfalse;
@@ -878,6 +932,7 @@ static VALUE rbncurs_initscr(VALUE dummy) {
 #ifdef ACS_SSSS
     rb_define_const(mNcurses, "ACS_SSSS",      INT2NUM(ACS_SSSS));
 #endif
+    rbncurshelper_halfdelay_cbreak_restore();
     return v;
 }
 static VALUE rbncurs_init_color(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
@@ -975,7 +1030,9 @@ static VALUE rbncurs_mvderwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvderwin(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
 static VALUE rbncurs_mvgetch(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(mvgetch(NUM2INT(arg1),  NUM2INT(arg2)));
+    if (wmove(stdscr, NUM2INT(arg1),  NUM2INT(arg2)) == ERR)
+        return INT2NUM(ERR);
+    return INT2NUM(rbncurshelper_nonblocking_wgetch(stdscr));
 }
 #ifdef HAVE_MVHLINE
 static VALUE rbncurs_mvhline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
@@ -1034,7 +1091,10 @@ static VALUE rbncurs_mvwdelch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvwdelch(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
 static VALUE rbncurs_mvwgetch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(mvwgetch(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
+    WINDOW * c_win = get_window(arg1);
+    if (wmove(c_win, NUM2INT(arg1),  NUM2INT(arg2)) == ERR)
+        return INT2NUM(ERR);
+    return INT2NUM(rbncurshelper_nonblocking_wgetch(c_win));
 }
 #ifdef HAVE_MVWHLINE
 static VALUE rbncurs_mvwhline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
@@ -1074,7 +1134,7 @@ static VALUE rbncurs_nl(VALUE dummy) {
     return INT2NUM(nl());
 }
 static VALUE rbncurs_nocbreak(VALUE dummy) {
-    return INT2NUM(nocbreak());
+    return INT2NUM(rbncurshelper_halfdelay_cbreak(0, 0));
 }
 static VALUE rbncurs_nodelay(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(nodelay(get_window(arg1),  RTEST(arg2)));
@@ -1182,7 +1242,9 @@ static VALUE rbncurs_setscrreg(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(setscrreg(NUM2INT(arg1),  NUM2INT(arg2)));
 }
 static VALUE rbncurs_set_term(VALUE dummy, VALUE arg1) {
-    return wrap_screen(set_term(get_screen(arg1)));
+    VALUE rb_old_screen = wrap_screen(set_term(get_screen(arg1)));
+    rbncurshelper_halfdelay_cbreak_restore();
+    return rb_old_screen;
 }
 static VALUE rbncurs_slk_attroff(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_attroff(NUM2ULONG(arg1)));
@@ -1367,7 +1429,7 @@ static VALUE rbncurs_werase(VALUE dummy, VALUE arg1) {
     return INT2NUM(werase(get_window(arg1)));
 }
 static VALUE rbncurs_wgetch(VALUE dummy, VALUE arg1) {
-    return INT2NUM(wgetch(get_window(arg1)));
+    return INT2NUM(rbncurshelper_nonblocking_wgetch(get_window(arg1)));
 }
 static VALUE rbncurs_whline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(whline(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3)));
@@ -1495,8 +1557,10 @@ static VALUE rbncurs_newterm(VALUE dummy, VALUE rb_type, VALUE rb_outfd, VALUE r
     int infd  = NUM2INT(rb_funcall(rb_infd, rb_intern("to_i"), 0));
     VALUE rb_screen =
         wrap_screen(newterm(type, fdopen(outfd, "w"), fdopen(infd, "r")));
-    if (RTEST(rb_screen))
+    if (RTEST(rb_screen)) {
         Init_ncurses_full();
+        rbncurshelper_halfdelay_cbreak_restore();
+    }
     return rb_screen;
 }
 
@@ -1866,7 +1930,7 @@ static void init_constants_3(void) {
     /* Pseudo-character tokens outside ASCII range.  The curses wgetch()
      * function will return any given one of these only if the corresponding
      * k- capability is defined in your terminal's terminfo entry. */
-#ifdef KAY_CODE_YES
+#ifdef KEY_CODE_YES
     rb_define_const(mNcurses, "KEY_CODE_YES", INT2NUM(KEY_CODE_YES));
 #endif
     rb_define_const(mNcurses, "KEY_MIN", INT2NUM(KEY_MIN));
@@ -2578,12 +2642,14 @@ static void init_safe_functions(void)
     NCFUNC(use_env, 1);
 #endif
 }
-void Init_ncurses(void)
+void Init_ncurses_bin(void)
 {
     mNcurses = rb_define_module("Ncurses");
     eNcurses = rb_define_class_under(mNcurses, "Exception", rb_eRuntimeError);
     rb_iv_set(mNcurses, "@windows_hash", rb_hash_new());
     rb_iv_set(mNcurses, "@screens_hash", rb_hash_new());
+    rb_iv_set(mNcurses, "@halfdelay", INT2NUM(0));
+    rb_iv_set(mNcurses, "@cbreak", Qfalse);
     cWINDOW  = rb_define_class_under(mNcurses, "WINDOW", rb_cObject);
     cSCREEN  = rb_define_class_under(mNcurses, "SCREEN", rb_cObject);
     init_constants_1();
