@@ -191,7 +191,7 @@ begin
       if ((Time.now.sec % 5) == 0 &&
 	  Time.now.sec != lastbeep) 
 	lastbeep = Time.now.sec;
-	Ncurses::beep();
+	#Ncurses::beep();
       end
       
       if ((ch = Ncurses::getch()) != Ncurses::ERR)
