@@ -16,7 +16,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.1 2002/11/16 21:57:20 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.2 2003/03/22 20:02:07 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -138,9 +138,9 @@ init_constants_1(void)
 #endif
 }
 
-static VALUE rb_COLORS()
+static VALUE rbncurs_COLORS()
 {return INT2NUM(COLORS);}
-static VALUE rb_COLOR_PAIRS()
+static VALUE rbncurs_COLOR_PAIRS()
 {return INT2NUM(COLOR_PAIRS);}
 
 static
@@ -149,9 +149,9 @@ init_globals_1(void)
 {
     /* colors */
     rb_define_module_function(mNcurses, "COLORS",
-			      (&rb_COLORS), 0);
+			      (&rbncurs_COLORS), 0);
     rb_define_module_function(mNcurses, "COLOR_PAIRS",
-			      (&rb_COLOR_PAIRS), 0);
+			      (&rbncurs_COLOR_PAIRS), 0);
 }
 static
 void
@@ -237,7 +237,7 @@ static WINDOW* get_window(VALUE rb_window)
     Data_Get_Struct(rb_window, WINDOW, window);
     return window;
 }
-static VALUE rb_delwin(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_delwin(VALUE dummy, VALUE arg1) {
     VALUE windows_hash   = rb_iv_get(mNcurses, "@windows_hash");
     WINDOW* window       = get_window(arg1);
     VALUE window_adress  = INT2NUM((long)(window));
@@ -273,7 +273,7 @@ static SCREEN* get_screen(VALUE rb_screen)
     return screen;
 }
 #ifdef HAVE_DELSCREEN
-static VALUE rb_delscreen(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_delscreen(VALUE dummy, VALUE arg1) {
     VALUE screens_hash   = rb_iv_get(mNcurses, "@screens_hash");
     SCREEN* screen       = get_screen(arg1);
     VALUE screen_adress  = INT2NUM((long)(screen));
@@ -283,7 +283,7 @@ static VALUE rb_delscreen(VALUE dummy, VALUE arg1) {
     return Qnil;
 }
 #endif
-static VALUE rb_winchnstr(VALUE dummy, VALUE rb_win, VALUE rb_str, VALUE rb_n)
+static VALUE rbncurs_winchnstr(VALUE dummy, VALUE rb_win, VALUE rb_str, VALUE rb_n)
 {
     if (rb_obj_is_instance_of(rb_str, rb_cArray) != Qtrue) {
         rb_raise(rb_eArgError, "2nd argument must be an empty Array");
@@ -306,7 +306,7 @@ static VALUE rb_winchnstr(VALUE dummy, VALUE rb_win, VALUE rb_str, VALUE rb_n)
         return INT2NUM(return_value);
     }
 }
-static VALUE rb_wgetnstr(VALUE dummy, VALUE rb_win, VALUE rb_chstr, VALUE rb_n)
+static VALUE rbncurs_wgetnstr(VALUE dummy, VALUE rb_win, VALUE rb_chstr, VALUE rb_n)
 {
     WINDOW * window = get_window(rb_win);
     int      n      = NUM2INT(rb_n);
@@ -314,12 +314,12 @@ static VALUE rb_wgetnstr(VALUE dummy, VALUE rb_win, VALUE rb_chstr, VALUE rb_n)
     int return_value;
     return_value = wgetnstr(window, str, n);
     if (return_value != ERR) {
-        rb_str_cat(rb_chstr, str, return_value);
+        rb_str_cat2(rb_chstr, str);
     }
     xfree(str);
     return INT2NUM(return_value);
 }
-static VALUE rb_winnstr(VALUE dummy, VALUE rb_win, VALUE rb_chstr, VALUE rb_n)
+static VALUE rbncurs_winnstr(VALUE dummy, VALUE rb_win, VALUE rb_chstr, VALUE rb_n)
 {
     WINDOW * window = get_window(rb_win);
     int      n      = NUM2INT(rb_n);
@@ -343,19 +343,19 @@ init_functions_0(void)
 {
 #ifdef HAVE_DELSCREEN
     rb_define_module_function(mNcurses, "delscreen",
-                              (&rb_delscreen),
+                              (&rbncurs_delscreen),
                               1);
 #endif
     rb_define_module_function(mNcurses, "delwin",
-                              (&rb_delwin), 1);
+                              (&rbncurs_delwin), 1);
     rb_define_module_function(mNcurses, "winchnstr",
-                              (&rb_winchnstr),
+                              (&rbncurs_winchnstr),
                               3);
     rb_define_module_function(mNcurses, "winnstr",
-                              (&rb_winnstr),
+                              (&rbncurs_winnstr),
                               3);
     rb_define_module_function(mNcurses, "wgetnstr",
-                              (&rb_wgetnstr),
+                              (&rbncurs_wgetnstr),
                               3);
 }
 
@@ -434,7 +434,7 @@ init_globals_2(void)
 #endif
 }
 #ifdef HAVE_KEYBOUND
-static VALUE rb_keybound(VALUE dummy, VALUE keycode, VALUE count)
+static VALUE rbncurs_keybound(VALUE dummy, VALUE keycode, VALUE count)
 {
     char * str = keybound(NUM2INT(keycode), NUM2INT(count));
     VALUE rb_str = Qnil;
@@ -446,10 +446,10 @@ static VALUE rb_keybound(VALUE dummy, VALUE keycode, VALUE count)
 }
 #endif
 #ifdef HAVE_CURSES_VERSION
-static VALUE rb_curses_version(){return rb_str_new2(curses_version());}
+static VALUE rbncurs_curses_version(){return rb_str_new2(curses_version());}
 #endif
 #ifdef HAVE_DEFINE_KEY
-static VALUE rb_define_key(VALUE dummy, VALUE definition, VALUE keycode)
+static VALUE rbncurs_define_key(VALUE dummy, VALUE definition, VALUE keycode)
 {
     return INT2NUM(define_key((definition != Qnil)
                               ? STR2CSTR(definition)
@@ -458,27 +458,27 @@ static VALUE rb_define_key(VALUE dummy, VALUE definition, VALUE keycode)
 }
 #endif
 #ifdef HAVE_KEYOK
-static VALUE rb_keyok(VALUE dummy, VALUE keycode, VALUE enable)
+static VALUE rbncurs_keyok(VALUE dummy, VALUE keycode, VALUE enable)
 {
     return INT2NUM(keyok(NUM2INT(keycode), RTEST(enable)));
 }
 #endif
 #ifdef HAVE_RESIZETERM
-static VALUE rb_resizeterm(VALUE dummy, VALUE lines, VALUE columns)
+static VALUE rbncurs_resizeterm(VALUE dummy, VALUE lines, VALUE columns)
 {
     return INT2NUM(resizeterm(NUM2INT(lines), NUM2INT(columns)));
 }
 #endif
 #ifdef HAVE_USE_DEFAULT_COLORS
-static VALUE rb_use_default_colors()
+static VALUE rbncurs_use_default_colors()
 {return INT2NUM(use_default_colors());}
 #endif
 #ifdef HAVE_USE_EXTENDED_NAMES
-static VALUE rb_use_extended_names(VALUE dummy, VALUE boolean)
+static VALUE rbncurs_use_extended_names(VALUE dummy, VALUE boolean)
 {return INT2NUM(use_extended_names(RTEST(boolean)));}
 #endif
 #ifdef HAVE_WRESIZE
-static VALUE rb_wresize(VALUE dummy, VALUE win, VALUE lines, VALUE columns)
+static VALUE rbncurs_wresize(VALUE dummy, VALUE win, VALUE lines, VALUE columns)
 {
     return INT2NUM(wresize(get_window(win), NUM2INT(lines), NUM2INT(columns)));
 }
@@ -489,39 +489,39 @@ init_functions_1(void)
 {
 #ifdef HAVE_KEYBOUND
     rb_define_module_function(mNcurses, "keybound",
-                              (&rb_keybound),
+                              (&rbncurs_keybound),
                               2);
 #endif
 #ifdef HAVE_CURSES_VERSION
     rb_define_module_function(mNcurses, "curses_version",
-                              (&rb_curses_version),
+                              (&rbncurs_curses_version),
 			      0);
 #endif
 #ifdef HAVE_DEFINE_KEY
     rb_define_module_function(mNcurses, "define_key",
-                              (&rb_define_key),
+                              (&rbncurs_define_key),
                               2);
 #endif
 #ifdef HAVE_KEYOK
     rb_define_module_function(mNcurses, "keyok",
-                              (&rb_keyok), 2);
+                              (&rbncurs_keyok), 2);
 #endif
 #ifdef HAVE_RESIZETERM
     rb_define_module_function(mNcurses, "resizeterm",
-                              (&rb_resizeterm),
+                              (&rbncurs_resizeterm),
                               2);
 #endif
 #ifdef HAVE_USE_DEFAULT_COLORS
     rb_define_module_function(mNcurses, "use_default_colors",
-                              (&rb_use_default_colors), 0);
+                              (&rbncurs_use_default_colors), 0);
 #endif
 #ifdef HAVE_USE_EXTENDED_NAMES
     rb_define_module_function(mNcurses, "use_extended_names",
-                              (&rb_use_extended_names), 1);
+                              (&rbncurs_use_extended_names), 1);
 #endif
 #ifdef HAVE_WRESIZE
     rb_define_module_function(mNcurses, "wresize",
-                              (&rb_wresize), 3);
+                              (&rbncurs_wresize), 3);
 #endif
 }
 /* FIXME: what's this? */
@@ -551,188 +551,188 @@ static chtype * RB2CHSTR(VALUE array)
     }
 }
 
-static VALUE rb_addch(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_addch(VALUE dummy, VALUE arg1) {
     return INT2NUM(addch(NUM2ULONG(arg1)));
 }
-static VALUE rb_addchnstr(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_addchnstr(VALUE dummy, VALUE arg1, VALUE arg2) {
     chtype * chstr = RB2CHSTR(arg1);
     VALUE return_value = INT2NUM(addchnstr(chstr,  NUM2INT(arg2)));
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_addchstr(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_addchstr(VALUE dummy, VALUE arg1) {
     chtype * chstr = RB2CHSTR(arg1);
     VALUE return_value = INT2NUM(addchstr(chstr));
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_addnstr(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_addnstr(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(addnstr(STR2CSTR(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_addstr(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_addstr(VALUE dummy, VALUE arg1) {
     return INT2NUM(addstr(STR2CSTR(arg1)));
 }
-static VALUE rb_attroff(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_attroff(VALUE dummy, VALUE arg1) {
     return INT2NUM(attroff(NUM2ULONG(arg1)));
 }
-static VALUE rb_attron(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_attron(VALUE dummy, VALUE arg1) {
     return INT2NUM(attron(NUM2ULONG(arg1)));
 }
-static VALUE rb_attrset(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_attrset(VALUE dummy, VALUE arg1) {
     return INT2NUM(attrset(NUM2ULONG(arg1)));
 }
 #ifdef HAVE_ATTR_OFF
-static VALUE rb_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(attr_off(NUM2ULONG(arg1),  ((arg2),NULL)));
 }
 #endif
 #ifdef HAVE_ATTR_ON
-static VALUE rb_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(attr_on(NUM2ULONG(arg1),  ((arg2),NULL)));
 }
 #endif
 #ifdef HAVE_ATTR_SET
-static VALUE rb_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
 }
 #endif
-static VALUE rb_baudrate(VALUE dummy) {
+static VALUE rbncurs_baudrate(VALUE dummy) {
     return INT2NUM(baudrate());
 }
-static VALUE rb_beep(VALUE dummy) {
+static VALUE rbncurs_beep(VALUE dummy) {
     return INT2NUM(beep());
 }
-static VALUE rb_bkgd(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_bkgd(VALUE dummy, VALUE arg1) {
     return INT2NUM(bkgd(NUM2ULONG(arg1)));
 }
-static VALUE rb_bkgdset(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_bkgdset(VALUE dummy, VALUE arg1) {
     return ((bkgdset(NUM2ULONG(arg1))),Qnil);
 }
-static VALUE rb_border(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7, VALUE arg8) {
+static VALUE rbncurs_border(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7, VALUE arg8) {
     return INT2NUM(border(NUM2ULONG(arg1),  NUM2ULONG(arg2),  NUM2ULONG(arg3),  NUM2ULONG(arg4),  NUM2ULONG(arg5),  NUM2ULONG(arg6),  NUM2ULONG(arg7),  NUM2ULONG(arg8)));
 }
-static VALUE rb_box(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_box(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(box(get_window(arg1),  NUM2ULONG(arg2),  NUM2ULONG(arg3)));
 }
-static VALUE rb_can_change_color(VALUE dummy) {
+static VALUE rbncurs_can_change_color(VALUE dummy) {
     return (can_change_color()) ? Qtrue : Qfalse;
 }
-static VALUE rb_cbreak(VALUE dummy) {
+static VALUE rbncurs_cbreak(VALUE dummy) {
     return INT2NUM(cbreak());
 }
 #ifdef HAVE_CHGAT
-static VALUE rb_chgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_chgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(chgat(NUM2INT(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3),
                          ((arg4),NULL)));
 }
 #endif
-static VALUE rb_clear(VALUE dummy) {
+static VALUE rbncurs_clear(VALUE dummy) {
     return INT2NUM(clear());
 }
-static VALUE rb_clearok(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_clearok(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(clearok(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_clrtobot(VALUE dummy) {
+static VALUE rbncurs_clrtobot(VALUE dummy) {
     return INT2NUM(clrtobot());
 }
-static VALUE rb_clrtoeol(VALUE dummy) {
+static VALUE rbncurs_clrtoeol(VALUE dummy) {
     return INT2NUM(clrtoeol());
 }
 #ifdef HAVE_COLOR_SET
-static VALUE rb_color_set(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_color_set(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(color_set(NUM2INT(arg1),  ((arg2),NULL)));
 }
 #endif
-static VALUE rb_COLOR_PAIR(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_COLOR_PAIR(VALUE dummy, VALUE arg1) {
     return INT2NUM(COLOR_PAIR(NUM2INT(arg1)));
 }
-static VALUE rb_copywin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7, VALUE arg8, VALUE arg9) {
+static VALUE rbncurs_copywin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7, VALUE arg8, VALUE arg9) {
     return INT2NUM(copywin(get_window(arg1),  get_window(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2INT(arg5),  NUM2INT(arg6),  NUM2INT(arg7),  NUM2INT(arg8),  NUM2INT(arg9)));
 }
-static VALUE rb_curs_set(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_curs_set(VALUE dummy, VALUE arg1) {
     return INT2NUM(curs_set(NUM2INT(arg1)));
 }
-static VALUE rb_def_prog_mode(VALUE dummy) {
+static VALUE rbncurs_def_prog_mode(VALUE dummy) {
     return INT2NUM(def_prog_mode());
 }
-static VALUE rb_def_shell_mode(VALUE dummy) {
+static VALUE rbncurs_def_shell_mode(VALUE dummy) {
     return INT2NUM(def_shell_mode());
 }
-static VALUE rb_delay_output(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_delay_output(VALUE dummy, VALUE arg1) {
     return INT2NUM(delay_output(NUM2INT(arg1)));
 }
-static VALUE rb_delch(VALUE dummy) {
+static VALUE rbncurs_delch(VALUE dummy) {
     return INT2NUM(delch());
 }
-static VALUE rb_deleteln(VALUE dummy) {
+static VALUE rbncurs_deleteln(VALUE dummy) {
     return INT2NUM(deleteln());
 }
-static VALUE rb_derwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_derwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return wrap_window(derwin(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2INT(arg5)));
 }
-static VALUE rb_doupdate(VALUE dummy) {
+static VALUE rbncurs_doupdate(VALUE dummy) {
     return INT2NUM(doupdate());
 }
-static VALUE rb_dupwin(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_dupwin(VALUE dummy, VALUE arg1) {
     return wrap_window(dupwin(get_window(arg1)));
 }
-static VALUE rb_echo(VALUE dummy) {
+static VALUE rbncurs_echo(VALUE dummy) {
     return INT2NUM(echo());
 }
-static VALUE rb_echochar(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_echochar(VALUE dummy, VALUE arg1) {
     return INT2NUM(echochar(NUM2ULONG(arg1)));
 }
-static VALUE rb_endwin(VALUE dummy) {
+static VALUE rbncurs_endwin(VALUE dummy) {
     return INT2NUM(endwin());
 }
-static VALUE rb_erasechar(VALUE dummy) {
+static VALUE rbncurs_erasechar(VALUE dummy) {
     return INT2NUM(erasechar());
 }
 #ifdef HAVE_FILTER
-static VALUE rb_filter(VALUE dummy) {
+static VALUE rbncurs_filter(VALUE dummy) {
     return ((filter()),Qnil);
 }
 #endif
-static VALUE rb_flash(VALUE dummy) {
+static VALUE rbncurs_flash(VALUE dummy) {
     return INT2NUM(flash());
 }
-static VALUE rb_flushinp(VALUE dummy) {
+static VALUE rbncurs_flushinp(VALUE dummy) {
     return INT2NUM(flushinp());
 }
-static VALUE rb_getbkgd(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_getbkgd(VALUE dummy, VALUE arg1) {
     return INT2NUM(getbkgd(get_window(arg1)));
 }
-static VALUE rb_getch(VALUE dummy) {
+static VALUE rbncurs_getch(VALUE dummy) {
     return INT2NUM(getch());
 }
-static VALUE rb_halfdelay(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_halfdelay(VALUE dummy, VALUE arg1) {
     return INT2NUM(halfdelay(NUM2INT(arg1)));
 }
-static VALUE rb_has_colors(VALUE dummy) {
+static VALUE rbncurs_has_colors(VALUE dummy) {
     return (has_colors()) ? Qtrue : Qfalse;
 }
-static VALUE rb_has_ic(VALUE dummy) {
+static VALUE rbncurs_has_ic(VALUE dummy) {
     return (has_ic()) ? Qtrue : Qfalse;
 }
-static VALUE rb_has_il(VALUE dummy) {
+static VALUE rbncurs_has_il(VALUE dummy) {
     return (has_il()) ? Qtrue : Qfalse;
 }
-static VALUE rb_hline(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_hline(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(hline(NUM2ULONG(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_idcok(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_idcok(VALUE dummy, VALUE arg1, VALUE arg2) {
     return ((idcok(get_window(arg1),  RTEST(arg2))),Qnil);
 }
-static VALUE rb_idlok(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_idlok(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(idlok(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_immedok(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_immedok(VALUE dummy, VALUE arg1, VALUE arg2) {
     return ((immedok(get_window(arg1),  RTEST(arg2))),Qnil);
 }
-static VALUE rb_inch(VALUE dummy) {
+static VALUE rbncurs_inch(VALUE dummy) {
     return INT2NUM(inch());
 }
-static VALUE rb_initscr(VALUE dummy) {
+static VALUE rbncurs_initscr(VALUE dummy) {
     VALUE v = wrap_window(initscr());
     
     /* These constants are not defined before the call to initscr. */
@@ -834,66 +834,66 @@ static VALUE rb_initscr(VALUE dummy) {
 #endif
     return v;
 }
-static VALUE rb_init_color(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_init_color(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(init_color(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4)));
 }
-static VALUE rb_init_pair(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_init_pair(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(init_pair(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_insch(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_insch(VALUE dummy, VALUE arg1) {
     return INT2NUM(insch(NUM2ULONG(arg1)));
 }
-static VALUE rb_insdelln(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_insdelln(VALUE dummy, VALUE arg1) {
     return INT2NUM(insdelln(NUM2INT(arg1)));
 }
-static VALUE rb_insertln(VALUE dummy) {
+static VALUE rbncurs_insertln(VALUE dummy) {
     return INT2NUM(insertln());
 }
-static VALUE rb_insnstr(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_insnstr(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(insnstr(STR2CSTR(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_insstr(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_insstr(VALUE dummy, VALUE arg1) {
     return INT2NUM(insstr(STR2CSTR(arg1)));
 }
 #ifdef HAVE_INTRFLUSH
-static VALUE rb_intrflush(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_intrflush(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(intrflush(get_window(arg1),  RTEST(arg2)));
 }
 #endif
-static VALUE rb_isendwin(VALUE dummy) {
+static VALUE rbncurs_isendwin(VALUE dummy) {
     return (isendwin()) ? Qtrue : Qfalse;
 }
-static VALUE rb_is_linetouched(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_is_linetouched(VALUE dummy, VALUE arg1, VALUE arg2) {
     return (is_linetouched(get_window(arg1),  NUM2INT(arg2))) ? Qtrue : Qfalse;
 }
-static VALUE rb_is_wintouched(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_is_wintouched(VALUE dummy, VALUE arg1) {
     return (is_wintouched(get_window(arg1))) ? Qtrue : Qfalse;
 }
-static VALUE rb_keyname(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_keyname(VALUE dummy, VALUE arg1) {
     return rb_str_new2(keyname(NUM2INT(arg1)));
 }
-static VALUE rb_keypad(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_keypad(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(keypad(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_killchar(VALUE dummy) {
+static VALUE rbncurs_killchar(VALUE dummy) {
     return INT2NUM(killchar());
 }
-static VALUE rb_leaveok(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_leaveok(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(leaveok(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_longname(VALUE dummy) {
+static VALUE rbncurs_longname(VALUE dummy) {
     return rb_str_new2(longname());
 }
-static VALUE rb_meta(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_meta(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(meta(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_move(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_move(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(move(NUM2INT(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_mvaddch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvaddch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvaddch(NUM2INT(arg1),  NUM2INT(arg2),  NUM2ULONG(arg3)));
 }
-static VALUE rb_mvaddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
+static VALUE rbncurs_mvaddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
                             VALUE arg4) {
     chtype * chstr = RB2CHSTR(arg3);
     VALUE return_value = INT2NUM(mvaddchnstr(NUM2INT(arg1), NUM2INT(arg2),
@@ -901,62 +901,62 @@ static VALUE rb_mvaddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_mvaddchstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvaddchstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     chtype * chstr = RB2CHSTR(arg3);
     VALUE return_value = INT2NUM(mvaddchstr(NUM2INT(arg1), NUM2INT(arg2),
                                             chstr));
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_mvaddnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvaddnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvaddnstr(NUM2INT(arg1),  NUM2INT(arg2),  STR2CSTR(arg3),  NUM2INT(arg4)));
 }
-static VALUE rb_mvaddstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvaddstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvaddstr(NUM2INT(arg1),  NUM2INT(arg2),  STR2CSTR(arg3)));
 }
 #ifdef HAVE_MVCHGAT
-static VALUE rb_mvchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6) {
+static VALUE rbncurs_mvchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6) {
     return INT2NUM(mvchgat(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2ULONG(arg4),  NUM2INT(arg5),  ((arg6),NULL)));
 }
 #endif
-static VALUE rb_mvcur(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvcur(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvcur(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4)));
 }
-static VALUE rb_mvdelch(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_mvdelch(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(mvdelch(NUM2INT(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_mvderwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvderwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvderwin(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_mvgetch(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_mvgetch(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(mvgetch(NUM2INT(arg1),  NUM2INT(arg2)));
 }
 #ifdef HAVE_MVHLINE
-static VALUE rb_mvhline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvhline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvhline(NUM2INT(arg1),  NUM2INT(arg2),  NUM2ULONG(arg3),  NUM2INT(arg4)));
 }
 #endif
-static VALUE rb_mvinch(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_mvinch(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(mvinch(NUM2INT(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_mvinsch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvinsch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvinsch(NUM2INT(arg1),  NUM2INT(arg2),  NUM2ULONG(arg3)));
 }
-static VALUE rb_mvinsnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvinsnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvinsnstr(NUM2INT(arg1),  NUM2INT(arg2),  STR2CSTR(arg3),  NUM2INT(arg4)));
 }
-static VALUE rb_mvinsstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvinsstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvinsstr(NUM2INT(arg1),  NUM2INT(arg2),  STR2CSTR(arg3)));
 }
 #ifdef HAVE_MVVLINE
-static VALUE rb_mvvline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvvline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvvline(NUM2INT(arg1),  NUM2INT(arg2),  NUM2ULONG(arg3),  NUM2INT(arg4)));
 }
 #endif
-static VALUE rb_mvwaddch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvwaddch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvwaddch(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2ULONG(arg4)));
 }
-static VALUE rb_mvwaddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
+static VALUE rbncurs_mvwaddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
                              VALUE arg4, VALUE arg5) {
     chtype * chstr = RB2CHSTR(arg4);
     VALUE return_value = INT2NUM(mvwaddchnstr(get_window(arg1), NUM2INT(arg2),
@@ -965,7 +965,7 @@ static VALUE rb_mvwaddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_mvwaddchstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
+static VALUE rbncurs_mvwaddchstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
                             VALUE arg4) {
     chtype * chstr = RB2CHSTR(arg4);
     VALUE return_value = INT2NUM(mvwaddchstr(get_window(arg1), NUM2INT(arg2),
@@ -973,451 +973,451 @@ static VALUE rb_mvwaddchstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3,
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_mvwaddnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_mvwaddnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return INT2NUM(mvwaddnstr(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  STR2CSTR(arg4),  NUM2INT(arg5)));
 }
-static VALUE rb_mvwaddstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvwaddstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvwaddstr(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  STR2CSTR(arg4)));
 }
 #ifdef HAVE_MVWCHGAT
-static VALUE rb_mvwchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7) {
+static VALUE rbncurs_mvwchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7) {
     return INT2NUM(mvwchgat(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2ULONG(arg5),  NUM2INT(arg6),  ((arg7),NULL)));
 }
 #endif
-static VALUE rb_mvwdelch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvwdelch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvwdelch(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_mvwgetch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvwgetch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvwgetch(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
 #ifdef HAVE_MVWHLINE
-static VALUE rb_mvwhline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_mvwhline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return INT2NUM(mvwhline(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2ULONG(arg4),  NUM2INT(arg5)));
 }
 #endif
-static VALUE rb_mvwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvwin(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_mvwinch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_mvwinch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(mvwinch(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_mvwinsch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvwinsch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvwinsch(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2ULONG(arg4)));
 }
-static VALUE rb_mvwinsnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_mvwinsnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return INT2NUM(mvwinsnstr(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  STR2CSTR(arg4),  NUM2INT(arg5)));
 }
-static VALUE rb_mvwinsstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_mvwinsstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(mvwinsstr(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  STR2CSTR(arg4)));
 }
 #ifdef HAVE_MVWVLINE
-static VALUE rb_mvwvline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_mvwvline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return INT2NUM(mvwvline(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2ULONG(arg4),  NUM2INT(arg5)));
 }
 #endif
-static VALUE rb_napms(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_napms(VALUE dummy, VALUE arg1) {
     return INT2NUM(napms(NUM2INT(arg1)));
 }
-static VALUE rb_newpad(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_newpad(VALUE dummy, VALUE arg1, VALUE arg2) {
     return wrap_window(newpad(NUM2INT(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_newwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_newwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return wrap_window(newwin(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4)));
 }
-static VALUE rb_nl(VALUE dummy) {
+static VALUE rbncurs_nl(VALUE dummy) {
     return INT2NUM(nl());
 }
-static VALUE rb_nocbreak(VALUE dummy) {
+static VALUE rbncurs_nocbreak(VALUE dummy) {
     return INT2NUM(nocbreak());
 }
-static VALUE rb_nodelay(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_nodelay(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(nodelay(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_noecho(VALUE dummy) {
+static VALUE rbncurs_noecho(VALUE dummy) {
     return INT2NUM(noecho());
 }
-static VALUE rb_nonl(VALUE dummy) {
+static VALUE rbncurs_nonl(VALUE dummy) {
     return INT2NUM(nonl());
 }
 #ifdef HAVE_NOQIFLUSH
-static VALUE rb_noqiflush(VALUE dummy) {
+static VALUE rbncurs_noqiflush(VALUE dummy) {
     return ((noqiflush()),Qnil);
 }
 #endif
-static VALUE rb_noraw(VALUE dummy) {
+static VALUE rbncurs_noraw(VALUE dummy) {
     return INT2NUM(noraw());
 }
-static VALUE rb_notimeout(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_notimeout(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(notimeout(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_overlay(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_overlay(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(overlay(get_window(arg1),  get_window(arg2)));
 }
-static VALUE rb_overwrite(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_overwrite(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(overwrite(get_window(arg1),  get_window(arg2)));
 }
-static VALUE rb_PAIR_NUMBER(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_PAIR_NUMBER(VALUE dummy, VALUE arg1) {
     return INT2NUM(PAIR_NUMBER(NUM2INT(arg1)));
 }
 #ifndef __PDCURSES__ /* pdcurses "pechochar" macro won't compile*/
-static VALUE rb_pechochar(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_pechochar(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(pechochar(get_window(arg1),  NUM2ULONG(arg2)));
 }
 #endif
-static VALUE rb_pnoutrefresh(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7) {
+static VALUE rbncurs_pnoutrefresh(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7) {
     return INT2NUM(pnoutrefresh(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2INT(arg5),  NUM2INT(arg6),  NUM2INT(arg7)));
 }
-static VALUE rb_prefresh(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7) {
+static VALUE rbncurs_prefresh(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7) {
     return INT2NUM(prefresh(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2INT(arg5),  NUM2INT(arg6),  NUM2INT(arg7)));
 }
 #ifdef HAVE_PUTP
-static VALUE rb_putp(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_putp(VALUE dummy, VALUE arg1) {
     return INT2NUM(putp(STR2CSTR(arg1)));
 }
 #endif
 #ifdef HAVE_QIFLUSH
-static VALUE rb_qiflush(VALUE dummy) {
+static VALUE rbncurs_qiflush(VALUE dummy) {
     return ((qiflush()),Qnil);
 }
 #endif
-static VALUE rb_raw(VALUE dummy) {
+static VALUE rbncurs_raw(VALUE dummy) {
     return INT2NUM(raw());
 }
 #ifndef __PDCURSES__ /* __PDCURSES__ redrawwin macro is buggy */
-static VALUE rb_redrawwin(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_redrawwin(VALUE dummy, VALUE arg1) {
     return INT2NUM(redrawwin(get_window(arg1)));
 }
 #endif
-static VALUE rb_refresh(VALUE dummy) {
+static VALUE rbncurs_refresh(VALUE dummy) {
     return INT2NUM(refresh());
 }
-static VALUE rb_resetty(VALUE dummy) {
+static VALUE rbncurs_resetty(VALUE dummy) {
     return INT2NUM(resetty());
 }
-static VALUE rb_reset_prog_mode(VALUE dummy) {
+static VALUE rbncurs_reset_prog_mode(VALUE dummy) {
     return INT2NUM(reset_prog_mode());
 }
-static VALUE rb_reset_shell_mode(VALUE dummy) {
+static VALUE rbncurs_reset_shell_mode(VALUE dummy) {
     return INT2NUM(reset_shell_mode());
 }
-static VALUE rb_savetty(VALUE dummy) {
+static VALUE rbncurs_savetty(VALUE dummy) {
     return INT2NUM(savetty());
 }
 #ifdef HAVE_SCR_DUMP
-static VALUE rb_scr_dump(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_scr_dump(VALUE dummy, VALUE arg1) {
     return INT2NUM(scr_dump(STR2CSTR(arg1)));
 }
 #endif
 #ifdef HAVE_SCR_INIT
-static VALUE rb_scr_init(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_scr_init(VALUE dummy, VALUE arg1) {
     return INT2NUM(scr_init(STR2CSTR(arg1)));
 }
 #endif
-static VALUE rb_scrl(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_scrl(VALUE dummy, VALUE arg1) {
     return INT2NUM(scrl(NUM2INT(arg1)));
 }
-static VALUE rb_scroll(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_scroll(VALUE dummy, VALUE arg1) {
     return INT2NUM(scroll(get_window(arg1)));
 }
-static VALUE rb_scrollok(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_scrollok(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(scrollok(get_window(arg1),  RTEST(arg2)));
 }
 #ifdef HAVE_SCR_RESTORE
-static VALUE rb_scr_restore(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_scr_restore(VALUE dummy, VALUE arg1) {
     return INT2NUM(scr_restore(STR2CSTR(arg1)));
 }
 #endif
 #ifdef HAVE_SCR_SET
-static VALUE rb_scr_set(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_scr_set(VALUE dummy, VALUE arg1) {
     return INT2NUM(scr_set(STR2CSTR(arg1)));
 }
 #endif
-static VALUE rb_setscrreg(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_setscrreg(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(setscrreg(NUM2INT(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_set_term(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_set_term(VALUE dummy, VALUE arg1) {
     return wrap_screen(set_term(get_screen(arg1)));
 }
-static VALUE rb_slk_attroff(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_slk_attroff(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_attroff(NUM2ULONG(arg1)));
 }
 #if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
-static VALUE rb_slk_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_slk_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(slk_attr_off(NUM2ULONG(arg1),  ((arg2),NULL)));
 }
 #endif
-static VALUE rb_slk_attron(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_slk_attron(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_attron(NUM2ULONG(arg1)));
 }
 #if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
-static VALUE rb_slk_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_slk_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(slk_attr_on(NUM2ULONG(arg1),  ((arg2),NULL)));
 }
 #endif
-static VALUE rb_slk_attrset(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_slk_attrset(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_attrset(NUM2ULONG(arg1)));
 }
 #ifdef HAVE_SLK_ATTR
-static VALUE rb_slk_attr(VALUE dummy) {
+static VALUE rbncurs_slk_attr(VALUE dummy) {
     return INT2NUM(slk_attr());
 }
 #endif
 #ifdef HAVE_SLK_ATTR_SET
-static VALUE rb_slk_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_slk_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(slk_attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
 }
 #endif
-static VALUE rb_slk_clear(VALUE dummy) {
+static VALUE rbncurs_slk_clear(VALUE dummy) {
     return INT2NUM(slk_clear());
 }
 #ifdef HAVE_SLK_COLOR
-static VALUE rb_slk_color(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_slk_color(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_color(NUM2INT(arg1)));
 }
 #endif
-static VALUE rb_slk_init(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_slk_init(VALUE dummy, VALUE arg1) {
     return INT2NUM(slk_init(NUM2INT(arg1)));
 }
-static VALUE rb_slk_label(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_slk_label(VALUE dummy, VALUE arg1) {
     return rb_str_new2(slk_label(NUM2INT(arg1)));
 }
-static VALUE rb_slk_noutrefresh(VALUE dummy) {
+static VALUE rbncurs_slk_noutrefresh(VALUE dummy) {
     return INT2NUM(slk_noutrefresh());
 }
-static VALUE rb_slk_refresh(VALUE dummy) {
+static VALUE rbncurs_slk_refresh(VALUE dummy) {
     return INT2NUM(slk_refresh());
 }
-static VALUE rb_slk_restore(VALUE dummy) {
+static VALUE rbncurs_slk_restore(VALUE dummy) {
     return INT2NUM(slk_restore());
 }
-static VALUE rb_slk_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_slk_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(slk_set(NUM2INT(arg1),  STR2CSTR(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_slk_touch(VALUE dummy) {
+static VALUE rbncurs_slk_touch(VALUE dummy) {
     return INT2NUM(slk_touch());
 }
-static VALUE rb_standout(VALUE dummy) {
+static VALUE rbncurs_standout(VALUE dummy) {
     return INT2NUM(standout());
 }
-static VALUE rb_standend(VALUE dummy) {
+static VALUE rbncurs_standend(VALUE dummy) {
     return INT2NUM(standend());
 }
-static VALUE rb_start_color(VALUE dummy) {
+static VALUE rbncurs_start_color(VALUE dummy) {
     return INT2NUM(start_color());
 }
-static VALUE rb_subpad(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_subpad(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return wrap_window(subpad(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2INT(arg5)));
 }
-static VALUE rb_subwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_subwin(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return wrap_window(subwin(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2INT(arg5)));
 }
-static VALUE rb_syncok(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_syncok(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(syncok(get_window(arg1),  RTEST(arg2)));
 }
-static VALUE rb_termattrs(VALUE dummy) {
+static VALUE rbncurs_termattrs(VALUE dummy) {
     return INT2NUM(termattrs());
 }
-static VALUE rb_termname(VALUE dummy) {
+static VALUE rbncurs_termname(VALUE dummy) {
     return rb_str_new2(termname());
 }
 #ifdef HAVE_TIGETFLAG
-static VALUE rb_tigetflag(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_tigetflag(VALUE dummy, VALUE arg1) {
     return INT2NUM(tigetflag(STR2CSTR(arg1)));
 }
 #endif
 #ifdef HAVE_TIGETNUM
-static VALUE rb_tigetnum(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_tigetnum(VALUE dummy, VALUE arg1) {
     return INT2NUM(tigetnum(STR2CSTR(arg1)));
 }
 #endif
 #ifdef HAVE_TIGETSTR
-static VALUE rb_tigetstr(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_tigetstr(VALUE dummy, VALUE arg1) {
     return rb_str_new2(tigetstr(STR2CSTR(arg1)));
 }
 #endif
-static VALUE rb_timeout(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_timeout(VALUE dummy, VALUE arg1) {
     return ((timeout(NUM2INT(arg1))),Qnil);
 }
-static VALUE rb_typeahead(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_typeahead(VALUE dummy, VALUE arg1) {
     return INT2NUM(typeahead(NUM2INT(arg1)));
 }
-static VALUE rb_ungetch(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_ungetch(VALUE dummy, VALUE arg1) {
     return INT2NUM(ungetch(NUM2INT(arg1)));
 }
-static VALUE rb_untouchwin(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_untouchwin(VALUE dummy, VALUE arg1) {
     return INT2NUM(untouchwin(get_window(arg1)));
 }
 #ifdef HAVE_USE_ENV
-static VALUE rb_use_env(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_use_env(VALUE dummy, VALUE arg1) {
     return ((use_env(RTEST(arg1))),Qnil);
 }
 #endif
 #ifdef HAVE_VIDATTR
-static VALUE rb_vidattr(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_vidattr(VALUE dummy, VALUE arg1) {
     return INT2NUM(vidattr(NUM2ULONG(arg1)));
 }
 #endif
 #if defined(HAVE_VID_ATTR) || defined(vid_attr)
-static VALUE rb_vid_attr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_vid_attr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(vid_attr(NUM2ULONG(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
 }
 #endif
-static VALUE rb_vline(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_vline(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(vline(NUM2ULONG(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_waddch(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_waddch(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(waddch(get_window(arg1),  NUM2ULONG(arg2)));
 }
-static VALUE rb_waddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_waddchnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     chtype * chstr = RB2CHSTR(arg2);
     VALUE return_value = INT2NUM(waddchnstr(get_window(arg1), chstr,
                                             NUM2INT(arg3)));
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_waddchstr(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_waddchstr(VALUE dummy, VALUE arg1, VALUE arg2) {
     chtype * chstr = RB2CHSTR(arg2);
     VALUE return_value = INT2NUM(waddchstr(get_window(arg1), chstr));
     xfree(chstr);
     return return_value;
 }
-static VALUE rb_waddnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_waddnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(waddnstr(get_window(arg1),  STR2CSTR(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_waddstr(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_waddstr(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(waddstr(get_window(arg1),  STR2CSTR(arg2)));
 }
-static VALUE rb_wattron(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wattron(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wattron(get_window(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_wattroff(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wattroff(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wattroff(get_window(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_wattrset(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wattrset(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wattrset(get_window(arg1),  NUM2INT(arg2)));
 }
 #ifdef HAVE_WATTR_ON
-static VALUE rb_wattr_on(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_wattr_on(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(wattr_on(get_window(arg1),  NUM2ULONG(arg2),  ((arg3),NULL)));
 }
 #endif
 #ifdef HAVE_WATTR_OFF
-static VALUE rb_wattr_off(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_wattr_off(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(wattr_off(get_window(arg1),  NUM2ULONG(arg2),  ((arg3),NULL)));
 }
 #endif
 #ifdef HAVE_WATTR_SET
-static VALUE rb_wattr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_wattr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(wattr_set(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3),  ((arg4),NULL)));
 }
 #endif
-static VALUE rb_wbkgd(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wbkgd(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wbkgd(get_window(arg1),  NUM2ULONG(arg2)));
 }
-static VALUE rb_wbkgdset(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wbkgdset(VALUE dummy, VALUE arg1, VALUE arg2) {
     return ((wbkgdset(get_window(arg1),  NUM2ULONG(arg2))),Qnil);
 }
-static VALUE rb_wborder(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7, VALUE arg8, VALUE arg9) {
+static VALUE rbncurs_wborder(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7, VALUE arg8, VALUE arg9) {
     return INT2NUM(wborder(get_window(arg1),  NUM2ULONG(arg2),  NUM2ULONG(arg3),  NUM2ULONG(arg4),  NUM2ULONG(arg5),  NUM2ULONG(arg6),  NUM2ULONG(arg7),  NUM2ULONG(arg8),  NUM2ULONG(arg9)));
 }
 #ifdef HAVE_WCHGAT
-static VALUE rb_wchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
+static VALUE rbncurs_wchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
     return INT2NUM(wchgat(get_window(arg1),  NUM2INT(arg2),  NUM2ULONG(arg3),  NUM2INT(arg4),  ((arg5),NULL)));
 }
 #endif
-static VALUE rb_wclear(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wclear(VALUE dummy, VALUE arg1) {
     return INT2NUM(wclear(get_window(arg1)));
 }
-static VALUE rb_wclrtobot(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wclrtobot(VALUE dummy, VALUE arg1) {
     return INT2NUM(wclrtobot(get_window(arg1)));
 }
-static VALUE rb_wclrtoeol(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wclrtoeol(VALUE dummy, VALUE arg1) {
     return INT2NUM(wclrtoeol(get_window(arg1)));
 }
 #ifdef HAVE_WCOLOR_SET
-static VALUE rb_wcolor_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_wcolor_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(wcolor_set(get_window(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
 }
 #endif
-static VALUE rb_wcursyncup(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wcursyncup(VALUE dummy, VALUE arg1) {
     return ((wcursyncup(get_window(arg1))),Qnil);
 }
-static VALUE rb_wdelch(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wdelch(VALUE dummy, VALUE arg1) {
     return INT2NUM(wdelch(get_window(arg1)));
 }
-static VALUE rb_wdeleteln(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wdeleteln(VALUE dummy, VALUE arg1) {
     return INT2NUM(wdeleteln(get_window(arg1)));
 }
-static VALUE rb_wechochar(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wechochar(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wechochar(get_window(arg1),  NUM2ULONG(arg2)));
 }
-static VALUE rb_werase(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_werase(VALUE dummy, VALUE arg1) {
     return INT2NUM(werase(get_window(arg1)));
 }
-static VALUE rb_wgetch(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wgetch(VALUE dummy, VALUE arg1) {
     return INT2NUM(wgetch(get_window(arg1)));
 }
-static VALUE rb_whline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_whline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(whline(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_winch(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_winch(VALUE dummy, VALUE arg1) {
     return INT2NUM(winch(get_window(arg1)));
 }
-static VALUE rb_winsch(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_winsch(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(winsch(get_window(arg1),  NUM2ULONG(arg2)));
 }
-static VALUE rb_winsdelln(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_winsdelln(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(winsdelln(get_window(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_winsertln(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_winsertln(VALUE dummy, VALUE arg1) {
     return INT2NUM(winsertln(get_window(arg1)));
 }
-static VALUE rb_winsnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_winsnstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(winsnstr(get_window(arg1),  STR2CSTR(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_winsstr(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_winsstr(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(winsstr(get_window(arg1),  STR2CSTR(arg2)));
 }
-static VALUE rb_wmove(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_wmove(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(wmove(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_wnoutrefresh(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wnoutrefresh(VALUE dummy, VALUE arg1) {
     return INT2NUM(wnoutrefresh(get_window(arg1)));
 }
-static VALUE rb_wredrawln(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_wredrawln(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(wredrawln(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_wrefresh(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wrefresh(VALUE dummy, VALUE arg1) {
     return INT2NUM(wrefresh(get_window(arg1)));
 }
-static VALUE rb_wscrl(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wscrl(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(wscrl(get_window(arg1),  NUM2INT(arg2)));
 }
-static VALUE rb_wsetscrreg(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_wsetscrreg(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(wsetscrreg(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_wstandout(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wstandout(VALUE dummy, VALUE arg1) {
     return INT2NUM(wstandout(get_window(arg1)));
 }
-static VALUE rb_wstandend(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wstandend(VALUE dummy, VALUE arg1) {
     return INT2NUM(wstandend(get_window(arg1)));
 }
-static VALUE rb_wsyncdown(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wsyncdown(VALUE dummy, VALUE arg1) {
     return ((wsyncdown(get_window(arg1))),Qnil);
 }
-static VALUE rb_wsyncup(VALUE dummy, VALUE arg1) {
+static VALUE rbncurs_wsyncup(VALUE dummy, VALUE arg1) {
     return ((wsyncup(get_window(arg1))),Qnil);
 }
-static VALUE rb_wtimeout(VALUE dummy, VALUE arg1, VALUE arg2) {
+static VALUE rbncurs_wtimeout(VALUE dummy, VALUE arg1, VALUE arg2) {
     return ((wtimeout(get_window(arg1),  NUM2INT(arg2))),Qnil);
 }
-static VALUE rb_wtouchln(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
+static VALUE rbncurs_wtouchln(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(wtouchln(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4)));
 }
-static VALUE rb_wvline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
+static VALUE rbncurs_wvline(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
     return INT2NUM(wvline(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3)));
 }
-static VALUE rb_color_content(VALUE dummy, VALUE color, VALUE r, VALUE g, VALUE b) {
+static VALUE rbncurs_color_content(VALUE dummy, VALUE color, VALUE r, VALUE g, VALUE b) {
     if (rb_obj_is_instance_of(r, rb_cArray) != Qtrue
         || rb_obj_is_instance_of(g, rb_cArray) != Qtrue
         || rb_obj_is_instance_of(b, rb_cArray) != Qtrue) {
@@ -1433,7 +1433,7 @@ static VALUE rb_color_content(VALUE dummy, VALUE color, VALUE r, VALUE g, VALUE 
         rb_ary_push(b, INT2NUM(cv[2])); return INT2NUM(return_value);
     }
 }
-static VALUE rb_pair_content(VALUE dummy, VALUE pair, VALUE fg, VALUE bg) {
+static VALUE rbncurs_pair_content(VALUE dummy, VALUE pair, VALUE fg, VALUE bg) {
     if (rb_obj_is_instance_of(fg, rb_cArray) != Qtrue
         || rb_obj_is_instance_of(bg, rb_cArray) != Qtrue) {
         rb_raise(rb_eArgError,
@@ -1448,7 +1448,7 @@ static VALUE rb_pair_content(VALUE dummy, VALUE pair, VALUE fg, VALUE bg) {
     }
 }
 #ifdef HAVE_GETWIN
-static VALUE rb_getwin(VALUE dummy, VALUE io)
+static VALUE rbncurs_getwin(VALUE dummy, VALUE io)
 {
     int fd = dup(NUM2INT(rb_funcall(io, rb_intern("to_i"), 0)));
     FILE * f = fdopen(fd, "r");
@@ -1463,7 +1463,7 @@ static VALUE rb_getwin(VALUE dummy, VALUE io)
 }
 #endif
 #ifdef HAVE_PUTWIN
-static VALUE rb_putwin(VALUE dummy, VALUE rb_win, VALUE io)
+static VALUE rbncurs_putwin(VALUE dummy, VALUE rb_win, VALUE io)
 {
     int fd = dup(NUM2INT(rb_funcall(io, rb_intern("to_i"), 0)));
     FILE * f = fdopen(fd, "w");
@@ -1474,9 +1474,9 @@ static VALUE rb_putwin(VALUE dummy, VALUE rb_win, VALUE io)
     return INT2NUM(return_value);
 }
 #endif
-static VALUE rb_unctrl(VALUE dummy, VALUE ch)
+static VALUE rbncurs_unctrl(VALUE dummy, VALUE ch)
 { return rb_str_new2(unctrl(NUM2ULONG(ch))); }
-static VALUE rb_newterm(VALUE dummy, VALUE rb_type, VALUE rb_outfd, VALUE rb_infd)
+static VALUE rbncurs_newterm(VALUE dummy, VALUE rb_type, VALUE rb_outfd, VALUE rb_infd)
 {
     char * type = (rb_type == Qnil) ? (char*)0 : STR2CSTR(rb_type);
     int outfd = NUM2INT(rb_funcall(rb_outfd, rb_intern("to_i"), 0));
@@ -1487,756 +1487,756 @@ static VALUE rb_newterm(VALUE dummy, VALUE rb_type, VALUE rb_outfd, VALUE rb_inf
 
 static void init_functions_2(void) {
     rb_define_module_function(mNcurses, "addch",
-                              (&rb_addch),
+                              (&rbncurs_addch),
                               1);
     rb_define_module_function(mNcurses, "addchnstr",
-                              (&rb_addchnstr),
+                              (&rbncurs_addchnstr),
                               2);
     rb_define_module_function(mNcurses, "addchstr",
-                              (&rb_addchstr),
+                              (&rbncurs_addchstr),
                               1);
     rb_define_module_function(mNcurses, "addnstr",
-                              (&rb_addnstr),
+                              (&rbncurs_addnstr),
                               2);
     rb_define_module_function(mNcurses, "addstr",
-                              (&rb_addstr),
+                              (&rbncurs_addstr),
                               1);
     rb_define_module_function(mNcurses, "attroff",
-                              (&rb_attroff),
+                              (&rbncurs_attroff),
                               1);
     rb_define_module_function(mNcurses, "attron",
-                              (&rb_attron),
+                              (&rbncurs_attron),
                               1);
     rb_define_module_function(mNcurses, "attrset",
-                              (&rb_attrset),
+                              (&rbncurs_attrset),
                               1);
 #ifdef HAVE_ATTR_OFF
     rb_define_module_function(mNcurses, "attr_off",
-                              (&rb_attr_off),
+                              (&rbncurs_attr_off),
                               2);
 #endif
 #ifdef HAVE_ATTR_ON
     rb_define_module_function(mNcurses, "attr_on",
-                              (&rb_attr_on),
+                              (&rbncurs_attr_on),
                               2);
 #endif
 #ifdef HAVE_ATTR_SET
     rb_define_module_function(mNcurses, "attr_set",
-                              (&rb_attr_set),
+                              (&rbncurs_attr_set),
                               3);
 #endif
     rb_define_module_function(mNcurses, "baudrate",
-                              (&rb_baudrate),
+                              (&rbncurs_baudrate),
                               0);
     rb_define_module_function(mNcurses, "beep",
-                              (&rb_beep),
+                              (&rbncurs_beep),
                               0);
     rb_define_module_function(mNcurses, "bkgd",
-                              (&rb_bkgd),
+                              (&rbncurs_bkgd),
                               1);
     rb_define_module_function(mNcurses, "bkgdset",
-                              (&rb_bkgdset),
+                              (&rbncurs_bkgdset),
                               1);
     rb_define_module_function(mNcurses, "border",
-                              (&rb_border),
+                              (&rbncurs_border),
                               8);
     rb_define_module_function(mNcurses, "box",
-                              (&rb_box),
+                              (&rbncurs_box),
                               3);
     rb_define_module_function(mNcurses, "can_change_color?",
-                              (&rb_can_change_color),
+                              (&rbncurs_can_change_color),
                               0);
     rb_define_module_function(mNcurses, "cbreak",
-                              (&rb_cbreak),
+                              (&rbncurs_cbreak),
                               0);
 #ifdef HAVE_CHGAT
     rb_define_module_function(mNcurses, "chgat",
-                              (&rb_chgat),
+                              (&rbncurs_chgat),
                               4);
 #endif
     rb_define_module_function(mNcurses, "clear",
-                              (&rb_clear),
+                              (&rbncurs_clear),
                               0);
     rb_define_module_function(mNcurses, "clearok",
-                              (&rb_clearok),
+                              (&rbncurs_clearok),
                               2);
     rb_define_module_function(mNcurses, "clrtobot",
-                              (&rb_clrtobot),
+                              (&rbncurs_clrtobot),
                               0);
     rb_define_module_function(mNcurses, "clrtoeol",
-                              (&rb_clrtoeol),
+                              (&rbncurs_clrtoeol),
                               0);
 #ifdef HAVE_COLOR_SET
     rb_define_module_function(mNcurses, "color_set",
-                              (&rb_color_set),
+                              (&rbncurs_color_set),
                               2);
 #endif
     rb_define_module_function(mNcurses, "COLOR_PAIR",
-                              (&rb_COLOR_PAIR),
+                              (&rbncurs_COLOR_PAIR),
                               1);
     rb_define_module_function(mNcurses, "copywin",
-                              (&rb_copywin),
+                              (&rbncurs_copywin),
                               9);
     rb_define_module_function(mNcurses, "curs_set",
-                              (&rb_curs_set),
+                              (&rbncurs_curs_set),
                               1);
     rb_define_module_function(mNcurses, "def_prog_mode",
-                              (&rb_def_prog_mode),
+                              (&rbncurs_def_prog_mode),
                               0);
     rb_define_module_function(mNcurses, "def_shell_mode",
-                              (&rb_def_shell_mode),
+                              (&rbncurs_def_shell_mode),
                               0);
     rb_define_module_function(mNcurses, "delay_output",
-                              (&rb_delay_output),
+                              (&rbncurs_delay_output),
                               1);
     rb_define_module_function(mNcurses, "delch",
-                              (&rb_delch),
+                              (&rbncurs_delch),
                               0);
     rb_define_module_function(mNcurses, "deleteln",
-                              (&rb_deleteln),
+                              (&rbncurs_deleteln),
                               0);
     rb_define_module_function(mNcurses, "derwin",
-                              (&rb_derwin),
+                              (&rbncurs_derwin),
                               5);
     rb_define_module_function(mNcurses, "doupdate",
-                              (&rb_doupdate),
+                              (&rbncurs_doupdate),
                               0);
     rb_define_module_function(mNcurses, "dupwin",
-                              (&rb_dupwin),
+                              (&rbncurs_dupwin),
                               1);
     rb_define_module_function(mNcurses, "echo",
-                              (&rb_echo),
+                              (&rbncurs_echo),
                               0);
     rb_define_module_function(mNcurses, "echochar",
-                              (&rb_echochar),
+                              (&rbncurs_echochar),
                               1);
     rb_define_module_function(mNcurses, "endwin",
-                              (&rb_endwin),
+                              (&rbncurs_endwin),
                               0);
     rb_define_module_function(mNcurses, "erasechar",
-                              (&rb_erasechar),
+                              (&rbncurs_erasechar),
                               0);
 #ifdef HAVE_FILTER
     rb_define_module_function(mNcurses, "filter",
-                              (&rb_filter),
+                              (&rbncurs_filter),
                               0);
 #endif
     rb_define_module_function(mNcurses, "flash",
-                              (&rb_flash),
+                              (&rbncurs_flash),
                               0);
     rb_define_module_function(mNcurses, "flushinp",
-                              (&rb_flushinp),
+                              (&rbncurs_flushinp),
                               0);
     rb_define_module_function(mNcurses, "getbkgd",
-                              (&rb_getbkgd),
+                              (&rbncurs_getbkgd),
                               1);
     rb_define_module_function(mNcurses, "getch",
-                              (&rb_getch),
+                              (&rbncurs_getch),
                               0);
     rb_define_module_function(mNcurses, "halfdelay",
-                              (&rb_halfdelay),
+                              (&rbncurs_halfdelay),
                               1);
     rb_define_module_function(mNcurses, "has_colors?",
-                              (&rb_has_colors),
+                              (&rbncurs_has_colors),
                               0);
     rb_define_module_function(mNcurses, "has_ic?",
-                              (&rb_has_ic),
+                              (&rbncurs_has_ic),
                               0);
     rb_define_module_function(mNcurses, "has_il?",
-                              (&rb_has_il),
+                              (&rbncurs_has_il),
                               0);
     rb_define_module_function(mNcurses, "hline",
-                              (&rb_hline),
+                              (&rbncurs_hline),
                               2);
     rb_define_module_function(mNcurses, "idcok",
-                              (&rb_idcok),
+                              (&rbncurs_idcok),
                               2);
     rb_define_module_function(mNcurses, "idlok",
-                              (&rb_idlok),
+                              (&rbncurs_idlok),
                               2);
     rb_define_module_function(mNcurses, "immedok",
-                              (&rb_immedok),
+                              (&rbncurs_immedok),
                               2);
     rb_define_module_function(mNcurses, "inch",
-                              (&rb_inch),
+                              (&rbncurs_inch),
                               0);
     rb_define_module_function(mNcurses, "initscr",
-                              (&rb_initscr),
+                              (&rbncurs_initscr),
                               0);
     rb_define_module_function(mNcurses, "init_color",
-                              (&rb_init_color),
+                              (&rbncurs_init_color),
                               4);
     rb_define_module_function(mNcurses, "init_pair",
-                              (&rb_init_pair),
+                              (&rbncurs_init_pair),
                               3);
     rb_define_module_function(mNcurses, "insch",
-                              (&rb_insch),
+                              (&rbncurs_insch),
                               1);
     rb_define_module_function(mNcurses, "insdelln",
-                              (&rb_insdelln),
+                              (&rbncurs_insdelln),
                               1);
     rb_define_module_function(mNcurses, "insertln",
-                              (&rb_insertln),
+                              (&rbncurs_insertln),
                               0);
     rb_define_module_function(mNcurses, "insnstr",
-                              (&rb_insnstr),
+                              (&rbncurs_insnstr),
                               2);
     rb_define_module_function(mNcurses, "insstr",
-                              (&rb_insstr),
+                              (&rbncurs_insstr),
                               1);
 #ifdef HAVE_INTRFLUSH
     rb_define_module_function(mNcurses, "intrflush",
-                              (&rb_intrflush),
+                              (&rbncurs_intrflush),
                               2);
 #endif
     rb_define_module_function(mNcurses, "isendwin?",
-                              (&rb_isendwin),
+                              (&rbncurs_isendwin),
                               0);
     rb_define_module_function(mNcurses, "is_linetouched?",
-                              (&rb_is_linetouched),
+                              (&rbncurs_is_linetouched),
                               2);
     rb_define_module_function(mNcurses, "is_wintouched?",
-                              (&rb_is_wintouched),
+                              (&rbncurs_is_wintouched),
                               1);
     rb_define_module_function(mNcurses, "keyname",
-                              (&rb_keyname),
+                              (&rbncurs_keyname),
                               1);
     rb_define_module_function(mNcurses, "keypad",
-                              (&rb_keypad),
+                              (&rbncurs_keypad),
                               2);
     rb_define_module_function(mNcurses, "killchar",
-                              (&rb_killchar),
+                              (&rbncurs_killchar),
                               0);
     rb_define_module_function(mNcurses, "leaveok",
-                              (&rb_leaveok),
+                              (&rbncurs_leaveok),
                               2);
     rb_define_module_function(mNcurses, "longname",
-                              (&rb_longname),
+                              (&rbncurs_longname),
                               0);
     rb_define_module_function(mNcurses, "meta",
-                              (&rb_meta),
+                              (&rbncurs_meta),
                               2);
     rb_define_module_function(mNcurses, "move",
-                              (&rb_move),
+                              (&rbncurs_move),
                               2);
     rb_define_module_function(mNcurses, "mvaddch",
-                              (&rb_mvaddch),
+                              (&rbncurs_mvaddch),
                               3);
     rb_define_module_function(mNcurses, "mvaddchnstr",
-                              (&rb_mvaddchnstr),
+                              (&rbncurs_mvaddchnstr),
                               4);
     rb_define_module_function(mNcurses, "mvaddchstr",
-                              (&rb_mvaddchstr),
+                              (&rbncurs_mvaddchstr),
                               3);
     rb_define_module_function(mNcurses, "mvaddnstr",
-                              (&rb_mvaddnstr),
+                              (&rbncurs_mvaddnstr),
                               4);
     rb_define_module_function(mNcurses, "mvaddstr",
-                              (&rb_mvaddstr),
+                              (&rbncurs_mvaddstr),
                               3);
 #ifdef HAVE_MVCHGAT
     rb_define_module_function(mNcurses, "mvchgat",
-                              (&rb_mvchgat),
+                              (&rbncurs_mvchgat),
                               6);
 #endif
     rb_define_module_function(mNcurses, "mvcur",
-                              (&rb_mvcur),
+                              (&rbncurs_mvcur),
                               4);
     rb_define_module_function(mNcurses, "mvdelch",
-                              (&rb_mvdelch),
+                              (&rbncurs_mvdelch),
                               2);
     rb_define_module_function(mNcurses, "mvderwin",
-                              (&rb_mvderwin),
+                              (&rbncurs_mvderwin),
                               3);
     rb_define_module_function(mNcurses, "mvgetch",
-                              (&rb_mvgetch),
+                              (&rbncurs_mvgetch),
                               2);
 #ifdef HAVE_MVHLINE
     rb_define_module_function(mNcurses, "mvhline",
-                              (&rb_mvhline),
+                              (&rbncurs_mvhline),
                               4);
 #endif
     rb_define_module_function(mNcurses, "mvinch",
-                              (&rb_mvinch),
+                              (&rbncurs_mvinch),
                               2);
     rb_define_module_function(mNcurses, "mvinsch",
-                              (&rb_mvinsch),
+                              (&rbncurs_mvinsch),
                               3);
     rb_define_module_function(mNcurses, "mvinsnstr",
-                              (&rb_mvinsnstr),
+                              (&rbncurs_mvinsnstr),
                               4);
     rb_define_module_function(mNcurses, "mvinsstr",
-                              (&rb_mvinsstr),
+                              (&rbncurs_mvinsstr),
                               3);
 #ifdef HAVE_MVVLINE
     rb_define_module_function(mNcurses, "mvvline",
-                              (&rb_mvvline),
+                              (&rbncurs_mvvline),
                               4);
 #endif
     rb_define_module_function(mNcurses, "mvwaddch",
-                              (&rb_mvwaddch),
+                              (&rbncurs_mvwaddch),
                               4);
     rb_define_module_function(mNcurses, "mvwaddchnstr",
-                              (&rb_mvwaddchnstr),
+                              (&rbncurs_mvwaddchnstr),
                               5);
     rb_define_module_function(mNcurses, "mvwaddchstr",
-                              (&rb_mvwaddchstr),
+                              (&rbncurs_mvwaddchstr),
                               4);
     rb_define_module_function(mNcurses, "mvwaddnstr",
-                              (&rb_mvwaddnstr),
+                              (&rbncurs_mvwaddnstr),
                               5);
     rb_define_module_function(mNcurses, "mvwaddstr",
-                              (&rb_mvwaddstr),
+                              (&rbncurs_mvwaddstr),
                               4);
 #ifdef HAVE_MVWCHGAT
     rb_define_module_function(mNcurses, "mvwchgat",
-                              (&rb_mvwchgat),
+                              (&rbncurs_mvwchgat),
                               7);
 #endif
     rb_define_module_function(mNcurses, "mvwdelch",
-                              (&rb_mvwdelch),
+                              (&rbncurs_mvwdelch),
                               3);
     rb_define_module_function(mNcurses, "mvwgetch",
-                              (&rb_mvwgetch),
+                              (&rbncurs_mvwgetch),
                               3);
 #ifdef HAVE_MVWHLINE
     rb_define_module_function(mNcurses, "mvwhline",
-                              (&rb_mvwhline),
+                              (&rbncurs_mvwhline),
                               5);
 #endif
     rb_define_module_function(mNcurses, "mvwin",
-                              (&rb_mvwin),
+                              (&rbncurs_mvwin),
                               3);
     rb_define_module_function(mNcurses, "mvwinch",
-                              (&rb_mvwinch),
+                              (&rbncurs_mvwinch),
                               3);
     rb_define_module_function(mNcurses, "mvwinsch",
-                              (&rb_mvwinsch),
+                              (&rbncurs_mvwinsch),
                               4);
     rb_define_module_function(mNcurses, "mvwinsnstr",
-                              (&rb_mvwinsnstr),
+                              (&rbncurs_mvwinsnstr),
                               5);
     rb_define_module_function(mNcurses, "mvwinsstr",
-                              (&rb_mvwinsstr),
+                              (&rbncurs_mvwinsstr),
                               4);
 #ifdef HAVE_MVWVLINE
     rb_define_module_function(mNcurses, "mvwvline",
-                              (&rb_mvwvline),
+                              (&rbncurs_mvwvline),
                               5);
 #endif
     rb_define_module_function(mNcurses, "napms",
-                              (&rb_napms),
+                              (&rbncurs_napms),
                               1);
     rb_define_module_function(mNcurses, "newpad",
-                              (&rb_newpad),
+                              (&rbncurs_newpad),
                               2);
     rb_define_module_function(mNcurses, "newwin",
-                              (&rb_newwin),
+                              (&rbncurs_newwin),
                               4);
     rb_define_module_function(mNcurses, "nl",
-                              (&rb_nl),
+                              (&rbncurs_nl),
                               0);
     rb_define_module_function(mNcurses, "nocbreak",
-                              (&rb_nocbreak),
+                              (&rbncurs_nocbreak),
                               0);
     rb_define_module_function(mNcurses, "nodelay",
-                              (&rb_nodelay),
+                              (&rbncurs_nodelay),
                               2);
     rb_define_module_function(mNcurses, "noecho",
-                              (&rb_noecho),
+                              (&rbncurs_noecho),
                               0);
     rb_define_module_function(mNcurses, "nonl",
-                              (&rb_nonl),
+                              (&rbncurs_nonl),
                               0);
 #ifdef HAVE_NOQIFLUSH
     rb_define_module_function(mNcurses, "noqiflush",
-                              (&rb_noqiflush),
+                              (&rbncurs_noqiflush),
                               0);
 #endif
     rb_define_module_function(mNcurses, "noraw",
-                              (&rb_noraw),
+                              (&rbncurs_noraw),
                               0);
     rb_define_module_function(mNcurses, "notimeout",
-                              (&rb_notimeout),
+                              (&rbncurs_notimeout),
                               2);
     rb_define_module_function(mNcurses, "overlay",
-                              (&rb_overlay),
+                              (&rbncurs_overlay),
                               2);
     rb_define_module_function(mNcurses, "overwrite",
-                              (&rb_overwrite),
+                              (&rbncurs_overwrite),
                               2);
     rb_define_module_function(mNcurses, "PAIR_NUMBER",
-                              (&rb_PAIR_NUMBER),
+                              (&rbncurs_PAIR_NUMBER),
                               1);
 #ifdef HAVE_PECHOCHAR
     rb_define_module_function(mNcurses, "pechochar",
-                              (&rb_pechochar),
+                              (&rbncurs_pechochar),
                               2);
 #endif
     rb_define_module_function(mNcurses, "pnoutrefresh",
-                              (&rb_pnoutrefresh),
+                              (&rbncurs_pnoutrefresh),
                               7);
     rb_define_module_function(mNcurses, "prefresh",
-                              (&rb_prefresh),
+                              (&rbncurs_prefresh),
                               7);
 #ifdef HAVE_PUTP
     rb_define_module_function(mNcurses, "putp",
-                              (&rb_putp),
+                              (&rbncurs_putp),
                               1);
 #endif
 #ifdef HAVE_QIFLUSH
     rb_define_module_function(mNcurses, "qiflush",
-                              (&rb_qiflush),
+                              (&rbncurs_qiflush),
                               0);
 #endif
     rb_define_module_function(mNcurses, "raw",
-                              (&rb_raw),
+                              (&rbncurs_raw),
                               0);
 #ifdef HAVE_REDRAWWIN
     rb_define_module_function(mNcurses, "redrawwin",
-                              (&rb_redrawwin),
+                              (&rbncurs_redrawwin),
                               1);
 #endif
     rb_define_module_function(mNcurses, "refresh",
-                              (&rb_refresh),
+                              (&rbncurs_refresh),
                               0);
     rb_define_module_function(mNcurses, "resetty",
-                              (&rb_resetty),
+                              (&rbncurs_resetty),
                               0);
     rb_define_module_function(mNcurses, "reset_prog_mode",
-                              (&rb_reset_prog_mode),
+                              (&rbncurs_reset_prog_mode),
                               0);
     rb_define_module_function(mNcurses, "reset_shell_mode",
-                              (&rb_reset_shell_mode),
+                              (&rbncurs_reset_shell_mode),
                               0);
     rb_define_module_function(mNcurses, "savetty",
-                              (&rb_savetty),
+                              (&rbncurs_savetty),
                               0);
 #ifdef HAVE_SCR_DUMP
     rb_define_module_function(mNcurses, "scr_dump",
-                              (&rb_scr_dump),
+                              (&rbncurs_scr_dump),
                               1);
 #endif
 #ifdef HAVE_SCR_INIT
     rb_define_module_function(mNcurses, "scr_init",
-                              (&rb_scr_init),
+                              (&rbncurs_scr_init),
                               1);
 #endif
     rb_define_module_function(mNcurses, "scrl",
-                              (&rb_scrl),
+                              (&rbncurs_scrl),
                               1);
     rb_define_module_function(mNcurses, "scroll",
-                              (&rb_scroll),
+                              (&rbncurs_scroll),
                               1);
     rb_define_module_function(mNcurses, "scrollok",
-                              (&rb_scrollok),
+                              (&rbncurs_scrollok),
                               2);
 #ifdef HAVE_SCR_RESTORE
     rb_define_module_function(mNcurses, "scr_restore",
-                              (&rb_scr_restore),
+                              (&rbncurs_scr_restore),
                               1);
 #endif
 #ifdef HAVE_SCR_SET
     rb_define_module_function(mNcurses, "scr_set",
-                              (&rb_scr_set),
+                              (&rbncurs_scr_set),
                               1);
 #endif
     rb_define_module_function(mNcurses, "setscrreg",
-                              (&rb_setscrreg),
+                              (&rbncurs_setscrreg),
                               2);
     rb_define_module_function(mNcurses, "set_term",
-                              (&rb_set_term),
+                              (&rbncurs_set_term),
                               1);
     rb_define_module_function(mNcurses, "slk_attroff",
-                              (&rb_slk_attroff),
+                              (&rbncurs_slk_attroff),
                               1);
 #if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
     rb_define_module_function(mNcurses, "slk_attr_off",
-                              (&rb_slk_attr_off),
+                              (&rbncurs_slk_attr_off),
                               2);
 #endif
     rb_define_module_function(mNcurses, "slk_attron",
-                              (&rb_slk_attron),
+                              (&rbncurs_slk_attron),
                               1);
 #if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
     rb_define_module_function(mNcurses, "slk_attr_on",
-                              (&rb_slk_attr_on),
+                              (&rbncurs_slk_attr_on),
                               2);
 #endif
     rb_define_module_function(mNcurses, "slk_attrset",
-                              (&rb_slk_attrset),
+                              (&rbncurs_slk_attrset),
                               1);
 #ifdef HAVE_SLK_ATTR
     rb_define_module_function(mNcurses, "slk_attr",
-                              (&rb_slk_attr),
+                              (&rbncurs_slk_attr),
                               0);
 #endif
 #ifdef HAVE_SLK_ATTR_SET
     rb_define_module_function(mNcurses, "slk_attr_set",
-                              (&rb_slk_attr_set),
+                              (&rbncurs_slk_attr_set),
                               3);
 #endif
     rb_define_module_function(mNcurses, "slk_clear",
-                              (&rb_slk_clear),
+                              (&rbncurs_slk_clear),
                               0);
 #ifdef HAVE_SLK_COLOR
     rb_define_module_function(mNcurses, "slk_color",
-                              (&rb_slk_color),
+                              (&rbncurs_slk_color),
                               1);
 #endif
     rb_define_module_function(mNcurses, "slk_init",
-                              (&rb_slk_init),
+                              (&rbncurs_slk_init),
                               1);
     rb_define_module_function(mNcurses, "slk_label",
-                              (&rb_slk_label),
+                              (&rbncurs_slk_label),
                               1);
     rb_define_module_function(mNcurses, "slk_noutrefresh",
-                              (&rb_slk_noutrefresh),
+                              (&rbncurs_slk_noutrefresh),
                               0);
     rb_define_module_function(mNcurses, "slk_refresh",
-                              (&rb_slk_refresh),
+                              (&rbncurs_slk_refresh),
                               0);
     rb_define_module_function(mNcurses, "slk_restore",
-                              (&rb_slk_restore),
+                              (&rbncurs_slk_restore),
                               0);
     rb_define_module_function(mNcurses, "slk_set",
-                              (&rb_slk_set),
+                              (&rbncurs_slk_set),
                               3);
     rb_define_module_function(mNcurses, "slk_touch",
-                              (&rb_slk_touch),
+                              (&rbncurs_slk_touch),
                               0);
     rb_define_module_function(mNcurses, "standout",
-                              (&rb_standout),
+                              (&rbncurs_standout),
                               0);
     rb_define_module_function(mNcurses, "standend",
-                              (&rb_standend),
+                              (&rbncurs_standend),
                               0);
     rb_define_module_function(mNcurses, "start_color",
-                              (&rb_start_color),
+                              (&rbncurs_start_color),
                               0);
     rb_define_module_function(mNcurses, "subpad",
-                              (&rb_subpad),
+                              (&rbncurs_subpad),
                               5);
     rb_define_module_function(mNcurses, "subwin",
-                              (&rb_subwin),
+                              (&rbncurs_subwin),
                               5);
     rb_define_module_function(mNcurses, "syncok",
-                              (&rb_syncok),
+                              (&rbncurs_syncok),
                               2);
     rb_define_module_function(mNcurses, "termattrs",
-                              (&rb_termattrs),
+                              (&rbncurs_termattrs),
                               0);
     rb_define_module_function(mNcurses, "termname",
-                              (&rb_termname),
+                              (&rbncurs_termname),
                               0);
 #ifdef HAVE_TIGETFLAG
     rb_define_module_function(mNcurses, "tigetflag",
-                              (&rb_tigetflag),
+                              (&rbncurs_tigetflag),
                               1);
 #endif
 #ifdef HAVE_TIGETNUM
     rb_define_module_function(mNcurses, "tigetnum",
-                              (&rb_tigetnum),
+                              (&rbncurs_tigetnum),
                               1);
 #endif
 #ifdef HAVE_TIGETSTR
     rb_define_module_function(mNcurses, "tigetstr",
-                              (&rb_tigetstr),
+                              (&rbncurs_tigetstr),
                               1);
 #endif
     rb_define_module_function(mNcurses, "timeout",
-                              (&rb_timeout),
+                              (&rbncurs_timeout),
                               1);
     rb_define_module_function(mNcurses, "typeahead",
-                              (&rb_typeahead),
+                              (&rbncurs_typeahead),
                               1);
     rb_define_module_function(mNcurses, "ungetch",
-                              (&rb_ungetch),
+                              (&rbncurs_ungetch),
                               1);
     rb_define_module_function(mNcurses, "untouchwin",
-                              (&rb_untouchwin),
+                              (&rbncurs_untouchwin),
                               1);
 #ifdef HAVE_USE_ENV
     rb_define_module_function(mNcurses, "use_env",
-                              (&rb_use_env),
+                              (&rbncurs_use_env),
                               1);
 #endif
 #ifdef HAVE_VIDATTR
     rb_define_module_function(mNcurses, "vidattr",
-                              (&rb_vidattr),
+                              (&rbncurs_vidattr),
                               1);
 #endif
 #if defined (HAVE_VID_ATTR) || defined(vid_attr)
     rb_define_module_function(mNcurses, "vid_attr",
-                              (&rb_vid_attr),
+                              (&rbncurs_vid_attr),
                               3);
 #endif
     rb_define_module_function(mNcurses, "vline",
-                              (&rb_vline),
+                              (&rbncurs_vline),
                               2);
     rb_define_module_function(mNcurses, "waddch",
-                              (&rb_waddch),
+                              (&rbncurs_waddch),
                               2);
     rb_define_module_function(mNcurses, "waddchnstr",
-                              (&rb_waddchnstr),
+                              (&rbncurs_waddchnstr),
                               3);
     rb_define_module_function(mNcurses, "waddchstr",
-                              (&rb_waddchstr),
+                              (&rbncurs_waddchstr),
                               2);
     rb_define_module_function(mNcurses, "waddnstr",
-                              (&rb_waddnstr),
+                              (&rbncurs_waddnstr),
                               3);
     rb_define_module_function(mNcurses, "waddstr",
-                              (&rb_waddstr),
+                              (&rbncurs_waddstr),
                               2);
     rb_define_module_function(mNcurses, "wattron",
-                              (&rb_wattron),
+                              (&rbncurs_wattron),
                               2);
     rb_define_module_function(mNcurses, "wattroff",
-                              (&rb_wattroff),
+                              (&rbncurs_wattroff),
                               2);
     rb_define_module_function(mNcurses, "wattrset",
-                              (&rb_wattrset),
+                              (&rbncurs_wattrset),
                               2);
  #ifdef HAVE_WATTR_ON
    rb_define_module_function(mNcurses, "wattr_on",
-                              (&rb_wattr_on),
+                              (&rbncurs_wattr_on),
                               3);
 #endif
 #ifdef HAVE_WATTR_OFF
     rb_define_module_function(mNcurses, "wattr_off",
-                              (&rb_wattr_off),
+                              (&rbncurs_wattr_off),
                               3);
 #endif
 #ifdef HAVE_WATTR_SET
     rb_define_module_function(mNcurses, "wattr_set",
-                              (&rb_wattr_set),
+                              (&rbncurs_wattr_set),
                               4);
 #endif
     rb_define_module_function(mNcurses, "wbkgd",
-                              (&rb_wbkgd),
+                              (&rbncurs_wbkgd),
                               2);
     rb_define_module_function(mNcurses, "wbkgdset",
-                              (&rb_wbkgdset),
+                              (&rbncurs_wbkgdset),
                               2);
     rb_define_module_function(mNcurses, "wborder",
-                              (&rb_wborder),
+                              (&rbncurs_wborder),
                               9);
 #ifdef HAVE_WCHGAT
     rb_define_module_function(mNcurses, "wchgat",
-                              (&rb_wchgat),
+                              (&rbncurs_wchgat),
                               5);
 #endif
     rb_define_module_function(mNcurses, "wclear",
-                              (&rb_wclear),
+                              (&rbncurs_wclear),
                               1);
     rb_define_module_function(mNcurses, "wclrtobot",
-                              (&rb_wclrtobot),
+                              (&rbncurs_wclrtobot),
                               1);
     rb_define_module_function(mNcurses, "wclrtoeol",
-                              (&rb_wclrtoeol),
+                              (&rbncurs_wclrtoeol),
                               1);
 #ifdef HAVE_WCOLOR_SET
     rb_define_module_function(mNcurses, "wcolor_set",
-                              (&rb_wcolor_set),
+                              (&rbncurs_wcolor_set),
                               3);
 #endif
     rb_define_module_function(mNcurses, "wcursyncup",
-                              (&rb_wcursyncup),
+                              (&rbncurs_wcursyncup),
                               1);
     rb_define_module_function(mNcurses, "wdelch",
-                              (&rb_wdelch),
+                              (&rbncurs_wdelch),
                               1);
     rb_define_module_function(mNcurses, "wdeleteln",
-                              (&rb_wdeleteln),
+                              (&rbncurs_wdeleteln),
                               1);
     rb_define_module_function(mNcurses, "wechochar",
-                              (&rb_wechochar),
+                              (&rbncurs_wechochar),
                               2);
     rb_define_module_function(mNcurses, "werase",
-                              (&rb_werase),
+                              (&rbncurs_werase),
                               1);
     rb_define_module_function(mNcurses, "wgetch",
-                              (&rb_wgetch),
+                              (&rbncurs_wgetch),
                               1);
     rb_define_module_function(mNcurses, "whline",
-                              (&rb_whline),
+                              (&rbncurs_whline),
                               3);
     rb_define_module_function(mNcurses, "winch",
-                              (&rb_winch),
+                              (&rbncurs_winch),
                               1);
     rb_define_module_function(mNcurses, "winsch",
-                              (&rb_winsch),
+                              (&rbncurs_winsch),
                               2);
     rb_define_module_function(mNcurses, "winsdelln",
-                              (&rb_winsdelln),
+                              (&rbncurs_winsdelln),
                               2);
     rb_define_module_function(mNcurses, "winsertln",
-                              (&rb_winsertln),
+                              (&rbncurs_winsertln),
                               1);
     rb_define_module_function(mNcurses, "winsnstr",
-                              (&rb_winsnstr),
+                              (&rbncurs_winsnstr),
                               3);
     rb_define_module_function(mNcurses, "winsstr",
-                              (&rb_winsstr),
+                              (&rbncurs_winsstr),
                               2);
     rb_define_module_function(mNcurses, "wmove",
-                              (&rb_wmove),
+                              (&rbncurs_wmove),
                               3);
     rb_define_module_function(mNcurses, "wnoutrefresh",
-                              (&rb_wnoutrefresh),
+                              (&rbncurs_wnoutrefresh),
                               1);
     rb_define_module_function(mNcurses, "wredrawln",
-                              (&rb_wredrawln),
+                              (&rbncurs_wredrawln),
                               3);
     rb_define_module_function(mNcurses, "wrefresh",
-                              (&rb_wrefresh),
+                              (&rbncurs_wrefresh),
                               1);
     rb_define_module_function(mNcurses, "wscrl",
-                              (&rb_wscrl),
+                              (&rbncurs_wscrl),
                               2);
     rb_define_module_function(mNcurses, "wsetscrreg",
-                              (&rb_wsetscrreg),
+                              (&rbncurs_wsetscrreg),
                               3);
     rb_define_module_function(mNcurses, "wstandout",
-                              (&rb_wstandout),
+                              (&rbncurs_wstandout),
                               1);
     rb_define_module_function(mNcurses, "wstandend",
-                              (&rb_wstandend),
+                              (&rbncurs_wstandend),
                               1);
     rb_define_module_function(mNcurses, "wsyncdown",
-                              (&rb_wsyncdown),
+                              (&rbncurs_wsyncdown),
                               1);
     rb_define_module_function(mNcurses, "wsyncup",
-                              (&rb_wsyncup),
+                              (&rbncurs_wsyncup),
                               1);
     rb_define_module_function(mNcurses, "wtimeout",
-                              (&rb_wtimeout),
+                              (&rbncurs_wtimeout),
                               2);
     rb_define_module_function(mNcurses, "wtouchln",
-                              (&rb_wtouchln),
+                              (&rbncurs_wtouchln),
                               4);
     rb_define_module_function(mNcurses, "wvline",
-                              (&rb_wvline),
+                              (&rbncurs_wvline),
                               3);
     rb_define_module_function(mNcurses, "color_content",
-                              (&rb_color_content), 4);
+                              (&rbncurs_color_content), 4);
     rb_define_module_function(mNcurses, "pair_content",
-                              (&rb_pair_content), 3);
+                              (&rbncurs_pair_content), 3);
     rb_define_module_function(mNcurses, "pair_content",
-                              (&rb_pair_content), 3);
+                              (&rbncurs_pair_content), 3);
 #ifdef HAVE_GETWIN
     rb_define_module_function(mNcurses, "getwin",
-                              (&rb_getwin), 1);
+                              (&rbncurs_getwin), 1);
 #endif
 #ifdef HAVE_PUTWIN
     rb_define_module_function(mNcurses, "putwin",
-                              (&rb_putwin), 2);
+                              (&rbncurs_putwin), 2);
 #endif
     rb_define_module_function(mNcurses, "unctrl",
-                              (&rb_unctrl), 1);
+                              (&rbncurs_unctrl), 1);
     rb_define_module_function(mNcurses, "newterm",
-                              (&rb_newterm), 3);
+                              (&rbncurs_newterm), 3);
 }
 
 
@@ -2483,7 +2483,7 @@ static void init_constants_3(void) {
 /* } */
 /* MEVENT; */
 #ifdef HAVE_UNGETMOUSE
-static VALUE rb_getmouse(VALUE dummy, VALUE rb_m)
+static VALUE rbncurs_getmouse(VALUE dummy, VALUE rb_m)
 {
     MEVENT m;
     int return_value = getmouse(&m);
@@ -2496,7 +2496,7 @@ static VALUE rb_getmouse(VALUE dummy, VALUE rb_m)
     }
     return INT2NUM(return_value);
 }
-static VALUE rb_ungetmouse(VALUE dummy, VALUE rb_m)
+static VALUE rbncurs_ungetmouse(VALUE dummy, VALUE rb_m)
 {
     MEVENT m;
     m.id = NUM2INT(rb_iv_get(rb_m, "@id"));
@@ -2508,7 +2508,7 @@ static VALUE rb_ungetmouse(VALUE dummy, VALUE rb_m)
 }
 #endif
 #ifdef HAVE_MOUSEMASK
-static VALUE rb_mousemask(VALUE dummy, VALUE rb_newmask, VALUE rb_oldmask)
+static VALUE rbncurs_mousemask(VALUE dummy, VALUE rb_newmask, VALUE rb_oldmask)
 {
     if (rb_obj_is_instance_of(rb_oldmask, rb_cArray) != Qtrue) {
         rb_raise(rb_eArgError,
@@ -2524,18 +2524,18 @@ static VALUE rb_mousemask(VALUE dummy, VALUE rb_newmask, VALUE rb_oldmask)
 }
 #endif
 #ifdef HAVE_WENCLOSE
-static VALUE rb_wenclose(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
+static VALUE rbncurs_wenclose(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
 {
     return wenclose(get_window(rb_win), NUM2INT(rb_y), NUM2INT(rb_y))
         ? Qtrue : Qfalse;
 }
 #endif
 #ifdef HAVE_MOUSEINTERVAL
-static VALUE rb_mouseinterval(VALUE dummy, VALUE rb_interval)
+static VALUE rbncurs_mouseinterval(VALUE dummy, VALUE rb_interval)
 { return INT2NUM(mouseinterval(NUM2INT(rb_interval))); }
 #endif
 #ifdef HAVE_WMOUSE_TRAFO
-static VALUE rb_wmouse_trafo(VALUE dummy, VALUE rb_win, VALUE rb_pY, VALUE rb_pX,
+static VALUE rbncurs_wmouse_trafo(VALUE dummy, VALUE rb_win, VALUE rb_pY, VALUE rb_pX,
                              VALUE rb_to_screen)
 {
     if ((rb_obj_is_instance_of(rb_pY, rb_cArray) != Qtrue)
@@ -2556,16 +2556,16 @@ static VALUE rb_wmouse_trafo(VALUE dummy, VALUE rb_win, VALUE rb_pY, VALUE rb_pX
 }
 #endif
 #ifdef HAVE_MCPRINT
-static VALUE rb_mcprint(VALUE dummy, VALUE data, VALUE len)
+static VALUE rbncurs_mcprint(VALUE dummy, VALUE data, VALUE len)
 {
     return INT2NUM(mcprint(STR2CSTR(data), NUM2INT(len)));
 }
 #endif
 #ifdef HAVE_HAS_KEY
-static VALUE rb_has_key(VALUE dummy, VALUE ch)
+static VALUE rbncurs_has_key(VALUE dummy, VALUE ch)
 {return INT2NUM(has_key(NUM2INT(ch)));}
 #endif
-static VALUE rb_getyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
+static VALUE rbncurs_getyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
 {
     if ((rb_obj_is_instance_of(rb_y, rb_cArray) != Qtrue)
         || (rb_obj_is_instance_of(rb_x, rb_cArray) != Qtrue)) {
@@ -2582,10 +2582,10 @@ static VALUE rb_getyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
     }
 }
 #if defined(HAVE_GETATTRS) || defined(getattrs)
-static VALUE rb_getattrs(VALUE dummy, VALUE rb_win)
+static VALUE rbncurs_getattrs(VALUE dummy, VALUE rb_win)
 {return INT2NUM(getattrs(get_window(rb_win)));}
 #endif
-static VALUE rb_getbegyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
+static VALUE rbncurs_getbegyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
 {
     int y,x;
     if ((rb_obj_is_instance_of(rb_y, rb_cArray) != Qtrue)
@@ -2599,7 +2599,7 @@ static VALUE rb_getbegyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
     rb_ary_push(rb_x, INT2NUM(x));
     return Qnil;
 }
-static VALUE rb_getmaxyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
+static VALUE rbncurs_getmaxyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
 {
     int y,x;
     if ((rb_obj_is_instance_of(rb_y, rb_cArray) != Qtrue)
@@ -2613,7 +2613,7 @@ static VALUE rb_getmaxyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
     rb_ary_push(rb_x, INT2NUM(x));
     return Qnil;
 }
-static VALUE rb_getparyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
+static VALUE rbncurs_getparyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
 {
     int y,x;
     if ((rb_obj_is_instance_of(rb_y, rb_cArray) != Qtrue)
@@ -2627,7 +2627,7 @@ static VALUE rb_getparyx(VALUE dummy, VALUE rb_win, VALUE rb_y, VALUE rb_x)
     rb_ary_push(rb_x, INT2NUM(x));
     return Qnil;
 }
-static VALUE rb_getsyx(VALUE dummy, VALUE rb_y, VALUE rb_x)
+static VALUE rbncurs_getsyx(VALUE dummy, VALUE rb_y, VALUE rb_x)
 {
     int y,x;
     if ((rb_obj_is_instance_of(rb_y, rb_cArray) != Qtrue)
@@ -2645,14 +2645,14 @@ static VALUE rb_getsyx(VALUE dummy, VALUE rb_y, VALUE rb_x)
     rb_ary_push(rb_x, INT2NUM(x));
     return Qnil;
 }
-static VALUE rb_setsyx(VALUE dummy, VALUE rb_y, VALUE rb_x)
+static VALUE rbncurs_setsyx(VALUE dummy, VALUE rb_y, VALUE rb_x)
 {
     int y = NUM2INT(rb_y), x = NUM2INT(rb_x);
     setsyx(y,x);
     return Qnil;
 }
 
-static VALUE rb_wprintw(int argc, VALUE * argv, VALUE dummy)
+static VALUE rbncurs_wprintw(int argc, VALUE * argv, VALUE dummy)
 {
     if (argc < 2) {
         rb_raise(rb_eArgError, "function needs at least 2 arguments: a WINDOW"
@@ -2667,7 +2667,7 @@ static VALUE rb_wprintw(int argc, VALUE * argv, VALUE dummy)
 
 /* Debugging : use with libncurses_g.a */
 #ifdef HAVE__TRACEF
-static VALUE rb_tracef(int argc, VALUE * argv, VALUE)
+static VALUE rbncurs_tracef(int argc, VALUE * argv, VALUE)
 {
     if (argc < 1) {
         rb_raise(rb_eArgError, "function needs at least 1 argument");
@@ -2679,37 +2679,37 @@ static VALUE rb_tracef(int argc, VALUE * argv, VALUE)
 }
 #endif /* HAVE__TRACEF */
 #ifdef HAVE__TRACEDUMP
-static VALUE rb_tracedump(VALUE dummy, VALUE rb_label, label rb_win)
+static VALUE rbncurs_tracedump(VALUE dummy, VALUE rb_label, label rb_win)
 {
     _tracedump(STR2CSTR(rb_label), get_window(rb_win));
 }
 #endif /* HAVE__TRACEDUMP */
 #ifdef HAVE__TRACEATTR
-static VALUE rb_traceattr(VALUE dummy, VALUE attr)
+static VALUE rbncurs_traceattr(VALUE dummy, VALUE attr)
 { return rb_str_new2(_traceattr(NUM2ULONG(attr))); }
 #endif /* HAVE__TRACEATTR */
 #ifdef HAVE__TRACEATTR2
-static VALUE rb_traceattr2(VALUE dummy, VALUE buffer, VALUE ch)
+static VALUE rbncurs_traceattr2(VALUE dummy, VALUE buffer, VALUE ch)
 { return rb_str_new2(_traceattr2(NUM2INT(buffer),NUM2ULONG(ch))); }
 #endif /* HAVE__TRACEATTR2 */
 #ifdef HAVE__TRACEBITS
-static VALUE rb_tracebits(VALUE dummy)
+static VALUE rbncurs_tracebits(VALUE dummy)
 { return rb_str_new2(_tracebits()); }
 #endif /* HAVE__TRACEBITS */
 #ifdef HAVE__TRACECHAR
-static VALUE rb_tracechar(VALUE dummy, VALUE ch)
+static VALUE rbncurs_tracechar(VALUE dummy, VALUE ch)
 { return rb_str_new2(_tracechar(NUM2ULONG(ch))); }
 #endif /* HAVE__TRACECHAR */
 #ifdef HAVE__TRACECHTYPE
-static VALUE rb_tracechtype(VALUE dummy, VALUE ch)
+static VALUE rbncurs_tracechtype(VALUE dummy, VALUE ch)
 { return rb_str_new2(_tracechtype(NUM2ULONG(ch))); }
 #endif /* HAVE__TRACECHTYPE */
 #ifdef HAVE__TRACECHTYPE2
-static VALUE rb_tracechtype2(VALUE dummy, VALUE buffer, VALUE ch)
+static VALUE rbncurs_tracechtype2(VALUE dummy, VALUE buffer, VALUE ch)
 { return rb_str_new2(_tracechtype2(NUM2INT(buffer),NUM2ULONG(ch))); }
 #endif /* HAVE__TRACECHTYPE2 */
 #ifdef HAVE__TRACEMOUSE
-static VALUE rb_tracemouse(VALUE dummy, VALUE rb_m)
+static VALUE rbncurs_tracemouse(VALUE dummy, VALUE rb_m)
 {
     MEVENT m;
     m.id = NUM2INT(rb_iv_get(rb_m, "@id"));
@@ -2721,20 +2721,20 @@ static VALUE rb_tracemouse(VALUE dummy, VALUE rb_m)
 }
 #endif /* HAVE__TRACEMOUSE */
 #ifdef HAVE_TRACE
-static VALUE rb_trace(VALUE dummy, VALUE param)
+static VALUE rbncurs_trace(VALUE dummy, VALUE param)
 { trace(NUM2ULONG(param)); return Qnil; }
 #endif /* HAVE_TRACE */
 #ifdef HAVE__NC_TRACEBITS
-static VALUE rb_nc_tracebits()
+static VALUE rbncurs_nc_tracebits()
 { return rb_str_new2(_nc_tracebits()); }
 #endif /* HAVE__NC_TRACEBITS */
 
 #ifdef HAVE_ASSUME_DEFAULT_COLORS
-static VALUE rb_assume_default_colors(VALUE dummy, VALUE fg, VALUE bg)
+static VALUE rbncurs_assume_default_colors(VALUE dummy, VALUE fg, VALUE bg)
 { return INT2NUM(assume_default_colors(NUM2INT(fg),NUM2INT(bg))); }
 #endif  /* HAVE_ASSUME_DEFAULT_COLORS */
 #ifdef HAVE_ATTR_GET
-static VALUE rb_attr_get(VALUE dummy, VALUE rb_attrs, VALUE rb_pair,
+static VALUE rbncurs_attr_get(VALUE dummy, VALUE rb_attrs, VALUE rb_pair,
                          VALUE dummy2)
 {
     if ((rb_obj_is_instance_of(rb_attrs, rb_cArray) != Qtrue)
@@ -2752,7 +2752,7 @@ static VALUE rb_attr_get(VALUE dummy, VALUE rb_attrs, VALUE rb_pair,
         return INT2NUM(return_value);
     }
 }
-static VALUE rb_wattr_get(VALUE dummy,VALUE win, VALUE rb_attrs, VALUE rb_pair,
+static VALUE rbncurs_wattr_get(VALUE dummy,VALUE win, VALUE rb_attrs, VALUE rb_pair,
                           VALUE dummy2)
 {
     if ((rb_obj_is_instance_of(rb_attrs, rb_cArray) != Qtrue)
@@ -2776,128 +2776,128 @@ static void init_functions_3(void)
 {
 #ifdef HAVE_UNGETMOUSE
     rb_define_module_function(mNcurses, "getmouse",
-                              (&rb_getmouse),
+                              (&rbncurs_getmouse),
                               1);
     rb_define_module_function(mNcurses, "ungetmouse",
-                              (&rb_ungetmouse),
+                              (&rbncurs_ungetmouse),
                               1);
 #endif
 #ifdef HAVE_MOUSEMASK
     rb_define_module_function(mNcurses, "mousemask",
-                              (&rb_mousemask),
+                              (&rbncurs_mousemask),
                               1);
 #endif
 #ifdef HAVE_WENCLOSE
     rb_define_module_function(mNcurses, "wenclose?",
-                              (&rb_wenclose),
+                              (&rbncurs_wenclose),
                               1);
 #endif
 #ifdef HAVE_MOUSEINTERVAL
     rb_define_module_function(mNcurses, "mouseinterval",
-                              (&rb_mouseinterval), 1);
+                              (&rbncurs_mouseinterval), 1);
 #endif
 #ifdef HAVE_WMOUSE_TRAFO
     rb_define_module_function(mNcurses, "wmouse_trafo",
-                              (&rb_wmouse_trafo), 4);
+                              (&rbncurs_wmouse_trafo), 4);
 #endif
 #ifdef HAVE_MCPRINT
     rb_define_module_function(mNcurses, "mcprint",
-                              (&rb_mcprint),
+                              (&rbncurs_mcprint),
                               2);
 #endif
 #ifdef HAVE_HAS_KEY
     rb_define_module_function(mNcurses, "has_key?",
-                              (&rb_has_key),
+                              (&rbncurs_has_key),
                               2);
 #endif
     rb_define_module_function(mNcurses, "getyx",
-                              (&rb_getyx),
+                              (&rbncurs_getyx),
                               3);
     rb_define_module_function(mNcurses, "getbegyx",
-                              (&rb_getbegyx),
+                              (&rbncurs_getbegyx),
                               3);
     rb_define_module_function(mNcurses, "getmaxyx",
-                              (&rb_getmaxyx),
+                              (&rbncurs_getmaxyx),
                               3);
     rb_define_module_function(mNcurses, "getparyx",
-                              (&rb_getparyx),
+                              (&rbncurs_getparyx),
                               3);
     rb_define_module_function(mNcurses, "getsyx",
-                              (&rb_getsyx),
+                              (&rbncurs_getsyx),
                               2);
     rb_define_module_function(mNcurses, "setsyx",
-                              (&rb_setsyx),
+                              (&rbncurs_setsyx),
                               2);
 #if defined(HAVE_GETATTRS) || defined(getattrs)
     rb_define_module_function(mNcurses, "getattrs",
-                              (&rb_getattrs),
+                              (&rbncurs_getattrs),
                               1);
 #endif
 #ifdef HAVE__TRACEF
     rb_define_module_function(mNcurses, "_tracef",
-                              (&rb_tracef), -1);
+                              (&rbncurs_tracef), -1);
 #endif /* HAVE__TRACEF */
 #ifdef HAVE__TRACEDUMP
     rb_define_module_function(mNcurses, "_tracedump",
-                              (&rb_tracedump),
+                              (&rbncurs_tracedump),
                               2);
 #endif /* HAVE__TRACEDUMP */
 #ifdef HAVE__TRACEATTR
     rb_define_module_function(mNcurses, "_traceattr",
-                              (&rb_traceattr),
+                              (&rbncurs_traceattr),
                               1);
 #endif /* HAVE__TRACEATTR */
 #ifdef HAVE__TRACEATTR2
     rb_define_module_function(mNcurses, "_traceattr2",
-                              (&rb_traceattr2),
+                              (&rbncurs_traceattr2),
                               2);
 #endif /* HAVE__TRACEATTR2 */
 #ifdef HAVE__TRACEBITS
     rb_define_module_function(mNcurses, "_tracebits",
-                              (&rb_tracebits),
+                              (&rbncurs_tracebits),
                               0);
 #endif /* HAVE__TRACEBITS */
 #ifdef HAVE__TRACECHAR
     rb_define_module_function(mNcurses, "_tracechar",
-                              (&rb_tracechar),
+                              (&rbncurs_tracechar),
                               1);
 #endif /* HAVE__TRACECHAR */
 #ifdef HAVE__TRACECHTYPE
     rb_define_module_function(mNcurses, "_tracechtype",
-                              (&rb_tracechtype),
+                              (&rbncurs_tracechtype),
                               1);
 #endif /* HAVE__TRACECHTYPE */
 #ifdef HAVE__TRACECHTYPE2
     rb_define_module_function(mNcurses, "_tracechtype2",
-                              (&rb_tracechtype2), 2);
+                              (&rbncurs_tracechtype2), 2);
 #endif /* HAVE__TRACECHTYPE2 */
 #ifdef HAVE__TRACEMOUSE
     rb_define_module_function(mNcurses, "_tracechmouse",
-                              (&rb_tracemouse),
+                              (&rbncurs_tracemouse),
                               1);
 #endif /* HAVE__TRACEMOUSE */
 #ifdef HAVE_TRACE
     rb_define_module_function(mNcurses, "trace",
-                              (&rb_trace),
+                              (&rbncurs_trace),
                               1);
 #endif /* HAVE_TRACE */
 #ifdef HAVE__NC_TRACEBITS
-    rb_define_module_function(mNcurses, "_nc_tracebits", &rb_nc_tracebits, 0);
+    rb_define_module_function(mNcurses, "_nc_tracebits", &rbncurs_nc_tracebits, 0);
 #endif /* HAVE__NC_TRACEBITS */
 #ifdef HAVE_ASSUME_DEFAULT_COLORS
     rb_define_module_function(mNcurses, "assume_default_colors",
-                              (&rb_assume_default_colors), 2);
+                              (&rbncurs_assume_default_colors), 2);
 #endif  /* HAVE_ASSUME_DEFAULT_COLORS */
 #ifdef HAVE_ATTR_GET
     rb_define_module_function(mNcurses, "attr_get",
-                              (&rb_attr_get),
+                              (&rbncurs_attr_get),
                               3);
     rb_define_module_function(mNcurses, "wattr_get",
-                              (&rb_wattr_get),
+                              (&rbncurs_wattr_get),
                               4);
 #endif /* HAVE_ATTR_GET */
     rb_define_module_function(mNcurses, "wprintw",
-                              (&rb_wprintw),
+                              (&rbncurs_wprintw),
                               -1);
 }
 
