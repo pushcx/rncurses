@@ -1,3 +1,8 @@
+ncurses-ruby-0.9.3
+* Solved timing problems that affected visual smoothness of reactions
+  to user input
+* Each SCREEN got back its own "halfdelay" and "cbreak" settings
+
 ncurses-ruby-0.9.2
  * Preventing getch and wgetch functions from blocking other ruby threads.
  * Previously ncurses-ruby installed two files named "ncurses.rb" and
