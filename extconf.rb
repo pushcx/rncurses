@@ -35,7 +35,11 @@ have_header("panel.h")
 have_library("panel", "panel_hidden")
 create_makefile('ncurses')
 
-makefile = IO.readlines("Makefile")
+makefile = IO.readlines("Makefile").collect{|line|
+	line.chomp!
+	line.gsub("gcc", "g++")
+}	
+
 line_no = makefile.index(makefile.grep(/^install:/)[0])
 
 match_inst_prefix = /:(.*\/)/.match(makefile[line_no])
