@@ -35,12 +35,22 @@ have_func("attr_get")
 puts "checking for the panel library..."
 have_header("panel.h")
 have_library("panel", "panel_hidden")
+
+puts "checking for the standard c++ library..."
+have_stdcpp = have_library("stdc++", "cerr")
+unless have_stdcpp
+  puts "Did not find the standard c++ library.  Assuming this is due to name" +
+    " mangling of symbol std::cerr; trying to link to it by using g++ instead"+
+    " of gcc."
+end
+
 create_makefile('ncurses')
 
 makefile = IO.readlines("Makefile").collect{|line|
-	line.chomp!
-	line.gsub("gcc", "g++")
-}	
+  line.chomp!
+  line.sub!("gcc -shared", "g++ -shared") unless (have_stdcpp)
+  line
+}
 
 line_no = makefile.index(makefile.grep(/^install:/)[0])
 
