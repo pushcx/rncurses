@@ -480,6 +480,8 @@ init_functions_1(void)
 // FIXME: what's this?
 // extern char ttytype[];		/* needed for backward compatibility */
 
+
+// copy a chstr from ruby to c, using c++'s std::vector
 static std::vector<chtype> RB2CHSTR(VALUE array)
 {
     if (rb_obj_is_instance_of(array, rb_cArray) != Qtrue) {
@@ -487,9 +489,10 @@ static std::vector<chtype> RB2CHSTR(VALUE array)
                  "chtype string argument must be an empty Array");
         return std::vector<chtype>();
     }
-    std::vector<chtype> chstr(NUM2INT(rb_funcall(array, rb_intern("size"),
-                                                 0)) + 1);
-    for (unsigned long i = 0; i < chstr.size(); ++i) {
+    size_t string_length = NUM2ULONG(rb_funcall(array, rb_intern("size"), 0));
+    size_t vector_length = string_length + 1;        // for terminating 0
+    std::vector<chtype> chstr(vector_length);        // all initialized to 0
+    for (unsigned long i = 0; i < string_length; ++i) {
         chstr[i] = NUM2ULONG(rb_ary_entry(array, i));
     }
     return chstr;
