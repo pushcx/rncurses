@@ -16,7 +16,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.2 2003/03/22 20:02:07 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.3 2003/08/28 08:42:24 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -583,17 +583,17 @@ static VALUE rbncurs_attrset(VALUE dummy, VALUE arg1) {
 }
 #ifdef HAVE_ATTR_OFF
 static VALUE rbncurs_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(attr_off(NUM2ULONG(arg1),  ((arg2),NULL)));
+    return INT2NUM(attr_off(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
 }
 #endif
 #ifdef HAVE_ATTR_ON
 static VALUE rbncurs_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(attr_on(NUM2ULONG(arg1),  ((arg2),NULL)));
+    return INT2NUM(attr_on(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
 }
 #endif
 #ifdef HAVE_ATTR_SET
 static VALUE rbncurs_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
+    return INT2NUM(attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
 }
 #endif
 static VALUE rbncurs_baudrate(VALUE dummy) {
@@ -623,7 +623,7 @@ static VALUE rbncurs_cbreak(VALUE dummy) {
 #ifdef HAVE_CHGAT
 static VALUE rbncurs_chgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
     return INT2NUM(chgat(NUM2INT(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3),
-                         ((arg4),NULL)));
+                         ((void)(arg4),NULL)));
 }
 #endif
 static VALUE rbncurs_clear(VALUE dummy) {
@@ -640,7 +640,7 @@ static VALUE rbncurs_clrtoeol(VALUE dummy) {
 }
 #ifdef HAVE_COLOR_SET
 static VALUE rbncurs_color_set(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(color_set(NUM2INT(arg1),  ((arg2),NULL)));
+    return INT2NUM(color_set(NUM2INT(arg1),  ((void)(arg2),NULL)));
 }
 #endif
 static VALUE rbncurs_COLOR_PAIR(VALUE dummy, VALUE arg1) {
@@ -916,7 +916,7 @@ static VALUE rbncurs_mvaddstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
 }
 #ifdef HAVE_MVCHGAT
 static VALUE rbncurs_mvchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6) {
-    return INT2NUM(mvchgat(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2ULONG(arg4),  NUM2INT(arg5),  ((arg6),NULL)));
+    return INT2NUM(mvchgat(NUM2INT(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2ULONG(arg4),  NUM2INT(arg5),  ((void)(arg6),NULL)));
 }
 #endif
 static VALUE rbncurs_mvcur(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
@@ -981,7 +981,7 @@ static VALUE rbncurs_mvwaddstr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, 
 }
 #ifdef HAVE_MVWCHGAT
 static VALUE rbncurs_mvwchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5, VALUE arg6, VALUE arg7) {
-    return INT2NUM(mvwchgat(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2ULONG(arg5),  NUM2INT(arg6),  ((arg7),NULL)));
+    return INT2NUM(mvwchgat(get_window(arg1),  NUM2INT(arg2),  NUM2INT(arg3),  NUM2INT(arg4),  NUM2ULONG(arg5),  NUM2INT(arg6),  ((void)(arg7),NULL)));
 }
 #endif
 static VALUE rbncurs_mvwdelch(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
@@ -1143,7 +1143,7 @@ static VALUE rbncurs_slk_attroff(VALUE dummy, VALUE arg1) {
 }
 #if defined(HAVE_SLK_ATTR_OFF) || defined(slk_attr_off)
 static VALUE rbncurs_slk_attr_off(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(slk_attr_off(NUM2ULONG(arg1),  ((arg2),NULL)));
+    return INT2NUM(slk_attr_off(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
 }
 #endif
 static VALUE rbncurs_slk_attron(VALUE dummy, VALUE arg1) {
@@ -1151,7 +1151,7 @@ static VALUE rbncurs_slk_attron(VALUE dummy, VALUE arg1) {
 }
 #if defined(HAVE_SLK_ATTR_ON) || defined(slk_attr_on)
 static VALUE rbncurs_slk_attr_on(VALUE dummy, VALUE arg1, VALUE arg2) {
-    return INT2NUM(slk_attr_on(NUM2ULONG(arg1),  ((arg2),NULL)));
+    return INT2NUM(slk_attr_on(NUM2ULONG(arg1),  ((void)(arg2),NULL)));
 }
 #endif
 static VALUE rbncurs_slk_attrset(VALUE dummy, VALUE arg1) {
@@ -1164,7 +1164,7 @@ static VALUE rbncurs_slk_attr(VALUE dummy) {
 #endif
 #ifdef HAVE_SLK_ATTR_SET
 static VALUE rbncurs_slk_attr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(slk_attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
+    return INT2NUM(slk_attr_set(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
 }
 #endif
 static VALUE rbncurs_slk_clear(VALUE dummy) {
@@ -1259,7 +1259,7 @@ static VALUE rbncurs_vidattr(VALUE dummy, VALUE arg1) {
 #endif
 #if defined(HAVE_VID_ATTR) || defined(vid_attr)
 static VALUE rbncurs_vid_attr(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(vid_attr(NUM2ULONG(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
+    return INT2NUM(vid_attr(NUM2ULONG(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
 }
 #endif
 static VALUE rbncurs_vline(VALUE dummy, VALUE arg1, VALUE arg2) {
@@ -1298,17 +1298,17 @@ static VALUE rbncurs_wattrset(VALUE dummy, VALUE arg1, VALUE arg2) {
 }
 #ifdef HAVE_WATTR_ON
 static VALUE rbncurs_wattr_on(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(wattr_on(get_window(arg1),  NUM2ULONG(arg2),  ((arg3),NULL)));
+    return INT2NUM(wattr_on(get_window(arg1),  NUM2ULONG(arg2),  ((void)(arg3),NULL)));
 }
 #endif
 #ifdef HAVE_WATTR_OFF
 static VALUE rbncurs_wattr_off(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(wattr_off(get_window(arg1),  NUM2ULONG(arg2),  ((arg3),NULL)));
+    return INT2NUM(wattr_off(get_window(arg1),  NUM2ULONG(arg2),  ((void)(arg3),NULL)));
 }
 #endif
 #ifdef HAVE_WATTR_SET
 static VALUE rbncurs_wattr_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
-    return INT2NUM(wattr_set(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3),  ((arg4),NULL)));
+    return INT2NUM(wattr_set(get_window(arg1),  NUM2ULONG(arg2),  NUM2INT(arg3),  ((void)(arg4),NULL)));
 }
 #endif
 static VALUE rbncurs_wbkgd(VALUE dummy, VALUE arg1, VALUE arg2) {
@@ -1322,7 +1322,7 @@ static VALUE rbncurs_wborder(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VA
 }
 #ifdef HAVE_WCHGAT
 static VALUE rbncurs_wchgat(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4, VALUE arg5) {
-    return INT2NUM(wchgat(get_window(arg1),  NUM2INT(arg2),  NUM2ULONG(arg3),  NUM2INT(arg4),  ((arg5),NULL)));
+    return INT2NUM(wchgat(get_window(arg1),  NUM2INT(arg2),  NUM2ULONG(arg3),  NUM2INT(arg4),  ((void)(arg5),NULL)));
 }
 #endif
 static VALUE rbncurs_wclear(VALUE dummy, VALUE arg1) {
@@ -1336,7 +1336,7 @@ static VALUE rbncurs_wclrtoeol(VALUE dummy, VALUE arg1) {
 }
 #ifdef HAVE_WCOLOR_SET
 static VALUE rbncurs_wcolor_set(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3) {
-    return INT2NUM(wcolor_set(get_window(arg1),  NUM2INT(arg2),  ((arg3),NULL)));
+    return INT2NUM(wcolor_set(get_window(arg1),  NUM2INT(arg2),  ((void)(arg3),NULL)));
 }
 #endif
 static VALUE rbncurs_wcursyncup(VALUE dummy, VALUE arg1) {
@@ -1868,7 +1868,7 @@ static void init_functions_2(void) {
     rb_define_module_function(mNcurses, "PAIR_NUMBER",
                               (&rbncurs_PAIR_NUMBER),
                               1);
-#ifdef HAVE_PECHOCHAR
+#ifndef __PDCURSES__ /* pdcurses' pechochar macro does not work */
     rb_define_module_function(mNcurses, "pechochar",
                               (&rbncurs_pechochar),
                               2);
@@ -1892,7 +1892,7 @@ static void init_functions_2(void) {
     rb_define_module_function(mNcurses, "raw",
                               (&rbncurs_raw),
                               0);
-#ifdef HAVE_REDRAWWIN
+#ifndef __PDCURSES__ /* pdcurses redrawwin macro has a bug */
     rb_define_module_function(mNcurses, "redrawwin",
                               (&rbncurs_redrawwin),
                               1);
