@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-# $Id: tclock.rb,v 1.5 2002/02/26 11:06:57 t-peters Exp $
+# $Id: tclock.rb,v 1.6 2002/02/28 13:50:10 t-peters Exp $
 
 # tclock - analog/digital clock for curses, translated to ruby
-# Copyright (C) 2002 Tobias Peters
+# Copyright (C) 2002 Tobias Peters <t-peters@users.berlios.de>
 # This file was adapted from the C program tclock.c from the ncurses
 # distribution, which bears the following copyright statement:
 
