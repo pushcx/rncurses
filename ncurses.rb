@@ -1,21 +1,21 @@
-# Ncurses-Ruby Is A Ruby Module For Accessing The Fsf'S Ncurses Library
-# (C) 2002 Tobias Peters <T-Peters@Berlios.De>
+# ncurses-ruby is a ruby module for accessing the FSF's ncurses library
+# (C) 2002 Tobias Peters <t-peters@users.berlios.de>
 #
-# This Module Is Free Software; You Can Redistribute It And/Or
-# Modify It Under The Terms Of The Gnu Lesser General Public
-# License As Published By The Free Software Foundation; Either
-# Version 2 Of The License, Or (At Your Option) Any Later Version.
+# This module is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
 #
-# This Module Is Distributed In The Hope That It Will Be Useful,
-# But Without Any Warranty; Without Even The Implied Warranty Of
-# Merchantability Or Fitness For A Particular Purpose.  See The Gnu
-# Lesser General Public License For More Details.
+# This module is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
 #
-# You Should Have Received A Copy Of The Gnu Lesser General Public
-# License Along With This Module; If Not, Write To The Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, Ma 02111-1307  Usa
+# You should have received a copy of the GNU Lesser General Public
+# License along with this module; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+# $Id: ncurses.rb,v 1.4 2002/02/28 13:49:54 t-peters Exp $
 
 require "ncurses.so"
 
