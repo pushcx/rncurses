@@ -11,6 +11,7 @@ examples/LICENSES_for_examples
 examples/rain.rb
 examples/tclock.rb
 examples/read_line.rb
+examples/test_scanw.rb
 extconf.rb
 make_dist.rb
 ncurses_wrap.c
