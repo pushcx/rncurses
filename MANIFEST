@@ -1,6 +1,7 @@
 COPYING
 MANIFEST
 README
+README.windows
 THANKS
 TODO
 VERSION
@@ -9,9 +10,9 @@ examples/hello_ncurses.rb
 examples/LICENSES_for_examples
 examples/rain.rb
 examples/tclock.rb
+examples/read_line.rb
 extconf.rb
 make_dist.rb
-mkmf.log
-ncurses.cc
+ncurses_wrap.c
 ncurses.rb
-panel.hh
+panel_wrap.h
