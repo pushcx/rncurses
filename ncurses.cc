@@ -1,6 +1,6 @@
 /*
  * ncurses-ruby is a ruby module for accessing the FSF's ncurses library
- * (C) 2002 Tobias Peters <t-peters@berlios.de>
+ * (C) 2002 Tobias Peters <t-peters@users.berlios.de>
  * 
  *  This module is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -16,7 +16,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses.cc,v 1.8 2002/02/28 09:27:45 t-peters Exp $
+ * $Id: ncurses.cc,v 1.9 2002/02/28 13:50:03 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:

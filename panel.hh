@@ -1,6 +1,6 @@
 /*
  * ncurses-ruby is a ruby module for accessing the FSF's ncurses library
- * (C) 2002 Tobias Peters <t-peters@berlios.de>
+ * (C) 2002 Tobias Peters <t-peters@users.berlios.de>
  * 
  *  This module is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  */
 
-// $Id: panel.hh,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+// $Id: panel.hh,v 1.4 2002/02/28 13:50:03 t-peters Exp $
 
 #if !defined(PANEL_HH) && defined(HAVE_PANEL_H)
 #define PANEL_HH

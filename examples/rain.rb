@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-# $Id: rain.rb,v 1.3 2002/02/26 11:04:38 t-peters Exp $
+# $Id: rain.rb,v 1.4 2002/02/28 13:50:03 t-peters Exp $
 
 # This program is a translation of the popular rain.c demo program from the
 # ncurses library distribution.
 #
-# Copyright (C) 2002 Tobias Peters <t-peters@berlios.de>
+# Copyright (C) 2002 Tobias Peters <t-peters@users.berlios.de>
 #
 # I do not impose any additional restrictions over the copyright of the
 # ncurses library distribution. It has the following Copyright notice

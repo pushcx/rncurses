@@ -1,4 +1,4 @@
-$Id: LICENSES_for_examples,v 1.4 2002/02/26 11:04:38 t-peters Exp $
+$Id: LICENSES_for_examples,v 1.5 2002/02/28 13:50:03 t-peters Exp $
 
 Ideally, an example program how to use a library should be in the public
 domain.
@@ -20,4 +20,4 @@ That said, I suppose you may still look at their source code and learn how
 ncurses programs generally work, as long as you dont start your own programs
 by loading the example program into your editor and modify it to your needs.
 
-Tobias Peters <t-peters@berlios.de>
+Tobias Peters <t-peters@users.berlios.de>
