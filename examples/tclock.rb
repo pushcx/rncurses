@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# $Id: tclock.rb,v 1.4 2002/02/26 11:04:38 t-peters Exp $
+# $Id: tclock.rb,v 1.5 2002/02/26 11:06:57 t-peters Exp $
 
 # tclock - analog/digital clock for curses, translated to ruby
 # Copyright (C) 2002 Tobias Peters
@@ -193,7 +193,7 @@ begin
       if ((Time.now.sec % 5) == 0 &&
 	  Time.now.sec != lastbeep) 
 	lastbeep = Time.now.sec;
-	#Ncurses::beep();
+	Ncurses::beep();
       end
       
       if ((ch = Ncurses::getch()) != Ncurses::ERR)
