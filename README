@@ -1,4 +1,4 @@
-$Id: README,v 1.4 2002/02/28 09:29:19 t-peters Exp $
+$Id: README,v 1.5 2002/11/16 21:16:00 t-peters Exp $
 ------------------------------------------------------------------------
 This directory contains a ruby module for accessing the FSF's ncurses
 library.
@@ -23,6 +23,9 @@ This wrapper provides access to the functions, macros, global variables and
 constants of the ncurses library.  These are simply mapped to a Module named
 Ncurses.  Functions and external variables are implemented as module functions
 of the Module Ncurses.
+
+This wrapper can also be used to wrap the PDCurses library
+(http://pdcurses.sourceforge.net/). See README.windows for details.
 
 If you don't know how to use ncurses from C, then stop reading here, and read
 an introduction to ncurses. Eric Raymond has written an introduction that
