@@ -3,7 +3,7 @@
 # 
 # Unfinished read_line function
 #
-# Written 2003 by Tobias Peters
+# Written 2003, 2004 by Tobias Peters
 # No warranties
 # Share and enjoy!
 
@@ -38,10 +38,10 @@ def read_line(y, x,
         string[cursor_pos,0] = ch.chr
         cursor_pos += 1
       else
-        beep
+        Ncurses.beep
       end
     else
-      beep
+      Ncurses.beep
     end
   end    	
 end    
