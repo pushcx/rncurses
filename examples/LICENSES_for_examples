@@ -7,8 +7,9 @@ the public domain, however.
 The reason is because I did not write all programs completely myself -- I've
 adapted the following example programs from ncurses programs in other
 programming languages, and I have to respect their original licenses:
-  rain.rb is adapted from rain.c from the ncurses library distribution.
-  example.rb is adapted from an example program for the python ncurses binding.
+- rain.rb is adapted from rain.c from the ncurses library distribution.
+- example.rb is adapted from an example program for the python ncurses binding.
+- tclock.rb is adapted from tclock.c from the ncurses library distribution.
 
 See the comments in the source files for restrictions imposed on copying and
 modifying these.
