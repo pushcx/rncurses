@@ -17,7 +17,7 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: extconf.rb,v 1.8 2002/11/16 21:16:16 t-peters Exp $
+# $Id: extconf.rb,v 1.9 2003/03/22 20:00:52 t-peters Exp $
 
 require "mkmf"
 
@@ -34,7 +34,12 @@ elsif have_header("curses.h")
 else
   raise "ncurses header file not found"
 end
-unless have_library("ncurses", "wmove")
+
+if have_library("ncurses", "wmove")
+  curses_lib = "ncurses"
+elsif have_library("pdcurses", "wmove")
+  curses_lib = "pdcurses"
+else
   raise "ncurses library not found"
 end
 
@@ -114,25 +119,8 @@ have_func("assume_default_colors")
 have_func("attr_get")
 
 puts "checking for the panel library..."
-have_header("panel.h")
-have_library("panel", "panel_hidden")
+if have_header("panel.h")
+  have_library("panel", "panel_hidden")
+end
 
 create_makefile('ncurses')
-
-makefile = IO.readlines("Makefile").collect{|line|
-  line.chomp!
-  line
-}
-
-line_no = makefile.index(makefile.grep(/^install:/)[0])
-
-makefile[line_no] += " $(rubylibdir)$(target_prefix)/ncurses.rb\n" +
-  "$(rubylibdir)$(target_prefix)/ncurses.rb: ncurses.rb        \n" +
-  "\tif test -e $(sitelibdir)$(target_prefix)/ncurses.rb; then echo This file is probably a leftover from ncurses-ruby-0.1; rm -i $(sitelibdir)$(target_prefix)/ncurses.rb; fi\n" +
-  "\t@$(RUBY) -r ftools -e 'File::install(ARGV[0], ARGV[1], 0644, true)' " +
-  "                   ncurses.rb $(rubylibdir)$(target_prefix)/ncurses.rb"
-
-
-File.open("Makefile", "w") {|f|
-  f.puts(makefile)
-}
