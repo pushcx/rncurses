@@ -1,5 +1,6 @@
 # ncurses-ruby is a ruby module for accessing the FSF's ncurses library
-# (C) 2002 Tobias Peters <t-peters@users.berlios.de>
+# (C) 2002, 2003 Tobias Peters <t-peters@users.berlios.de>
+# (C) 2004 Simon Kaczor <skaczor@cox.net>
 #
 # This module is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -15,9 +16,10 @@
 # License along with this module; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 
-# $Id: ncurses.rb,v 1.3 2003/09/02 19:37:51 t-peters Exp $
+# $Id: ncurses.rb,v 1.4 2004/05/13 21:55:31 t-peters Exp $
 
 require "ncurses.so"
+
 
 # Ncurses constants with leading underscore
 def Ncurses._XOPEN_CURSES
@@ -59,22 +61,22 @@ module Ncurses
     def method_missing(name, *args)
       name = name.to_s
       if (name[0,2] == "mv")
-	test_name = name.dup
-	test_name[2,0] = "w" # insert "w" after"mv"
-	if (Ncurses.respond_to?(test_name))
-	  return Ncurses.send(test_name, self, *args)
-	end
+        test_name = name.dup
+        test_name[2,0] = "w" # insert "w" after"mv"
+        if (Ncurses.respond_to?(test_name))
+          return Ncurses.send(test_name, self, *args)
+        end
       end
       test_name = "w" + name
       if (Ncurses.respond_to?(test_name))
-	return Ncurses.send(test_name, self, *args)
+        return Ncurses.send(test_name, self, *args)
       end
       Ncurses.send(name, self, *args)
     end
     def respond_to?(name)
       name = name.to_s
       if (name[0,2] == "mv" && Ncurses.respond_to?("mvw" + name[2..-1]))
-	return true
+        return true
       end
       Ncurses.respond_to?("w" + name) || Ncurses.respond_to?(name)
     end
@@ -101,8 +103,30 @@ module Ncurses
   module Panel 
     class PANEL; end
   end
-end
 
+  module Form
+    class FORM
+      attr_reader :user_object
+
+      # This placeholder replaces the field_userptr function in curses
+      def user_object=(obj)
+        @user_object = obj
+      end
+    end
+    
+    class FIELD
+      attr_reader :user_object
+
+      # This placeholder replaces the field_userptr function in curses
+      def user_object=(obj)
+        @user_object = obj
+      end
+    end
+
+    class FIELDTYPE
+    end
+  end
+end
 def Ncurses.inchnstr(str,n)
   Ncurses.winchnstr(Ncurses.stdscr, str, n)
 end
