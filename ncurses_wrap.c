@@ -18,7 +18,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.7 2005/02/26 22:52:36 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.8 2005/03/05 22:48:43 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -766,6 +766,7 @@ static VALUE rbncurs_getbkgd(VALUE dummy, VALUE arg1) {
 static int rbncurshelper_nonblocking_wgetch(WINDOW *c_win) {
     /* nonblocking wgetch only implemented for Ncurses */
     int halfdelay = NUM2INT(rb_iv_get(mNcurses, "@halfdelay"));
+    int infd = NUM2INT(rb_iv_get(mNcurses, "@infd"));
     double screen_delay = halfdelay * 0.1;
 #ifdef NCURSES_VERSION
     int windelay = c_win->_delay;
@@ -773,25 +774,33 @@ static int rbncurshelper_nonblocking_wgetch(WINDOW *c_win) {
     int windelay = 0;
 #endif
     double window_delay = (windelay >= 0) ? 0.001 * windelay : (1e200*1e200);
+    /* FIXME:                                                  ^ Infinity ^*/
     double delay = (screen_delay > 0) ? screen_delay : window_delay;
     int result;
     struct timeval tv;
     struct timezone tz = {0,0};
     double starttime, nowtime, finishtime;
+    fd_set in_fds;
     gettimeofday(&tv, &tz);
     starttime = tv.tv_sec + tv.tv_usec * 1e-6;
     finishtime = starttime + delay;
 #ifdef NCURSES_VERSION
     c_win->_delay = 0;
 #endif
-    while ((result = wgetch(c_win)) == ERR && delay > 0) {
-        tv.tv_sec = 0;
-        tv.tv_usec =  (unsigned)( ( (0.1 < delay) ? 0.1 : delay) * 1e6 );
-        rb_thread_wait_for(tv);
-
+    while ((result = wgetch(c_win)) == ERR) {
         gettimeofday(&tv, &tz);
         nowtime = tv.tv_sec + tv.tv_usec * 1e-6;
         delay = finishtime - nowtime;
+	if (delay <= 0) break;
+
+	/* Check for terminal size change (wgetch) three times a second */
+        tv.tv_sec = 0;
+        tv.tv_usec =  (unsigned)( ( (0.33 < delay) ? 0.33 : delay) * 1e6 );
+
+	/* sleep on infd until input is available or tv reaches timeout */
+	FD_ZERO(&in_fds);
+	FD_SET(infd, &in_fds);
+	rb_thread_select(infd + 1, &in_fds, NULL, NULL, &tv);
     }
 #ifdef NCURSES_VERSION
     c_win->_delay = windelay;
@@ -933,6 +942,9 @@ static VALUE rbncurs_initscr(VALUE dummy) {
     rb_define_const(mNcurses, "ACS_SSSS",      INT2NUM(ACS_SSSS));
 #endif
     rbncurshelper_halfdelay_cbreak_restore();
+    rb_iv_set(mNcurses, "@infd", INT2FIX(0));
+    rb_iv_set(mNcurses, "@halfdelay", INT2FIX(0));
+    rb_iv_set(mNcurses, "@cbreak", Qfalse);
     return v;
 }
 static VALUE rbncurs_init_color(VALUE dummy, VALUE arg1, VALUE arg2, VALUE arg3, VALUE arg4) {
@@ -1241,8 +1253,15 @@ static VALUE rbncurs_scr_set(VALUE dummy, VALUE arg1) {
 static VALUE rbncurs_setscrreg(VALUE dummy, VALUE arg1, VALUE arg2) {
     return INT2NUM(setscrreg(NUM2INT(arg1),  NUM2INT(arg2)));
 }
-static VALUE rbncurs_set_term(VALUE dummy, VALUE arg1) {
-    VALUE rb_old_screen = wrap_screen(set_term(get_screen(arg1)));
+static VALUE rbncurs_set_term(VALUE dummy, VALUE rb_new_screen) {
+    VALUE rb_old_screen = wrap_screen(set_term(get_screen(rb_new_screen)));
+    rb_iv_set(rb_old_screen, "@infd",      rb_iv_get(mNcurses, "@infd"));
+    rb_iv_set(rb_old_screen, "@halfdelay", rb_iv_get(mNcurses, "@halfdelay"));
+    rb_iv_set(rb_old_screen, "@cbreak",    rb_iv_get(mNcurses, "@cbreak"));
+    rb_iv_set(mNcurses, "@infd",      rb_iv_get(rb_new_screen, "@infd"));
+    rb_iv_set(mNcurses, "@halfdelay", rb_iv_get(rb_new_screen, "@halfdelay"));
+    rb_iv_set(mNcurses, "@cbreak",    rb_iv_get(rb_new_screen, "@cbreak"));
+
     rbncurshelper_halfdelay_cbreak_restore();
     return rb_old_screen;
 }
@@ -1561,6 +1580,12 @@ static VALUE rbncurs_newterm(VALUE dummy, VALUE rb_type, VALUE rb_outfd, VALUE r
         Init_ncurses_full();
         rbncurshelper_halfdelay_cbreak_restore();
     }
+    rb_iv_set(mNcurses, "@infd", INT2NUM(infd));
+    rb_iv_set(rb_screen, "@infd", INT2NUM(infd));
+    rb_iv_set(mNcurses, "@halfdelay", INT2FIX(0));
+    rb_iv_set(rb_screen, "@halfdelay", INT2FIX(0));
+    rb_iv_set(mNcurses, "@cbreak", Qfalse);
+    rb_iv_set(rb_screen, "@cbreak", Qfalse);
     return rb_screen;
 }
 
@@ -2523,10 +2548,10 @@ static void init_constants_4(void)
 #define rb_ACS(ACS)                               \
 VALUE rb_## ACS (VALUE rb_screen)                 \
 {                                                 \
-    SCREEN * c_screen = get_screen(rb_screen);    \
-    SCREEN * current_screen = set_term(c_screen); \
+    VALUE current_screen =                        \
+      rbncurs_set_term(mNcurses, rb_screen);      \
     VALUE rb_ACS_CONST = INT2NUM(ACS);            \
-    set_term(current_screen);                     \
+    rbncurs_set_term(mNcurses, current_screen);   \
     return  rb_ACS_CONST;                         \
 }             
 #define wrap_ACS(ACS)                                          \
@@ -2648,8 +2673,14 @@ void Init_ncurses_bin(void)
     eNcurses = rb_define_class_under(mNcurses, "Exception", rb_eRuntimeError);
     rb_iv_set(mNcurses, "@windows_hash", rb_hash_new());
     rb_iv_set(mNcurses, "@screens_hash", rb_hash_new());
+
+    /* keep track of "halfdelay" settings in the wrapper */
     rb_iv_set(mNcurses, "@halfdelay", INT2NUM(0));
     rb_iv_set(mNcurses, "@cbreak", Qfalse);
+
+    /* filedescriptor that transports input from terminal to application */
+    rb_iv_set(mNcurses, "@infd", Qnil);
+
     cWINDOW  = rb_define_class_under(mNcurses, "WINDOW", rb_cObject);
     cSCREEN  = rb_define_class_under(mNcurses, "SCREEN", rb_cObject);
     init_constants_1();
