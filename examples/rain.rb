@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# $Id: rain.rb,v 1.5 2002/11/16 21:16:32 t-peters Exp $
+# $Id: rain.rb,v 1.6 2005/08/22 21:41:49 t-peters Exp $
 
 # This program is a translation of the popular rain.c demo program from the
 # ncurses library distribution.
@@ -193,7 +193,6 @@ begin
   Ncurses.noecho()
   Ncurses.curs_set(0)
   Ncurses.stdscr.nodelay(true)
-  Ncurses.timeout(0)
 
   rain = Rain.new(Ncurses.stdscr)
 
