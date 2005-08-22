@@ -18,7 +18,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.9 2005/03/06 16:13:31 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.10 2005/08/22 21:25:03 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -380,6 +380,21 @@ static VALUE set_ESCDELAY(VALUE dummy, VALUE new_delay)
     return INT2NUM(ESCDELAY);
 }
 #endif
+
+/* This global is wrapper-specific. It denotes the interval after which the
+   terminal is periodically checked for having resized or not. */
+/* time in milliseconds                           */
+static VALUE get_RESIZEDELAY(){return rb_iv_get(mNcurses, "@resize_delay");}
+static VALUE set_RESIZEDELAY(VALUE dummy, VALUE rb_new_delay)
+{
+    int c_new_delay = NUM2INT(rb_new_delay);
+    if (c_new_delay <= 0)
+        rb_raise(rb_eArgError, "delay must be > 0");
+    rb_new_delay = INT2NUM(c_new_delay);
+    rb_iv_set(mNcurses, "@resize_delay", rb_new_delay);
+    return rb_new_delay ;
+}
+
 static
 void
 init_globals_2(void)
@@ -387,6 +402,7 @@ init_globals_2(void)
     rb_iv_set(mNcurses, "@stdscr", Qnil);
     rb_iv_set(mNcurses, "@curscr", Qnil);
     rb_iv_set(mNcurses, "@newscr", Qnil);
+
     rb_define_module_function(mNcurses, "stdscr", 
                               (&get_stdscr), 0);
     rb_define_module_function(mNcurses, "curscr", 
@@ -409,6 +425,12 @@ init_globals_2(void)
     rb_define_module_function(mNcurses, "ESCDELAY=",
                               (&set_ESCDELAY),1);
 #endif
+    /* The maximum delay before screen resize is detected, in milliseconds */
+    rb_iv_set(mNcurses, "@resize_delay", INT2FIX(333));
+    rb_define_module_function(mNcurses, "RESIZEDELAY",
+                              (&get_RESIZEDELAY),0);
+    rb_define_module_function(mNcurses, "RESIZEDELAY=",
+                              (&set_RESIZEDELAY),1);
 }
 #ifdef HAVE_KEYBOUND
 static VALUE rbncurs_keybound(VALUE dummy, VALUE keycode, VALUE count)
@@ -780,6 +802,7 @@ static int rbncurshelper_nonblocking_wgetch(WINDOW *c_win) {
     struct timeval tv;
     struct timezone tz = {0,0};
     double starttime, nowtime, finishtime;
+    double resize_delay = NUM2INT(get_RESIZEDELAY()) / 1000.0;
     fd_set in_fds;
     gettimeofday(&tv, &tz);
     starttime = tv.tv_sec + tv.tv_usec * 1e-6;
@@ -787,15 +810,16 @@ static int rbncurshelper_nonblocking_wgetch(WINDOW *c_win) {
 #ifdef NCURSES_VERSION
     c_win->_delay = 0;
 #endif
-    while (wrefresh(c_win), (result = wgetch(c_win)) == ERR) {
+    while (doupdate() /* detects resize */, (result = wgetch(c_win)) == ERR) {
         gettimeofday(&tv, &tz);
         nowtime = tv.tv_sec + tv.tv_usec * 1e-6;
         delay = finishtime - nowtime;
 	if (delay <= 0) break;
 
-	/* Check for terminal size change (wgetch) three times a second */
-        tv.tv_sec = 0;
-        tv.tv_usec =  (unsigned)( ( (0.33 < delay) ? 0.33 : delay) * 1e6 );
+	/* Check for terminal size change every resize_delay seconds */
+        if (resize_delay > delay) resize_delay = delay;
+        tv.tv_sec = (time_t)resize_delay;
+        tv.tv_usec = (unsigned)( (resize_delay - tv.tv_sec) * 1e6 );
 
 	/* sleep on infd until input is available or tv reaches timeout */
 	FD_ZERO(&in_fds);
@@ -2675,7 +2699,7 @@ void Init_ncurses_bin(void)
     rb_iv_set(mNcurses, "@screens_hash", rb_hash_new());
 
     /* keep track of "halfdelay" settings in the wrapper */
-    rb_iv_set(mNcurses, "@halfdelay", INT2NUM(0));
+    rb_iv_set(mNcurses, "@halfdelay", INT2FIX(0));
     rb_iv_set(mNcurses, "@cbreak", Qfalse);
 
     /* filedescriptor that transports input from terminal to application */
