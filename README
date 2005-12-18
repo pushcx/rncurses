@@ -1,4 +1,4 @@
-$Id: README,v 1.12 2005/03/05 22:47:33 t-peters Exp $
+$Id: README,v 1.13 2005/12/18 20:51:59 t-peters Exp $
 ------------------------------------------------------------------------
 This directory contains a ruby module for accessing the FSF's ncurses
 library.
@@ -98,6 +98,9 @@ Ncurses.LINES).
 One of these external variables, ESCDELAY, is also settable with a ruby method
 (Ncurses.ESCDELAY=).
 
+Another external variable, Ncurses.RESIZEDELAY is introduced by this wrapper.
+It contains the maximum milliseconds delay with which terminal resizesings are 
+recognized.
 
 Constants
 =========

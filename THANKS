@@ -1,4 +1,4 @@
-$Id: THANKS,v 1.6 2005/02/26 22:54:01 t-peters Exp $
+$Id: THANKS,v 1.7 2005/12/18 20:52:00 t-peters Exp $
 
 A list of people that helped me with ncurses-ruby
 
@@ -10,3 +10,4 @@ Simon Kaczor    (skaczor at cox dut net)
 Hiroshi Sainohira
 Andreas Schwarz
 Simon Strandgaard
+Paul Duncan

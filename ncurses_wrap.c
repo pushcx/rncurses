@@ -18,7 +18,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.10 2005/08/22 21:25:03 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.11 2005/12/18 20:52:00 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -2436,7 +2436,7 @@ static void init_functions_3(void)
     NCFUNC(ungetmouse, 1);
 #endif
 #ifdef HAVE_MOUSEMASK
-    NCFUNC(mousemask, 1);
+    NCFUNC(mousemask, 2);
 #endif
 #ifdef HAVE_WENCLOSE
     rb_define_module_function(mNcurses, "wenclose?",
