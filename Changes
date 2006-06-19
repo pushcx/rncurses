@@ -1,4 +1,8 @@
-ncurses-ruby-0.9.3
+ncurses-ruby-1.1
+* Bugfixes by T. Sutherland in _tracef and _tracedump.
+
+ncurses-ruby-1.0
+* Mousemask bugfix from P.Duncan.
 * Solved timing problems that affected visual smoothness of reactions
   to user input
 * Each SCREEN got back its own "halfdelay" and "cbreak" settings
