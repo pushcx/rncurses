@@ -1,5 +1,0 @@
-This distribution of ncurses-ruby contains the pre-built binary extension
-module for ruby 1.8 on windows.
-
-Copy the files .\lib\ncurses.rb and .\ncurses.so into ruby's library search
-path.
