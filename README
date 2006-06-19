@@ -1,10 +1,10 @@
-$Id: README,v 1.13 2005/12/18 20:51:59 t-peters Exp $
+$Id: README,v 1.14 2006/06/19 09:43:58 t-peters Exp $
 ------------------------------------------------------------------------
 This directory contains a ruby module for accessing the FSF's ncurses
 library.
 (C) 2002, 2003, 2004 Tobias Peters <t-peters@users.berlios.de>
 (C) 2004 Simon Kaczor <skaczor@cox.net>
-(C) 2005 Tobias Herzke <t-peters@users.berlios.de>
+(C) 2005 2006 Tobias Herzke <t-peters@users.berlios.de>
 
 This module is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public

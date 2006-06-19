@@ -18,7 +18,7 @@
  *  License along with this module; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
  *
- * $Id: ncurses_wrap.c,v 1.11 2005/12/18 20:52:00 t-peters Exp $
+ * $Id: ncurses_wrap.c,v 1.12 2006/06/19 09:38:54 t-peters Exp $
  *
  * This file was adapted from the original ncurses header file which
  * has the following copyright statements:
@@ -2362,8 +2362,9 @@ static VALUE rbncurs_wprintw(int argc, VALUE * argv, VALUE dummy)
 
 /* Debugging : use with libncurses_g.a */
 #ifdef HAVE__TRACEF
-static VALUE rbncurs_tracef(int argc, VALUE * argv, VALUE)
+static VALUE rbncurs_tracef(int argc, VALUE * argv, VALUE dummy)
 {
+    (void) dummy;
     if (argc < 1) {
         rb_raise(rb_eArgError, "function needs at least 1 argument");
         return Qnil;
@@ -2374,7 +2375,7 @@ static VALUE rbncurs_tracef(int argc, VALUE * argv, VALUE)
 }
 #endif /* HAVE__TRACEF */
 #ifdef HAVE__TRACEDUMP
-static VALUE rbncurs_tracedump(VALUE dummy, VALUE rb_label, label rb_win)
+static VALUE rbncurs_tracedump(VALUE dummy, VALUE rb_label, VALUE rb_win)
 {
     _tracedump(STR2CSTR(rb_label), get_window(rb_win));
 }
