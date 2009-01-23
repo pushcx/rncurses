@@ -1,6 +1,4 @@
-$Id: THANKS,v 1.8 2006/06/19 09:39:40 t-peters Exp $
-
-A list of people that helped me with ncurses-ruby
+A list of people that have contributed to ncurses-ruby:
 
 Akinori MUSHA   (knu at idaemons dot org)
 Jan Becvar      (jan dot becvar at solnet dot cz)
@@ -12,3 +10,4 @@ Andreas Schwarz
 Simon Strandgaard
 Paul Duncan
 Tim Sutherland
+Tobias Peters
